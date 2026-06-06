@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CoreLibrary/CoreLibrary.csproj" />
+  <Project Path="WebApplication1/CoreWeb.csproj" />
+</Solution>
