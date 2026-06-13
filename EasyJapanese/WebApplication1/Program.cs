@@ -1,3 +1,5 @@
+using CoreLibrary.Payment;
+
 namespace WebApplication1
 {
     public class Program
@@ -8,6 +10,9 @@ namespace WebApplication1
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Đăng ký PayOS service (đọc config từ section "PayOS" trong appsettings.json)
+            builder.Services.AddPayOS(builder.Configuration);
 
             var app = builder.Build();
 
