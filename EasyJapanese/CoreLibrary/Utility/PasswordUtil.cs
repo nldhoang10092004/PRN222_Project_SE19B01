@@ -1,6 +1,6 @@
 ﻿using BCrypt.Net;
 
-namespace CoreLibrary.Security
+namespace CoreLibrary.Utility
 {
     public static class PasswordUtil
     {
