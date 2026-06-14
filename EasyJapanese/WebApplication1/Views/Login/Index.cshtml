@@ -1,3 +1,4 @@
+@model WebApplication1.Models.Authentication.LoginViewModel
 @{
     ViewData["Title"] = "Đăng nhập";
     Layout = null;
@@ -27,26 +28,36 @@
         </div>
 
         <div class="login-right">
-            <form method="post" class="login-form" novalidate>
+            <form asp-controller="Login" asp-action="Index" method="post" class="login-form" novalidate>
+                @Html.AntiForgeryToken()
                 <h2>Đăng nhập</h2>
                 <p class="subtitle">Nhập thông tin tài khoản của bạn để tiếp tục.</p>
 
+                @if (TempData["FlashMessage"] is string flash)
+                {
+                    <div class="alert-login alert-login--success">@flash</div>
+                }
+
+                <div asp-validation-summary="All" class="alert-login alert-login--error"></div>
+
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control-custom" id="email" name="email" placeholder="you@example.com" required />
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email" class="form-control-custom" placeholder="you@example.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <div class="form-row-flex">
-                        <label for="password">Mật khẩu</label>
+                        <label asp-for="Password">Mật khẩu</label>
                         <a href="#" class="link-orange">Quên mật khẩu?</a>
                     </div>
-                    <input type="password" class="form-control-custom" id="password" name="password" placeholder="••••••••" required />
+                    <input asp-for="Password" class="form-control-custom" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
                 <div class="form-check-custom">
-                    <input type="checkbox" id="remember" name="remember" />
-                    <label for="remember">Ghi nhớ đăng nhập</label>
+                    <input asp-for="Remember" />
+                    <label asp-for="Remember">Ghi nhớ đăng nhập</label>
                 </div>
 
                 <button type="submit" class="btn-login">Đăng nhập</button>
@@ -77,6 +88,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
     @await Html.PartialAsync("_LoginScript")
 </body>
 </html>

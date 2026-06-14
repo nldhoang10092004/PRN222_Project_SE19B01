@@ -1,0 +1,70 @@
+@model WebApplication1.Models.Authentication.RegisterStep2ViewModel
+@{
+    ViewData["Title"] = "Xác nhận OTP";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hi Japan!</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await Html.PartialAsync("_RegisterStyle")
+    <style>
+        .otp-input {
+            text-align: center;
+            font-size: 1.75rem;
+            letter-spacing: 0.5rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-left">
+            <div class="brand-logo">
+                <span class="brand-badge">H</span>
+                <span>Hi Japan!</span>
+            </div>
+            <h1 class="register-left-title">Kiểm tra email của bạn!</h1>
+            <p class="register-left-desc">Chúng tôi vừa gửi mã xác nhận 6 chữ số tới email <strong>@Model.Email</strong>. Mã có hiệu lực trong 10 phút.</p>
+        </div>
+
+        <div class="register-right">
+            <form asp-controller="Register" asp-action="Verify" method="post" class="register-form" novalidate>
+                @Html.AntiForgeryToken()
+                <h2>Bước 2: Nhập mã OTP</h2>
+                <p class="subtitle">Vui lòng nhập mã xác nhận đã gửi tới email của bạn.</p>
+
+                <div asp-validation-summary="All" class="alert-register alert-register--error"></div>
+
+                <input asp-for="Email" type="hidden" />
+
+                <div class="form-group">
+                    <label asp-for="Otp">Mã OTP</label>
+                    <input asp-for="Otp" class="form-control-custom otp-input" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="000000" autocomplete="one-time-code" />
+                    <span asp-validation-for="Otp" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn-register">Xác nhận</button>
+
+                <p class="login-text">
+                    Không nhận được mã? <a asp-controller="Register" asp-action="Init" class="link-orange">Đăng ký lại</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    @await Html.PartialAsync("_RegisterScript")
+</body>
+</html>

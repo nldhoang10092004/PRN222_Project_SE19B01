@@ -1,6 +1,10 @@
+@using CoreLibrary.Authentication
+@using CoreLibrary.Utility
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var currentUser = HttpContextAccessor.HttpContext?.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
 }
 <header class="hj-header">
     <nav class="navbar navbar-expand-lg hj-navbar">
@@ -32,10 +36,23 @@
                     </li>
                 </ul>
 
-                <div class="hj-nav-actions">
-                    <a class="btn btn-outline-primary hj-btn-login" asp-area="" asp-controller="Login">Đăng nhập</a>
-                    <a class="btn btn-primary hj-btn-start" href="#pricing">Bắt đầu miễn phí</a>
-                </div>
+                @if (currentUser == null)
+                {
+                    <div class="hj-nav-actions">
+                        <a class="btn btn-outline-primary hj-btn-login" asp-controller="Login" asp-action="Index">Đăng nhập</a>
+                        <a class="btn btn-primary hj-btn-start" href="#pricing">Bắt đầu miễn phí</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="hj-nav-actions hj-nav-user">
+                        <span class="hj-user-greeting">Xin chào, <strong>@(currentUser.FullName ?? currentUser.Email)</strong></span>
+                        <form asp-controller="Login" asp-action="Logout" method="post" class="hj-logout-form">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-primary hj-btn-login">Đăng xuất</button>
+                        </form>
+                    </div>
+                }
             </div>
         </div>
     </nav>

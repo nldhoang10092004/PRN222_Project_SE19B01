@@ -1,4 +1,6 @@
+using CoreLibrary.Authentication;
 using CoreLibrary.Data;
+using CoreLibrary.Email;
 using CoreLibrary.Payment;
 using CoreLibrary.Storage;
 using WebApplication1.Areas.Admin;
@@ -15,8 +17,27 @@ namespace WebApplication1
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // HttpContextAccessor (dùng cho partial view _Header đọc session)
+            builder.Services.AddHttpContextAccessor();
+
+            // Session - lưu trạng thái auth, pending registration
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.Name = ".HiJapan.Session";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.IdleTimeout = TimeSpan.FromHours(2);
+            });
+
             // Đăng ký DbContext - đọc connection string "DefaultConnection" từ appsettings.json
             builder.Services.AddAppDbContext(builder.Configuration);
+
+            // Đăng ký Email (Gmail SMTP)
+            builder.Services.AddGmailEmail(builder.Configuration);
+
+            // Đăng ký Authentication service
+            builder.Services.AddAuthenticationService(builder.Configuration);
 
             // Đăng ký PayOS service (đọc config từ section "PayOS" trong appsettings.json)
             builder.Services.AddPayOS(builder.Configuration);
@@ -38,6 +59,8 @@ namespace WebApplication1
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthorization();
 

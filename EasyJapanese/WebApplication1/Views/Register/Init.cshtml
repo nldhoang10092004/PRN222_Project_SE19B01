@@ -1,3 +1,4 @@
+@model WebApplication1.Models.Authentication.RegisterStep1ViewModel
 @{
     ViewData["Title"] = "Đăng ký";
     Layout = null;
@@ -27,61 +28,54 @@
         </div>
 
         <div class="register-right">
-            <form method="post" class="register-form" novalidate>
-                <h2>Đăng ký</h2>
-                <p class="subtitle">Tạo tài khoản miễn phí để bắt đầu học ngay hôm nay.</p>
+            <form asp-controller="Register" asp-action="Init" method="post" class="register-form" novalidate>
+                @Html.AntiForgeryToken()
+                <h2>Bước 1: Tạo tài khoản</h2>
+                <p class="subtitle">Điền thông tin bên dưới. Chúng tôi sẽ gửi mã OTP tới email để xác nhận.</p>
+
+                <div asp-validation-summary="All" class="alert-register alert-register--error"></div>
 
                 <div class="form-group">
-                    <label for="fullname">Họ và tên</label>
-                    <input type="text" class="form-control-custom" id="fullname" name="fullname" placeholder="Nguyễn Văn A" required />
+                    <label asp-for="FullName">Họ và tên</label>
+                    <input asp-for="FullName" class="form-control-custom" placeholder="Nguyễn Văn A" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control-custom" id="email" name="email" placeholder="you@example.com" required />
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email" type="email" class="form-control-custom" placeholder="you@example.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label for="phone">Số điện thoại</label>
-                    <input type="tel" class="form-control-custom" id="phone" name="phone" placeholder="0901 234 567" required />
+                    <label asp-for="PhoneNumber">Số điện thoại</label>
+                    <input asp-for="PhoneNumber" type="tel" class="form-control-custom" placeholder="0901 234 567" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Mật khẩu</label>
-                    <input type="password" class="form-control-custom" id="password" name="password" placeholder="••••••••" required />
+                    <label asp-for="Password">Mật khẩu</label>
+                    <input asp-for="Password" type="password" class="form-control-custom" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label for="confirm-password">Xác nhận mật khẩu</label>
-                    <input type="password" class="form-control-custom" id="confirm-password" name="confirmPassword" placeholder="••••••••" required />
+                    <label asp-for="ConfirmPassword">Xác nhận mật khẩu</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control-custom" placeholder="••••••••" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
 
                 <div class="form-check-custom">
-                    <input type="checkbox" id="agree" name="agree" required />
-                    <label for="agree">Tôi đồng ý với <a href="#" class="link-orange">Điều khoản</a> và <a href="#" class="link-orange">Chính sách bảo mật</a></label>
+                    <input asp-for="Agree" />
+                    <label asp-for="Agree">Tôi đồng ý với <a href="#" class="link-orange">Điều khoản</a> và <a href="#" class="link-orange">Chính sách bảo mật</a></label>
+                    <span asp-validation-for="Agree" class="text-danger"></span>
                 </div>
 
-                <button type="submit" class="btn-register">Đăng ký</button>
+                <button type="submit" class="btn-register">Gửi mã OTP</button>
 
                 <p class="login-text">
                     Đã có tài khoản? <a asp-controller="Login" asp-action="Index" class="link-orange">Đăng nhập ngay</a>
                 </p>
-
-                <div class="divider-wrapper">
-                    <hr class="divider" />
-                    <span class="divider-text">hoặc đăng ký bằng</span>
-                </div>
-
-                <div class="social-row">
-                    <a href="#" class="social-btn">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18" height="18" />
-                        <span>Google</span>
-                    </a>
-                    <a href="#" class="social-btn">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg" alt="Facebook" width="18" height="18" />
-                        <span>Facebook</span>
-                    </a>
-                </div>
             </form>
         </div>
     </div>
@@ -89,6 +83,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
     @await Html.PartialAsync("_RegisterScript")
 </body>
 </html>
