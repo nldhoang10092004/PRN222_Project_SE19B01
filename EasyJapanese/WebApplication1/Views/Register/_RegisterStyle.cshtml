@@ -1,0 +1,223 @@
+<style>
+    /* ===== Register page - scoped styles (Hi Japan! brand) ===== */
+    .register-wrapper {
+        display: flex;
+        min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Left brand panel */
+    .register-left {
+        flex: 1;
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 3rem;
+    }
+
+    .register-left .brand-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .brand-badge {
+        width: 36px;
+        height: 36px;
+        background: #fff;
+        color: #FF6B35;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+    }
+
+    .register-left-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        line-height: 1.2;
+    }
+
+    .register-left-desc {
+        font-size: 1rem;
+        opacity: 0.95;
+        max-width: 380px;
+        line-height: 1.5;
+    }
+
+    /* Right form panel */
+    .register-right {
+        flex: 1;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+    }
+
+    .register-form {
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .register-form h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        color: #333;
+    }
+
+    .register-form .subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+
+    /* Form group */
+    .register-form .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .register-form .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        color: #666;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        border: 1px solid #E0E0E0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: #fff;
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+    }
+
+    .link-orange {
+        color: #FF6B35;
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .link-orange:hover {
+        text-decoration: underline;
+        color: #E55A2B;
+    }
+
+    .form-check-custom {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .form-check-custom input[type="checkbox"] {
+        accent-color: #FF6B35;
+        margin-top: 0.2rem;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 0.8rem;
+        background: #FF6B35;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-register:hover {
+        background: #E55A2B;
+    }
+
+    .login-text {
+        text-align: center;
+        margin: 1.25rem 0 0 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    /* Divider with text */
+    .divider-wrapper {
+        position: relative;
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+
+    .divider-wrapper .divider {
+        border: none;
+        border-top: 1px solid #EEE;
+        margin: 0;
+    }
+
+    .divider-wrapper .divider-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 0 0.75rem;
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    /* Social buttons */
+    .social-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .social-btn {
+        flex: 1;
+        padding: 0.7rem;
+        border: 1px solid #E0E0E0;
+        border-radius: 6px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: #555;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .social-btn:hover {
+        background: #FAFAFA;
+        color: #333;
+    }
+
+    /* Responsive: hide left panel on mobile */
+    @@media (max-width: 768px) {
+        .register-left {
+            display: none;
+        }
+
+        .register-right {
+            flex: 1;
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
