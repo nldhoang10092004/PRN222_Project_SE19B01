@@ -41,7 +41,16 @@
                 <h2>Bước 2: Nhập mã OTP</h2>
                 <p class="subtitle">Vui lòng nhập mã xác nhận đã gửi tới email của bạn.</p>
 
-                <div asp-validation-summary="All" class="alert-register alert-register--error"></div>
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert-register alert-register--error">
+                        @foreach (var error in ViewData.ModelState.SelectMany(kv => kv.Value!.Errors))
+                        {
+                            @error.ErrorMessage
+                            <br />
+                        }
+                    </div>
+                }
 
                 <input asp-for="Email" type="hidden" />
 

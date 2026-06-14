@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -35,13 +36,22 @@ namespace CoreLibrary.Email
             message.Body = new TextPart(TextFormat.Html) { Text = htmlBody };
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(_options.Host, _options.Port, _options.UseSsl, cancellationToken);
+            await client.ConnectAsync(_options.Host, _options.Port, ResolveSslOptions(_options.Port), cancellationToken);
             await client.AuthenticateAsync(_options.User, _options.AppPassword, cancellationToken);
             await client.SendAsync(message, cancellationToken);
             await client.DisconnectAsync(quit: true, cancellationToken);
 
             _logger.LogInformation("Email sent to {Email} subject={Subject}", toEmail, subject);
         }
+
+        // Gmail: 465 = implicit SSL, 587 = STARTTLS. Tránh dùng bool UseSsl mơ hồ.
+        private static SecureSocketOptions ResolveSslOptions(int port) => port switch
+        {
+            465 => SecureSocketOptions.SslOnConnect,
+            587 => SecureSocketOptions.StartTls,
+            25 => SecureSocketOptions.StartTlsWhenAvailable,
+            _ => SecureSocketOptions.Auto
+        };
 
         private static string BuildOtpHtml(string otp, string purpose)
         {

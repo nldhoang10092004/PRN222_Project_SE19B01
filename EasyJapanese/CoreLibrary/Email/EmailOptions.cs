@@ -10,6 +10,5 @@ namespace CoreLibrary.Email
         public string AppPassword { get; set; } = string.Empty;
         public string FromAddress { get; set; } = string.Empty;
         public string FromName { get; set; } = "Hi Japan!";
-        public bool UseSsl { get; set; } = true;
     }
 }

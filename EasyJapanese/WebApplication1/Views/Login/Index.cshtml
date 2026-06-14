@@ -38,7 +38,16 @@
                     <div class="alert-login alert-login--success">@flash</div>
                 }
 
-                <div asp-validation-summary="All" class="alert-login alert-login--error"></div>
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert-login alert-login--error">
+                        @foreach (var error in ViewData.ModelState.SelectMany(kv => kv.Value!.Errors))
+                        {
+                            @error.ErrorMessage
+                            <br />
+                        }
+                    </div>
+                }
 
                 <div class="form-group">
                     <label asp-for="Email">Email</label>
@@ -51,7 +60,7 @@
                         <label asp-for="Password">Mật khẩu</label>
                         <a href="#" class="link-orange">Quên mật khẩu?</a>
                     </div>
-                    <input asp-for="Password" class="form-control-custom" placeholder="••••••••" />
+                    <input asp-for="Password" class="form-control-custom" type ="password" placeholder="••••••••" />
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 

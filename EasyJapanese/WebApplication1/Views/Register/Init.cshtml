@@ -33,7 +33,16 @@
                 <h2>Bước 1: Tạo tài khoản</h2>
                 <p class="subtitle">Điền thông tin bên dưới. Chúng tôi sẽ gửi mã OTP tới email để xác nhận.</p>
 
-                <div asp-validation-summary="All" class="alert-register alert-register--error"></div>
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert-register alert-register--error">
+                        @foreach (var error in ViewData.ModelState.SelectMany(kv => kv.Value!.Errors))
+                        {
+                            @error.ErrorMessage
+                            <br />
+                        }
+                    </div>
+                }
 
                 <div class="form-group">
                     <label asp-for="FullName">Họ và tên</label>
