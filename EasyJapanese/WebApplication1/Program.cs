@@ -1,3 +1,4 @@
+using CoreLibrary.Data;
 using CoreLibrary.Payment;
 using CoreLibrary.Storage;
 using WebApplication1.Areas.Admin;
@@ -13,6 +14,9 @@ namespace WebApplication1
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Đăng ký DbContext - đọc connection string "DefaultConnection" từ appsettings.json
+            builder.Services.AddAppDbContext(builder.Configuration);
 
             // Đăng ký PayOS service (đọc config từ section "PayOS" trong appsettings.json)
             builder.Services.AddPayOS(builder.Configuration);
