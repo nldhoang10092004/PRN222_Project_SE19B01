@@ -73,3 +73,4 @@ appsettings.Development.json
 # Rider (Nếu ông xài JetBrains Rider thay vì Visual Studio)
 .idea/
 *.sln.iml
+/EasyJapanese/WebApplication1/appsettings.Development.json
