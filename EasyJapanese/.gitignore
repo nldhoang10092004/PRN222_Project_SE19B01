@@ -1,0 +1,123 @@
+# ============================================
+# .NET / ASP.NET Core
+# ============================================
+bin/
+obj/
+out/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+*.userosscache
+*.sln.ide/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+[Oo]bj/
+[Oo]ld/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vscode/
+.idea/
+
+# Rider
+.idea/
+*.sln.iml
+
+# ============================================
+# NuGet
+# ============================================
+*.nupkg
+*.snupkg
+**/[Bb]in/**/*.nupkg
+**/[Oo]bj/**/*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ============================================
+# Publish
+# ============================================
+publish/
+*.pubxml
+*.pubxml.user
+*.publishproj
+PublishProfiles/
+
+# ============================================
+# Test results / coverage
+# ============================================
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+TestResult*.xml
+
+# ============================================
+# EF Core
+# ============================================
+# Migration files (chỉ giữ source, không commit DLL từ migration)
+**/Migrations/*.dll
+**/Migrations/*.pdb
+
+# ============================================
+# Secrets & environment (KHÔNG COMMIT)
+# ============================================
+# Connection string, API key, secret KHÔNG được commit.
+# Share structure qua appsettings.Example.json
+appsettings.*.json
+!appsettings.Example.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+appsettings.Staging.json
+*.env
+.env
+.env.local
+.env.*.local
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Misc
+# ============================================
+*.log
+*.cache
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.vs/
+*.tmp_proj
+*.dgspec.json
+
+# ============================================
+# User-specific files
+# ============================================
+**/[Bb]in/
+**/[Oo]bj/
+*.user
+*.suo
