@@ -1,0 +1,94 @@
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hi Japan!</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await Html.PartialAsync("_RegisterStyle")
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-left">
+            <div class="brand-logo">
+                <span class="brand-badge">H</span>
+                <span>Hi Japan!</span>
+            </div>
+            <h1 class="register-left-title">Bắt đầu hành trình của bạn!</h1>
+            <p class="register-left-desc">Tạo tài khoản để trải nghiệm giáo trình độc quyền, lộ trình cá nhân hóa và cộng đồng học tiếng Nhật trên Hi Japan!.</p>
+        </div>
+
+        <div class="register-right">
+            <form method="post" class="register-form" novalidate>
+                <h2>Đăng ký</h2>
+                <p class="subtitle">Tạo tài khoản miễn phí để bắt đầu học ngay hôm nay.</p>
+
+                <div class="form-group">
+                    <label for="fullname">Họ và tên</label>
+                    <input type="text" class="form-control-custom" id="fullname" name="fullname" placeholder="Nguyễn Văn A" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control-custom" id="email" name="email" placeholder="you@example.com" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="tel" class="form-control-custom" id="phone" name="phone" placeholder="0901 234 567" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" class="form-control-custom" id="password" name="password" placeholder="••••••••" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Xác nhận mật khẩu</label>
+                    <input type="password" class="form-control-custom" id="confirm-password" name="confirmPassword" placeholder="••••••••" required />
+                </div>
+
+                <div class="form-check-custom">
+                    <input type="checkbox" id="agree" name="agree" required />
+                    <label for="agree">Tôi đồng ý với <a href="#" class="link-orange">Điều khoản</a> và <a href="#" class="link-orange">Chính sách bảo mật</a></label>
+                </div>
+
+                <button type="submit" class="btn-register">Đăng ký</button>
+
+                <p class="login-text">
+                    Đã có tài khoản? <a asp-controller="Login" asp-action="Index" class="link-orange">Đăng nhập ngay</a>
+                </p>
+
+                <div class="divider-wrapper">
+                    <hr class="divider" />
+                    <span class="divider-text">hoặc đăng ký bằng</span>
+                </div>
+
+                <div class="social-row">
+                    <a href="#" class="social-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18" height="18" />
+                        <span>Google</span>
+                    </a>
+                    <a href="#" class="social-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg" alt="Facebook" width="18" height="18" />
+                        <span>Facebook</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await Html.PartialAsync("_RegisterScript")
+</body>
+</html>
