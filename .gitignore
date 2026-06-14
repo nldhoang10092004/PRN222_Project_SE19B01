@@ -68,8 +68,7 @@ node_modules/
 jspm_packages/
 
 # ASP.NET Core environment specific files (Tùy chọn: Bỏ comment nếu không muốn push cấu hình dev lên)
-#appsettings.Development.json
-#appsettings.Local.json
+appsettings.Development.json
 
 # Rider (Nếu ông xài JetBrains Rider thay vì Visual Studio)
 .idea/
