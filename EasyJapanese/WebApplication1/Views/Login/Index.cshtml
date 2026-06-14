@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hi Japan!</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await Html.PartialAsync("_LoginStyle")
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-left">
+            <div class="brand-logo">
+                <span class="brand-badge">H</span>
+                <span>Hi Japan!</span>
+            </div>
+            <h1 class="login-left-title">Chào mừng trở lại!</h1>
+            <p class="login-left-desc">Tiếp tục hành trình chinh phục tiếng Nhật của bạn cùng cộng đồng Hi Japan!.</p>
+        </div>
+
+        <div class="login-right">
+            <form method="post" class="login-form" novalidate>
+                <h2>Đăng nhập</h2>
+                <p class="subtitle">Nhập thông tin tài khoản của bạn để tiếp tục.</p>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control-custom" id="email" name="email" placeholder="you@example.com" required />
+                </div>
+
+                <div class="form-group">
+                    <div class="form-row-flex">
+                        <label for="password">Mật khẩu</label>
+                        <a href="#" class="link-orange">Quên mật khẩu?</a>
+                    </div>
+                    <input type="password" class="form-control-custom" id="password" name="password" placeholder="••••••••" required />
+                </div>
+
+                <div class="form-check-custom">
+                    <input type="checkbox" id="remember" name="remember" />
+                    <label for="remember">Ghi nhớ đăng nhập</label>
+                </div>
+
+                <button type="submit" class="btn-login">Đăng nhập</button>
+
+                <p class="signup-text">
+                    Chưa có tài khoản? <a href="#" class="link-orange">Đăng ký ngay</a>
+                </p>
+
+                <div class="divider-wrapper">
+                    <hr class="divider" />
+                    <span class="divider-text">hoặc đăng nhập bằng</span>
+                </div>
+
+                <div class="social-row">
+                    <a href="#" class="social-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18" height="18" />
+                        <span>Google</span>
+                    </a>
+                    <a href="#" class="social-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg" alt="Facebook" width="18" height="18" />
+                        <span>Facebook</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await Html.PartialAsync("_LoginScript")
+</body>
+</html>
