@@ -18,8 +18,9 @@ namespace WebApplication1.Controllers
         [HttpGet]
         [Route("Login")]
         [Route("Login/Index")]
-        public IActionResult Index()
+        public IActionResult Index(string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View(new LoginViewModel());
         }
 
@@ -27,10 +28,11 @@ namespace WebApplication1.Controllers
         [Route("Login")]
         [Route("Login/Index")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(LoginViewModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(LoginViewModel model, string? returnUrl, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
+                ViewData["ReturnUrl"] = returnUrl;
                 return View(model);
             }
 
@@ -38,7 +40,13 @@ namespace WebApplication1.Controllers
             if (!result.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, result.Message ?? "Đăng nhập thất bại.");
+                ViewData["ReturnUrl"] = returnUrl;
                 return View(model);
+            }
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
             }
 
             TempData["FlashMessage"] = result.Message;
@@ -46,10 +54,6 @@ namespace WebApplication1.Controllers
             if (role == CoreLibrary.Const.RoleConst.ADMIN)
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
-            }
-            if (role == CoreLibrary.Const.RoleConst.MENTOR)
-            {
-                return RedirectToAction("Index", "Dashboard", new { area = "Learner" });
             }
             return RedirectToAction("Index", "Dashboard", new { area = "Learner" });
         }

@@ -5,6 +5,8 @@ using CoreLibrary.Payment;
 using CoreLibrary.Storage;
 using WebApplication1.Areas.Admin;
 using WebApplication1.Areas.Learner;
+using WebApplication1.Areas.Mentor;
+using WebApplication1.Common;
 
 namespace WebApplication1
 {
@@ -15,7 +17,10 @@ namespace WebApplication1
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<AreaAuthorizationFilter>();
+            });
 
             // HttpContextAccessor (dùng cho partial view _Header đọc session)
             builder.Services.AddHttpContextAccessor();
@@ -71,6 +76,9 @@ namespace WebApplication1
 
             // Khu vực học viên: /learn/...
             app.MapLearnerArea();
+
+            // Khu vực giảng viên: /mentor/...
+            app.MapMentorArea();
 
             // Khu vực quản trị: /admin/...
             app.MapAdminArea();

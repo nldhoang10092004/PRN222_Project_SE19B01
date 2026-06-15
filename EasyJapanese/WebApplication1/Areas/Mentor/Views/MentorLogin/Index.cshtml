@@ -1,0 +1,88 @@
+@model WebApplication1.Models.Authentication.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập Mentor";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hi Japan! Mentor</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await Html.PartialAsync("_LoginStyle")
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-left">
+            <div class="brand-logo">
+                <span class="brand-badge">M</span>
+                <span>Hi Japan! Mentor</span>
+            </div>
+            <h1 class="login-left-title">Cổng Mentor</h1>
+            <p class="login-left-desc">Đồng hành cùng học viên, chia sẻ kinh nghiệm và dẫn dắt cộng đồng Hi Japan!.</p>
+        </div>
+
+        <div class="login-right">
+            <form asp-controller="MentorLogin" asp-action="Index" asp-route-area="Mentor" method="post" class="login-form" novalidate>
+                @Html.AntiForgeryToken()
+                <h2>Đăng nhập Mentor</h2>
+                <p class="subtitle">Chỉ tài khoản Mentor được cấp quyền mới có thể truy cập.</p>
+
+                @if (TempData["FlashMessage"] is string flash)
+                {
+                    <div class="alert-login alert-login--success">@flash</div>
+                }
+
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert-login alert-login--error">
+                        @foreach (var error in ViewData.ModelState.SelectMany(kv => kv.Value!.Errors))
+                        {
+                            @error.ErrorMessage
+                            <br />
+                        }
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email" class="form-control-custom" placeholder="mentor@example.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-row-flex">
+                        <label asp-for="Password">Mật khẩu</label>
+                        <a href="#" class="link-blue">Quên mật khẩu?</a>
+                    </div>
+                    <input asp-for="Password" class="form-control-custom" type="password" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-check-custom">
+                    <input asp-for="Remember" />
+                    <label asp-for="Remember">Ghi nhớ đăng nhập</label>
+                </div>
+
+                <button type="submit" class="btn-login">Đăng nhập</button>
+
+                <p class="signup-text">
+                    Quay lại trang <a href="/" class="link-blue">Hi Japan!</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    @await Html.PartialAsync("_LoginScript")
+</body>
+</html>
