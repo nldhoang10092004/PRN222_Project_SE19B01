@@ -24,7 +24,7 @@
         align-items: center;
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 1030;
     }
 
     .hj-brand {
@@ -142,11 +142,9 @@ else
                 <a href="/admin" class="text-muted d-none d-lg-inline text-decoration-none" style="font-size: 0.9rem;">Khu vực quản trị</a>
                 <a href="#" class="text-muted fs-5 text-decoration-none ms-2"><i class="bi bi-bell"></i></a>
                 <div class="dropdown">
-                    <button class="btn p-0 border-0 dropdown-toggle" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="hj-avatar">
-                            @((currentUser.FullName ?? currentUser.Email).Substring(0, 1).ToUpper())
-                        </div>
-                    </button>
+                    <a href="#" class="d-flex align-items-center text-decoration-none" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="hj-avatar" style="line-height: 1;">@((currentUser.FullName ?? currentUser.Email).Substring(0, 1).ToUpper())</div>
+                    </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="ddUser">
                         <li><span class="dropdown-item-text fw-bold text-dark px-3 pt-2">@(currentUser.FullName ?? currentUser.Email)</span></li>
                         <li><hr class="dropdown-divider"></li>
