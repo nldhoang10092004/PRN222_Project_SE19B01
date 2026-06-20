@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Bài 1: Giới thiệu bản thân";
+}
+
+@section Styles {
+    @await Html.PartialAsync("_CourseStyle")
+}
+
+<div class="hj-content container" style="max-width: 900px; margin: 0 auto; padding-top: 1rem;">
+    <!-- Header -->
+    <a href="/learn/dashboard" class="course-back-link">
+        &larr; Quay lại danh sách
+    </a>
+    
+    <div class="course-header">
+        <h1 class="course-title">Bài 1: Giới thiệu bản thân</h1>
+        <button class="btn-hj-primary" style="background-color: #e64a51;">
+            Làm Quiz Cuối Khóa <i class="bi bi-check-circle ms-1"></i>
+        </button>
+    </div>
+
+    <!-- Video Player -->
+    <div class="video-container">
+        <div class="play-button"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="course-tabs">
+        <a class="course-tab active" href="#">
+            <i class="bi bi-translate"></i> Kanji
+        </a>
+        <a class="course-tab" href="#">
+            <i class="bi bi-journal-text"></i> Ngữ pháp
+        </a>
+        <a class="course-tab" href="#">
+            <i class="bi bi-book"></i> Đọc
+        </a>
+        <a class="course-tab" href="#">
+            <i class="bi bi-headphones"></i> Nghe
+        </a>
+        <a class="course-tab" href="#">
+            <i class="bi bi-pencil-square"></i> Ex (Bài tập)
+        </a>
+    </div>
+
+    <!-- Kanji Section -->
+    <div class="hj-card kanji-section">
+        <h3 class="kanji-section-title">Kanji Bài 1</h3>
+        
+        <div class="kanji-grid">
+            <div class="kanji-card">
+                <div class="kanji-char">私</div>
+                <div class="kanji-meaning">Watashi - Tôi</div>
+            </div>
+            <div class="kanji-card">
+                <div class="kanji-char">人</div>
+                <div class="kanji-meaning">Hito / Jin - Người</div>
+            </div>
+            <div class="kanji-card">
+                <div class="kanji-char">先</div>
+                <div class="kanji-meaning">Sen - Trước</div>
+            </div>
+            <div class="kanji-card">
+                <div class="kanji-char">生</div>
+                <div class="kanji-meaning">Sei - Sinh</div>
+            </div>
+        </div>
+    </div>
+</div>

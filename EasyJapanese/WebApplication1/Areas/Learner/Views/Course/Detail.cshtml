@@ -1,0 +1,192 @@
+@{
+    ViewData["Title"] = "Nội dung khóa học N5";
+}
+
+@section Styles {
+    @await Html.PartialAsync("_CourseStyle")
+    <style>
+        .accordion-button:not(.collapsed) {
+            color: #333;
+            background-color: #f8f9fa;
+            box-shadow: none;
+            font-weight: 700;
+        }
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .lesson-item:last-child {
+            border-bottom: none;
+        }
+        .lesson-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+        }
+        .lesson-icon.completed { background: #198754; color: #fff; }
+        .lesson-icon.current { background: #0d6efd; color: #fff; }
+        .lesson-icon.locked { background: #f8f9fa; border: 1px solid #ddd; color: #aaa; }
+        
+        .lesson-info { flex: 1; }
+        .lesson-title { font-weight: 700; color: #333; margin-bottom: 0.2rem; }
+        .lesson-title.current { color: #0d6efd; }
+        .lesson-meta { font-size: 0.8rem; color: #888; }
+        .lesson-meta.current { color: #0d6efd; font-weight: 500; }
+        
+        .badge-status { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; }
+        .badge-status.viewed { background: #f8f9fa; border: 1px solid #eee; color: #666; }
+        .badge-status.learning { background: #e3f2fd; border: 1px solid #0d6efd; color: #0d6efd; font-weight: 600; }
+        
+        .progress-sm { height: 6px; border-radius: 6px; background: #e9ecef; margin: 1rem 0 0.5rem; }
+        .progress-bar-sm { height: 100%; border-radius: 6px; background: #0d6efd; }
+    </style>
+}
+
+<div class="hj-content container py-5" style="max-width: 1200px;">
+    <a href="/learn/Course" class="course-back-link mb-4">
+        &larr; Quay lại Danh sách khóa học
+    </a>
+
+    <div class="row g-5">
+        <!-- Left Sidebar: Course Info -->
+        <div class="col-lg-4">
+            <div class="course-card shadow-sm border-0">
+                <div class="course-cover bg-red">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" alt="Khóa học N5" />
+                </div>
+                <div class="course-body">
+                    <span class="badge-level n5">N5 Beginner</span>
+                    <h3 class="course-name">Khóa học tiếng Nhật N5</h3>
+                    <p class="course-desc">Khóa học nhập môn dành cho người mới bắt đầu. Nắm vững bảng chữ cái và ngữ pháp cơ bản để giao tiếp đời sống.</p>
+                    
+                    <div class="course-stats">
+                        <div class="stat-item">
+                            <div class="stat-val">25</div>
+                            <div class="stat-lbl">Bài học</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-val">50+</div>
+                            <div class="stat-lbl">Giờ video</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-val">12K</div>
+                            <div class="stat-lbl">Học viên</div>
+                        </div>
+                    </div>
+
+                    <div class="course-teacher">
+                        <img src="https://i.pravatar.cc/100?img=5" alt="Avatar" class="teacher-avt" />
+                        <div class="teacher-info">
+                            <div class="teacher-name">Cô Nguyễn Thị A</div>
+                            <div class="teacher-exp">Giáo viên kinh nghiệm 5 năm</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="progress-sm">
+                            <div class="progress-bar-sm" style="width: 15%"></div>
+                        </div>
+                        <div class="text-center text-muted" style="font-size: 0.8rem;">Bạn đã hoàn thành 15% khóa học</div>
+                    </div>
+
+                    <a href="/learn/Course/Lesson/1" class="btn-hj-primary w-100 mt-3 text-center" style="background-color: #e64a51;">Tiếp tục học Bài 4</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Content: Course Syllabus -->
+        <div class="col-lg-8">
+            <div class="hj-card p-4 shadow-sm border-0" style="border-radius: 16px;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="course-list-title m-0" style="font-size: 1.75rem;">Nội dung khóa học</h2>
+                    <span class="text-muted" style="font-size: 0.9rem;">25 Bài học</span>
+                </div>
+
+                <div class="accordion" id="courseAccordion">
+                    <!-- Chapter 1 -->
+                    <div class="accordion-item border-0 mb-3" style="background: #f8f9fa; border-radius: 12px; overflow: hidden;">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="background: #f8f9fa;">
+                                Chương 1: Làm quen (Bài 1 - Bài 5)
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#courseAccordion">
+                            <div class="accordion-body p-0 bg-white">
+                                <!-- Lesson 1 -->
+                                <a href="/learn/Course/Lesson/1" class="lesson-item text-decoration-none">
+                                    <div class="lesson-icon completed"><i class="bi bi-check2"></i></div>
+                                    <div class="lesson-info">
+                                        <div class="lesson-title">Bài 1: Giới thiệu bản thân</div>
+                                        <div class="lesson-meta"><i class="bi bi-play-circle me-1"></i> 45 phút &bull; Kanji, Ngữ pháp, Nghe hiểu</div>
+                                    </div>
+                                    <span class="badge-status viewed">Đã xem</span>
+                                </a>
+                                <!-- Lesson 2 -->
+                                <a href="/learn/Course/Lesson/1" class="lesson-item text-decoration-none">
+                                    <div class="lesson-icon completed"><i class="bi bi-check2"></i></div>
+                                    <div class="lesson-info">
+                                        <div class="lesson-title">Bài 2: Đồ vật và Sở hữu</div>
+                                        <div class="lesson-meta"><i class="bi bi-play-circle me-1"></i> 50 phút &bull; Kanji, Ngữ pháp, Đọc hiểu</div>
+                                    </div>
+                                    <span class="badge-status viewed">Đã xem</span>
+                                </a>
+                                <!-- Lesson 3 -->
+                                <a href="/learn/Course/Lesson/1" class="lesson-item text-decoration-none">
+                                    <div class="lesson-icon completed"><i class="bi bi-check2"></i></div>
+                                    <div class="lesson-info">
+                                        <div class="lesson-title">Bài 3: Địa điểm và Mua sắm</div>
+                                        <div class="lesson-meta"><i class="bi bi-play-circle me-1"></i> 60 phút &bull; Ngữ pháp, Giao tiếp</div>
+                                    </div>
+                                    <span class="badge-status viewed">Đã xem</span>
+                                </a>
+                                <!-- Lesson 4 -->
+                                <a href="/learn/Course/Lesson/1" class="lesson-item text-decoration-none bg-light">
+                                    <div class="lesson-icon current"><i class="bi bi-play-fill"></i></div>
+                                    <div class="lesson-info">
+                                        <div class="lesson-title current">Bài 4: Thời gian và Ngày tháng</div>
+                                        <div class="lesson-meta current"><i class="bi bi-play-circle me-1"></i> 55 phút &bull; Đang học dở (45%)</div>
+                                    </div>
+                                    <span class="badge-status learning">Đang học</span>
+                                </a>
+                                <!-- Lesson 5 -->
+                                <div class="lesson-item">
+                                    <div class="lesson-icon locked"><i class="bi bi-lock-fill"></i></div>
+                                    <div class="lesson-info opacity-50">
+                                        <div class="lesson-title">Bài 5: Di chuyển và Phương tiện</div>
+                                        <div class="lesson-meta"><i class="bi bi-play-circle me-1"></i> 50 phút &bull; Kanji, Ngữ pháp</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chapter 2 -->
+                    <div class="accordion-item border-0" style="background: #f8f9fa; border-radius: 12px; overflow: hidden;">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="background: #f8f9fa;">
+                                Chương 2: Đời sống (Bài 6 - Bài 10)
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#courseAccordion">
+                            <div class="accordion-body bg-white p-4 text-center text-muted">
+                                Các bài học đang bị khóa. Vui lòng hoàn thành Chương 1.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
