@@ -7,7 +7,7 @@
 ```
 EasyJapanese/
 ├── CoreLibrary/                  # Class library — domain + integrations (KHÔNG chứa appsettings)
-│   ├── Const/                    # RoleConst, MessageConst
+│   ├── Const/                    # RoleConst, MessageConst, StorageConst
 │   ├── Data/                     # AppDbContext (partial) + AppDbContextExtensions + Entities/
 │   ├── Payment/                  # IPaymentService + PayOS wrapper + AddPayOS extension
 │   ├── Storage/                  # IStorageService + R2 (S3) + AddCloudflareR2 extension
@@ -72,6 +72,14 @@ Ví dụ đang có: `Payment/` (PayOS), `Storage/` (R2), `Data/AppDbContextExten
 
 - Roles: `"Admin" | "Mentor" | "Student"` — dùng constants từ `CoreLibrary/Const/RoleConst.cs`, không viết string literal.
 - Messages VN: `CoreLibrary/Const/MessageConst.cs`.
+
+### Constants vs config — quy tắc phân biệt
+
+- **Constants** (đặt trong `CoreLibrary/Const/<Domain>Const.cs`) là **quy ước nghiệp vụ cố định** mà code nào cũng phải dùng đúng giá trị giống nhau. Ví dụ: role name (`RoleConst`), folder key trong storage bucket (`StorageConst.FOLDER_AVATARS = "avatars/"`).
+  - Tên constant dạng `SCREAMING_SNAKE_CASE` (`ADMIN`, `FOLDER_IMAGES`).
+  - **Không** đưa vào `appsettings.json` vì đổi sang môi trường khác không được phép sai (upload vào folder A, build URL trỏ folder B → 404 silent).
+- **Config** (`appsettings.json`) là thứ **thay đổi theo môi trường**: connection string, secret key, `AccountId`/`BucketName`/`PublicBaseUrl` của R2, PayOS credentials.
+- Khi thêm domain mới có quy ước cố định (vd: enum trạng thái đơn hàng, MIME type whitelist) → tạo file `<Domain>Const.cs` mới, đừng nhét vào file Const có sẵn trừ khi cùng domain.
 
 ### Areas
 
