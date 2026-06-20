@@ -32,9 +32,8 @@
 
 </head>
 <body>
-
-    @await Html.PartialAsync("_Header")
-
+    @await Html.PartialAsync("_LearnerHeader")
+    
     <!-- ═══ BANNER ═══ -->
     <div class="hj-banner">
         <div class="hj-banner-kanji">
@@ -128,7 +127,7 @@
                 <!-- Upgrade CTA -->
                 <div class="hj-upgrade-card p-4 mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3 fade-in">
                     <div>
-                        <span class="hj-upgrade-tag">🔒 Chưa kích hoạt</span>
+                        <span class="hj-upgrade-tag">Chưa kích hoạt</span>
                         <h4 class="fw-bold text-white mb-1" style="font-family:'Outfit',sans-serif;">Mở khoá toàn bộ khoá học N5 → N1</h4>
                         <p class="mb-0" style="color:rgba(255,255,255,.82);font-size:14px;">Flashcard · Quiz · Bài test xếp lớp · Không giới hạn truy cập</p>
                     </div>
@@ -142,18 +141,18 @@
                 <div class="row g-4 mb-5 fade-in delay-1">
                     <div class="col-md-6">
                         <div class="hj-free-card p-4 h-100">
-                            <div class="text-success small fw-600 mb-2">✅ Miễn phí</div>
+                            <div class="text-success small fw-600 mb-2">Miễn phí</div>
                             <h5 class="text-success fw-bold mb-2" style="font-family:'Outfit',sans-serif;">Xem thử khoá học</h5>
                             <p class="text-muted small mb-3">Duyệt danh sách bài học và xem demo nội dung trước khi đăng ký.</p>
                             <a asp-area="Learner" asp-controller="Course" asp-action="Index" class="btn-hj-outline" style="font-size:13px;padding:7px 18px;">Xem khoá học →</a>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="hj-lock-card p-4 h-100">
-                            <div class="text-primary small fw-600 mb-2">🔒 Cần membership</div>
-                            <h5 class="fw-bold mb-2" style="font-family:'Outfit',sans-serif;color:var(--color-primary);">Test xếp lớp</h5>
-                            <p class="text-muted small mb-3">Làm bài test để được xếp đúng trình độ N5–N1 và nhận lộ trình học cá nhân hoá.</p>
-                            <a asp-area="Learner" asp-controller="Membership" asp-action="Plans" class="btn-hj-primary" style="font-size:13px;padding:7px 18px;">Mở khoá ngay</a>
+                        <div class="hj-free-card p-4 h-100">
+                            <div class="text-success small fw-600 mb-2">Miễn phí · Không cần membership</div>
+                            <h5 class="text-success fw-bold mb-2" style="font-family:'Outfit',sans-serif;">Test xếp lớp</h5>
+                            <p class="text-muted small mb-3">40 câu, ~20 phút. Xác định trình độ N5–N1 ngay bây giờ — kết quả sẽ gợi ý lộ trình học phù hợp.</p>
+                            <a href="/learn/PlacementTest" class="btn-hj-primary" style="font-size:13px;padding:7px 18px;">Làm bài test →</a>
                         </div>
                     </div>
                 </div>

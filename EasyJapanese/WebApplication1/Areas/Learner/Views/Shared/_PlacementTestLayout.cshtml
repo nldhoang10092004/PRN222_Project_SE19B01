@@ -1,32 +1,48 @@
+@using CoreLibrary.Authentication
+@using CoreLibrary.Utility
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var currentUser = HttpContextAccessor.HttpContext?.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - EasyJapanese Learner</title>
+    <title>@ViewData["Title"] - Hi Japan!</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/assets/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/placement-test.css" asp-append-version="true" />
+    @await Html.PartialAsync("_LearnerStyle")
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
+    @if (currentUser == null)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
+    }
+    else
+    {
         @await Html.PartialAsync("_LearnerHeader")
-    </header>
+    }
 
-    <main role="main" class="container py-4">
+    <main role="main">
         @RenderBody()
     </main>
 
-    @await Html.PartialAsync("_Footer")
+    @if (currentUser == null)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_Footer.cshtml")
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
