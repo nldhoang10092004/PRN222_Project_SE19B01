@@ -22,14 +22,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    @if (currentUser == null)
-    {
-        @await Html.PartialAsync("~/Views/Shared/_Header.cshtml")
-    }
-    else
-    {
-        @await Html.PartialAsync("_LearnerHeader")
-    }
+    @await Html.PartialAsync("_Header")
 
     <main role="main">
         @RenderBody()
