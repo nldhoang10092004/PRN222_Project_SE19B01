@@ -6,34 +6,70 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     var currentUser = HttpContextAccessor.HttpContext?.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
 }
-<!-- ═══ NAVBAR ═══ -->
-<nav class="hj-nav" style="background-color: #fff; border-bottom: 1px solid #eaeaea; padding: 1rem 0;">
-    <div class="container d-flex align-items-center justify-content-between">
-        <a href="@((currentUser != null) ? "/learn/dashboard" : "/")" class="hj-brand" style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-            <div class="hj-brand-dot" style="width: 32px; height: 32px; border-radius: 8px; background: #e64a51; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">H</div>
-            <span style="font-size: 1.25rem; font-weight: 800; color: #e64a51; font-family: 'Outfit', sans-serif;">Hi Japan!</span>
-        </a>
 
-        <ul class="d-none d-md-flex list-unstyled mb-0 gap-4" style="margin: 0; padding: 0;">
-            <li><a href="/learn/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")" style="text-decoration: none; color: #666; font-weight: 500;">Tổng quan</a></li>
-            <li><a href="/learn/Course" class="hj-nav-link @(currentController == "Course" ? "active" : "")" style="text-decoration: none; color: #666; font-weight: 500;">Khóa học</a></li>
-            <li><a href="#" class="hj-nav-link" style="text-decoration: none; color: #666; font-weight: 500;">Tài liệu</a></li>
-            <li><a href="#" class="hj-nav-link" style="text-decoration: none; color: #666; font-weight: 500;">Cộng đồng</a></li>
-        </ul>
+@if (currentUser == null)
+{
+    <!-- ═══ PUBLIC NAVBAR ═══ -->
+    <header class="hj-header">
+        <nav class="navbar navbar-expand-lg hj-navbar bg-white border-bottom shadow-sm">
+            <div class="container hj-nav-container">
+                <a class="hj-brand" href="/">
+                    <span class="hj-brand-icon">H</span>
+                    <span class="hj-brand-text">Hi Japan!</span>
+                </a>
 
-        <div class="d-flex align-items-center gap-3">
-            @if (currentUser == null)
-            {
-                <a class="btn btn-outline-danger" href="/Login" style="border-radius: 20px; padding: 0.375rem 1.25rem; font-weight: 600;">Đăng nhập</a>
-                <a class="btn btn-danger" href="/#pricing" style="border-radius: 20px; padding: 0.375rem 1.25rem; font-weight: 600; background-color: #e64a51; border-color: #e64a51;">Bắt đầu miễn phí</a>
-            }
-            else
-            {
+                <button class="navbar-toggler hj-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hjNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse hj-nav-collapse" id="hjNav">
+                    <ul class="navbar-nav mx-auto hj-nav-links">
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Home" && currentAction == "Features" ? "active" : "")" href="/#features">Tính năng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#roadmap">Lộ trình</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#pricing">Bảng giá</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#blog">Blog</a>
+                        </li>
+                    </ul>
+
+                    <div class="hj-nav-actions">
+                        <a class="btn btn-outline-primary hj-btn-login" asp-area="" asp-controller="Login" asp-action="Index">Đăng nhập</a>
+                        <a class="btn btn-primary hj-btn-start" href="/#pricing">Bắt đầu miễn phí</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+}
+else
+{
+    <!-- ═══ LEARNER NAVBAR ═══ -->
+    <nav class="hj-nav">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="/learn/dashboard" class="hj-brand">
+                <div class="hj-brand-dot">H</div>
+                Hi Japan!
+            </a>
+
+            <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
+                <li><a href="/learn/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
+                <li><a href="/learn/Course" class="hj-nav-link @(currentController == "Course" ? "active" : "")">Khóa học</a></li>
+                <li><a href="#" class="hj-nav-link">Tài liệu</a></li>
+                <li><a href="#" class="hj-nav-link">Cộng đồng</a></li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
                 <a href="/admin" class="text-muted d-none d-lg-inline text-decoration-none" style="font-size: 0.9rem;">Khu vực quản trị</a>
                 <a href="#" class="text-muted fs-5 text-decoration-none ms-2"><i class="bi bi-bell"></i></a>
                 <div class="dropdown">
-                    <button class="btn p-0 border-0 dropdown-toggle" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div class="hj-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: #1e3c72; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    <button class="btn p-0 border-0 dropdown-toggle" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="hj-avatar">
                             @((currentUser.FullName ?? currentUser.Email).Substring(0, 1).ToUpper())
                         </div>
                     </button>
@@ -51,7 +87,7 @@
                         </li>
                     </ul>
                 </div>
-            }
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
+}
