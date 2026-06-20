@@ -6,7 +6,7 @@ using CoreLibrary.Storage;
 using WebApplication1.Areas.Admin;
 using WebApplication1.Areas.Learner;
 
-namespace WebApplication1
+namespace CoreWeb
 {
     public class Program
     {
@@ -62,15 +62,18 @@ namespace WebApplication1
 
             app.UseSession();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
+
+            // Khu vực học viên: /learn/...
+            app.MapLearnerArea();
             // Route mặc định cho website công khai (Controllers/, không có Area)
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            // Khu vực học viên: /learn/...
-            app.MapLearnerArea();
+            
 
             // Khu vực quản trị: /admin/...
             app.MapAdminArea();

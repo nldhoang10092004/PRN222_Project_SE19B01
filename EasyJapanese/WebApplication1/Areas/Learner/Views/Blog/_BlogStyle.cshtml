@@ -1,0 +1,440 @@
+﻿<style>
+    :root {
+        --color-primary: #C8102E;
+        --color-navy: #1a2744;
+        --color-navy-light: #eef0f6;
+        --color-bg: #f7f5f2;
+        --color-border: #e4e0db;
+        --color-text: #1a1a1a;
+        --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
+        --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+        --radius-full: 9999px;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+    }
+
+    /* ── NAVBAR ── */
+    .hj-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--color-border);
+        height: 60px;
+        display: flex;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .hj-brand {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 18px;
+        color: var(--color-navy);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .hj-brand-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hj-nav-link {
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        padding-bottom: 4px;
+        border-bottom: 2px solid transparent;
+        transition: color .15s, border-color .15s;
+    }
+
+        .hj-nav-link:hover, .hj-nav-link.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+    .hj-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--color-navy);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--color-primary);
+    }
+
+    /* ── HERO ── */
+    .hj-hero {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-navy) 100%);
+        padding: 52px 0 56px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .hj-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .10;
+            background-image: radial-gradient(circle at 0 60px, transparent 22px, #fff 23px, #fff 24px, transparent 25px), radial-gradient(circle at 50px 60px, transparent 22px, #fff 23px, #fff 24px, transparent 25px), radial-gradient(circle at 100px 60px, transparent 22px, #fff 23px, #fff 24px, transparent 25px);
+            background-size: 100px 60px;
+            pointer-events: none;
+        }
+
+    .hj-hero-kanji {
+        position: absolute;
+        right: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 140px;
+        font-weight: 800;
+        color: rgba(255,255,255,.08);
+        line-height: 1;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* ── FILTER PILLS ── */
+    .hj-filter-bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 20px 0 4px;
+    }
+
+    .hj-filter-pill {
+        padding: 7px 18px;
+        border-radius: var(--radius-full);
+        font-size: 13px;
+        font-weight: 600;
+        border: 1.5px solid var(--color-border);
+        background: #fff;
+        color: #555;
+        text-decoration: none;
+        transition: all .15s;
+        cursor: pointer;
+    }
+
+        .hj-filter-pill:hover, .hj-filter-pill.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+    /* ── FEATURED ── */
+    .hj-featured {
+        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: var(--shadow-md);
+    }
+
+    .hj-featured-img {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        object-fit: cover;
+    }
+
+    .hj-featured-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--color-text);
+        text-decoration: none;
+        display: block;
+        line-height: 1.35;
+        margin-bottom: 10px;
+        transition: color .15s;
+    }
+
+        .hj-featured-title:hover {
+            color: var(--color-primary);
+        }
+
+    .hj-author-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--color-navy-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--color-navy);
+        flex-shrink: 0;
+    }
+
+    /* ── POST CARDS ── */
+    .hj-post-card {
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: box-shadow .2s, transform .2s;
+    }
+
+        .hj-post-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+        }
+
+    .hj-post-card-img {
+        width: 100%;
+        height: 195px;
+        object-fit: cover;
+    }
+
+    .hj-post-card-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 15.5px;
+        font-weight: 700;
+        color: var(--color-text);
+        text-decoration: none;
+        line-height: 1.4;
+        display: block;
+        margin-bottom: 8px;
+        transition: color .15s;
+    }
+
+        .hj-post-card-title:hover {
+            color: var(--color-primary);
+        }
+
+    .hj-read-more {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: gap .15s;
+    }
+
+        .hj-read-more:hover {
+            gap: 8px;
+        }
+
+    /* ── CATEGORY TAGS ── */
+    .hj-tag {
+        display: inline-block;
+        padding: 4px 13px;
+        border-radius: var(--radius-full);
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+    }
+
+    .tag-culture {
+        background: #fff7ed;
+        color: #92400e;
+    }
+
+    .tag-vocab {
+        background: #eff6ff;
+        color: #1e40af;
+    }
+
+    .tag-experience {
+        background: rgba(200,16,46,.1);
+        color: var(--color-primary);
+    }
+
+    .tag-business {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .tag-grammar {
+        background: #fdf4ff;
+        color: #7e22ce;
+    }
+
+    .tag-kanji {
+        background: #fefce8;
+        color: #854d0e;
+    }
+
+    /* ── SECTION TITLE ── */
+    .hj-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 19px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+        .hj-section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--color-border);
+        }
+
+    /* ── SIDEBAR CARDS ── */
+    .hj-sidebar-card {
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        background: #fff;
+        padding: 22px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .hj-sidebar-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .hj-tag-pill {
+        display: inline-block;
+        padding: 5px 13px;
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid var(--color-border);
+        color: #555;
+        text-decoration: none;
+        margin: 0 4px 6px 0;
+        background: #fff;
+        transition: all .15s;
+    }
+
+        .hj-tag-pill:hover {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+    .hj-post-meta {
+        font-size: 12px;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── WRITE CTA ── */
+    .hj-write-cta {
+        background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-primary) 100%);
+        border-radius: 16px;
+        color: #fff;
+        padding: 26px 22px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .hj-write-cta::before {
+            content: "書";
+            position: absolute;
+            right: 14px;
+            bottom: -10px;
+            font-size: 80px;
+            font-weight: 800;
+            color: rgba(255,255,255,.08);
+            line-height: 1;
+            pointer-events: none;
+        }
+
+    /* ── BUTTONS ── */
+    .btn-hj-outline {
+        border: 1.5px solid var(--color-primary);
+        color: var(--color-primary);
+        background: transparent;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 10px 30px;
+        transition: background .15s, color .15s;
+        cursor: pointer;
+    }
+
+        .btn-hj-outline:hover {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+    .btn-hj-light {
+        background: rgba(255,255,255,.95);
+        color: var(--color-navy);
+        border: none;
+        border-radius: var(--radius-full);
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 20px;
+        cursor: pointer;
+    }
+
+        .btn-hj-light:hover {
+            background: #fff;
+        }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+        animation: fadeUp .4s ease both;
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .d1 {
+        animation-delay: .06s
+    }
+
+    .d2 {
+        animation-delay: .13s
+    }
+
+    .d3 {
+        animation-delay: .20s
+    }
+
+    .d4 {
+        animation-delay: .27s
+    }
+
+    .d5 {
+        animation-delay: .34s
+    }
+
+    .d6 {
+        animation-delay: .40s
+    }
+</style>
