@@ -6,6 +6,80 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     var currentUser = HttpContextAccessor.HttpContext?.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
 }
+<style>
+    /* ── NAVBAR TOKENS ── */
+    :root {
+        --color-primary: #C8102E;
+        --color-navy: #1a2744;
+        --color-border: #e4e0db;
+    }
+
+    /* ── NAVBAR ── */
+    .hj-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--color-border);
+        padding: 0 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .hj-brand {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 18px;
+        color: var(--color-navy);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .hj-brand-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hj-nav-link {
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        padding-bottom: 4px;
+        border-bottom: 2px solid transparent;
+        transition: color .15s, border-color .15s;
+    }
+
+    .hj-nav-link:hover, .hj-nav-link.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+
+    .hj-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--color-navy);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--color-primary);
+    }
+</style>
 
 @if (currentUser == null)
 {
