@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin tài khoản - Hi Japan!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body style="background-color: var(--color-bg);">
+
+    <!-- Premium Navbar (Logged In) -->
+    <nav class="navbar-premium">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="dashboard.html" class="brand-logo">
+                <div class="brand-icon">H</div>
+                Hi Japan!
+            </a>
+            <ul class="nav-links d-none d-md-flex">
+                <li><a href="dashboard.html" class="nav-link-item">Tổng quan</a></li>
+                <li><a href="hoc-tap/index.html" class="nav-link-item">Khóa học</a></li>
+                <li><a href="tai-lieu/index.html" class="nav-link-item">Tài liệu</a></li>
+                <li><a href="blog/index.html" class="nav-link-item">Cộng đồng</a></li>
+            </ul>
+            <div class="d-flex gap-3 align-items-center">
+                <a href="#" class="text-muted fs-5"><i class="bi bi-bell"></i></a>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop" alt="User" class="rounded-circle border border-2 border-primary" style="width: 40px; height: 40px;">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item py-2 active" href="profile.html"><i class="bi bi-person me-2"></i>Tài khoản</a></li>
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2"></i>Cài đặt</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="index.html"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-container py-5">
+        <div class="row g-4 fade-in-up">
+            
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="card-premium p-4 sticky-top" style="top: 100px;">
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop" class="rounded-circle border border-4 border-white shadow-sm" alt="Profile Picture">
+                            <button class="btn btn-primary-warm rounded-circle position-absolute bottom-0 end-0 d-flex align-items-center justify-content-center p-0" style="width: 36px; height: 36px; box-shadow: var(--shadow-sm);">
+                                <i class="bi bi-camera-fill"></i>
+                            </button>
+                        </div>
+                        <h4 class="mt-3 mb-1">Nguyễn Văn A</h4>
+                        <p class="text-muted small">abc@gmail.com</p>
+                    </div>
+
+                    <div class="list-group list-group-flush" style="margin: 0 -24px;">
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 px-4 py-3 active fw-600 text-primary" style="border-left: 4px solid var(--color-primary) !important;"><i class="bi bi-person me-3"></i>Thông tin cá nhân</a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 px-4 py-3 text-muted"><i class="bi bi-shield-lock me-3"></i>Bảo mật</a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 px-4 py-3 text-muted"><i class="bi bi-credit-card me-3"></i>Lịch sử thanh toán</a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 px-4 py-3 text-muted"><i class="bi bi-bell me-3"></i>Thông báo</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="col-lg-9">
+                <div class="card-premium p-4 p-md-5">
+                    <h3 class="mb-4">Thông tin cá nhân</h3>
+                    
+                    <form>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-500">Họ và tên</label>
+                                <input type="text" class="form-control p-3 bg-light border-0" value="Nguyễn Văn A" style="border-radius: var(--radius-sm);">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-500">Email</label>
+                                <input type="email" class="form-control p-3 bg-light border-0 text-muted" value="abc@gmail.com" readonly style="border-radius: var(--radius-sm);">
+                                <small class="text-muted d-block mt-1">Email không thể thay đổi.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-500">Số điện thoại</label>
+                                <input type="tel" class="form-control p-3 bg-light border-0" placeholder="Thêm số điện thoại" style="border-radius: var(--radius-sm);">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-500">Mục tiêu JLPT</label>
+                                <select class="form-select p-3 bg-light border-0" style="border-radius: var(--radius-sm);">
+                                    <option value="N5">N5</option>
+                                    <option value="N4" selected>N4</option>
+                                    <option value="N3">N3</option>
+                                    <option value="N2">N2</option>
+                                    <option value="N1">N1</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-muted fw-500">Giới thiệu bản thân</label>
+                                <textarea class="form-control p-3 bg-light border-0" rows="4" placeholder="Một vài dòng giới thiệu về bạn..." style="border-radius: var(--radius-sm);"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-3 pt-3 border-top mt-5">
+                            <button type="button" class="btn btn-light px-4 rounded-pill">Hủy</button>
+                            <button type="submit" class="btn btn-primary-warm px-5">Lưu thay đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
