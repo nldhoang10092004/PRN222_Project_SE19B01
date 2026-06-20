@@ -31,7 +31,7 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             var studentId = currentUser.AccountId;
             var student = await _db.Students
-                .Include(s => s.Account)
+                .Include(s => s.StudentNavigation)
                 .FirstOrDefaultAsync(s => s.StudentId == studentId, cancellationToken);
 
             if (student == null)
