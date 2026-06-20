@@ -10,44 +10,13 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="/learn/dashboard">EasyJapanese</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#learnerNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="learnerNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/learn/dashboard">Trang chủ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/learn/my-courses">Khoá học của tôi</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/learn/profile">Hồ sơ</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin">Khu vực quản trị</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
+    @await Html.PartialAsync("_Header")
 
     <main role="main" class="container py-4">
         @RenderBody()
     </main>
 
-    <footer class="border-top text-muted py-3">
-        <div class="container">
-            &copy; @DateTime.UtcNow.Year - EasyJapanese
-        </div>
-    </footer>
+    @await Html.PartialAsync("_Footer")
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
