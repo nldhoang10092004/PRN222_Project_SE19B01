@@ -11,32 +11,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="/learn/dashboard">EasyJapanese</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#learnerNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="learnerNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/learn/dashboard">Trang chủ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/learn/my-courses">Khoá học của tôi</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/learn/profile">Hồ sơ</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin">Khu vực quản trị</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+        @await Html.PartialAsync("_LearnerHeader")
     </header>
 
     <main role="main" class="container py-4">

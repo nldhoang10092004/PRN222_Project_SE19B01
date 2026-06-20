@@ -1,0 +1,41 @@
+@using CoreLibrary.Authentication
+@using CoreLibrary.Utility
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var currentUser = HttpContextAccessor.HttpContext?.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
+    var initial = !string.IsNullOrEmpty(currentUser?.FullName) ? currentUser.FullName.Substring(0, 1).ToUpper() : "?";
+}
+<header>
+    <nav class="hj-nav">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a asp-area="Learner" asp-controller="Dashboard" asp-action="Index" class="hj-brand">
+                <div class="hj-brand-dot">H</div>
+                Hi Japan!
+            </a>
+
+            <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
+                <li><a asp-area="Learner" asp-controller="Dashboard" asp-action="Index" class="hj-nav-link active">Tổng quan</a></li>
+                <li><a asp-area="Learner" asp-controller="Course" asp-action="Index" class="hj-nav-link">Khoá học</a></li>
+                <li><a href="#" class="hj-nav-link">Tài liệu</a></li>
+                <li><a asp-area="Learner" asp-controller="Blog" asp-action="Index" class="hj-nav-link">Cộng đồng</a></li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="#" class="text-muted fs-5 text-decoration-none"><i class="bi bi-bell"></i></a>
+                <div class="dropdown">
+                    <button class="btn p-0 border-0 dropdown-toggle" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="hj-avatar">@initial</div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="ddUser">
+                        <li><span class="dropdown-item-text fw-600 small text-muted px-3 pt-2">@currentUser?.FullName</span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-person me-2"></i>Tài khoản</a></li>
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2"></i>Cài đặt</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

@@ -1,0 +1,163 @@
+@{
+    Layout = "~/Areas/Learner/Views/Shared/_PlacementTestLayout.cshtml";
+    ViewData["Title"] = "Kiểm tra năng lực - Hi Japan!";
+}
+
+<div class="hj-test-page">
+  <div class="hj-test-container">
+
+    <div class="card-premium text-center w-100" style="max-width: 600px; margin: 0 auto;">
+
+      @* ============== INTRO ============== *@
+      <div id="test-intro" class="p-5 fade-in">
+        <i class="bi bi-clipboard2-check text-primary mb-4 d-inline-block" style="font-size: 4rem;"></i>
+        <h2 class="mb-3">Kiểm tra năng lực</h2>
+        <p class="text-muted mb-4">
+          Làm bài trắc nghiệm ngắn này để xác định trình độ tiếng Nhật hiện tại của bạn.
+          Chúng tôi sẽ gợi ý lộ trình học phù hợp nhất.
+        </p>
+        <button id="btn-start" class="btn btn-primary btn-lg w-100 py-3">Bắt đầu ngay</button>
+      </div>
+
+      @* ============== ACTIVE ============== *@
+      <div id="test-active" class="d-none text-start p-4 p-md-5">
+        <div class="hj-test-progress mb-4">
+          <div class="hj-test-progress-track">
+            <div id="test-progress-fill" class="hj-test-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="hj-test-progress-label"><span id="current-num">1</span> / <span id="total-num">0</span></div>
+        </div>
+        <h4 id="question-text" class="hj-question-text mb-4">Question goes here</h4>
+        <div id="options-container" class="hj-options d-grid gap-2"></div>
+        <div class="d-flex justify-content-between mt-4">
+          <button id="btn-prev" class="btn btn-outline-primary d-none">← Câu trước</button>
+          <button id="btn-next" class="btn btn-primary ms-auto">Câu tiếp →</button>
+        </div>
+      </div>
+
+      @* ============== RESULT ============== *@
+      <div id="test-result" class="d-none p-5">
+        <i class="bi bi-trophy text-warning mb-4 d-inline-block" style="font-size: 4rem;"></i>
+        <h2 class="mb-3">Hoàn thành!</h2>
+        <p class="text-muted mb-2">Dựa vào kết quả bài làm, trình độ đề xuất của bạn là:</p>
+        <h1 id="result-level" class="display-1 text-primary fw-bold mb-4" style="font-weight: 800; letter-spacing: -0.02em;">N5</h1>
+        <p id="result-score" class="text-muted mb-4"></p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <a href="/learn/PlacementTest" class="btn btn-outline-primary btn-lg">Làm lại</a>
+          <a id="result-course-link" href="/learn/PlacementTest" class="btn btn-primary btn-lg">Đi đến khóa học</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const questions = @Html.Raw(ViewBag.QuestionsJson);
+    const testId = @ViewBag.TestId;
+
+    let currentIndex = 0;
+    const answers = {};
+
+    document.getElementById('total-num').innerText = questions.length;
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      document.getElementById('test-intro').classList.add('d-none');
+      document.getElementById('test-active').classList.remove('d-none');
+      showQuestion();
+    });
+
+    document.getElementById('btn-next').addEventListener('click', () => {
+      if (answers[questions[currentIndex].questionId] == null) {
+        alert('Vui lòng chọn 1 đáp án trước khi tiếp tục.');
+        return;
+      }
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        showQuestion();
+      } else {
+        finishTest();
+      }
+    });
+
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        showQuestion();
+      }
+    });
+
+    function showQuestion() {
+      const q = questions[currentIndex];
+      document.getElementById('question-text').innerText = q.text;
+      document.getElementById('current-num').innerText = currentIndex + 1;
+      document.getElementById('test-progress-fill').style.width =
+        `${(currentIndex / questions.length) * 100}%`;
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'hj-option text-start';
+        btn.innerHTML =
+          `<input type="radio" name="opt-${q.questionId}" value="${opt.optionId}"
+                 ${answers[q.questionId] === opt.optionId ? 'checked' : ''} />
+           <span class="hj-option-label">${escapeHtml(opt.text)}</span>`;
+        btn.addEventListener('click', () => {
+          answers[q.questionId] = opt.optionId;
+          container.querySelectorAll('.hj-option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          btn.querySelector('input').checked = true;
+        });
+        container.appendChild(btn);
+      });
+
+      document.getElementById('btn-prev').classList.toggle('d-none', currentIndex === 0);
+      document.getElementById('btn-next').innerText =
+        currentIndex === questions.length - 1 ? 'Nộp bài' : 'Câu tiếp →';
+    }
+
+    function finishTest() {
+      const payload = {
+        testId: testId,
+        answers: Object.keys(answers).map(qid => ({
+          questionId: parseInt(qid),
+          selectedOptionId: answers[qid]
+        }))
+      };
+
+      const csrf = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+      fetch('@Url.Action("SaveResult", "PlacementTest", new { area = "Learner" })', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'RequestVerificationToken': csrf ?? ''
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(r => r.ok ? r.json() : Promise.reject(r))
+        .then(data => {
+          document.getElementById('test-active').classList.add('d-none');
+          document.getElementById('test-result').classList.remove('d-none');
+          document.getElementById('result-level').innerText = data.recommendedLevelName;
+          document.getElementById('result-score').innerText =
+            `Điểm: ${data.correctCount} / ${data.totalPoints} câu đúng`;
+          document.getElementById('result-course-link').href =
+            `/Learner/Course?level=${data.recommendedLevelName}`;
+        })
+        .catch(() => {
+          alert('Có lỗi khi nộp bài. Vui lòng thử lại.');
+        });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+  })();
+</script>
