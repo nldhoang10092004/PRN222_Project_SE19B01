@@ -1,10 +1,118 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Transaction>
 @{
-    ViewData["Title"] = "Dashboard quản trị";
+    ViewData["Title"] = "Tổng quan hệ thống";
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="mb-3">Dashboard</h1>
-        <p class="lead">Khu vực quản trị EasyJapanese.</p>
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Dashboard Quản trị</h3>
+    <button class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i> Xuất báo cáo</button>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #C8102E !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Doanh thu tháng này</p>
+                <h4 class="mb-0 fw-bold">@(((decimal)ViewData["MonthlyRevenue"]!).ToString("N0"))đ</h4>
+                <small class="text-success fw-bold"><i class="bi bi-arrow-up-short"></i> (Thực tế)</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #0d6efd !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Học viên mới</p>
+                <h4 class="mb-0 fw-bold">@ViewData["NewStudents"]</h4>
+                <small class="text-success fw-bold"><i class="bi bi-arrow-up-short"></i> (Tháng này)</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #ffc107 !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Giao dịch chờ duyệt</p>
+                <h4 class="mb-0 fw-bold">0</h4>
+                <a href="/admin/orders" class="small text-decoration-none text-primary fw-medium">Xem chi tiết <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #198754 !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Khóa học active</p>
+                <h4 class="mb-0 fw-bold">@ViewData["ActiveCourses"]</h4>
+                <small class="text-muted">Không thay đổi</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h5 class="fw-bold mb-0">Hoạt động đăng ký gần đây</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-muted fw-semibold small text-uppercase">Học viên</th>
+                                <th class="text-muted fw-semibold small text-uppercase">Gói/Khóa học</th>
+                                <th class="text-muted fw-semibold small text-uppercase">Ngày giờ</th>
+                                <th class="text-muted fw-semibold small text-uppercase">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tx in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">@(tx.Student?.FullName ?? "User_" + tx.StudentId)</div>
+                                    </td>
+                                    <td>@(tx.Plan?.PlanName ?? "Gói/Khóa học")</td>
+                                    <td>@tx.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if(tx.PaymentStatus == "Completed")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Thành công</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2">Đang chờ</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Chưa có giao dịch nào</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h5 class="fw-bold mb-0">Thao tác nhanh</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-grid gap-3">
+                    <a href="/admin/users" class="btn btn-light border text-start py-3 px-4 d-flex align-items-center rounded-3 text-decoration-none text-dark">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-lines-fill fs-5"></i>
+                        </div>
+                        <div class="fw-semibold">Quản lý người dùng</div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

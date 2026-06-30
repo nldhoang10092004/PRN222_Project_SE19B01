@@ -1,0 +1,87 @@
+@model CoreLibrary.Data.Entities.Lesson
+@{
+    ViewData["Title"] = "Thêm bài giảng";
+    var courseId = ViewData["CourseId"];
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div>
+        <a href="/teacher/lessons?courseId=@courseId" class="text-decoration-none text-muted mb-2 d-inline-block"><i class="bi bi-arrow-left"></i> Quay lại</a>
+        <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Thêm bài giảng mới</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form asp-action="Create" method="post">
+                    <input type="hidden" asp-for="CourseId" value="@courseId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-bold">Tiêu đề bài giảng <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control form-control-lg" placeholder="Ví dụ: Bài 1: Từ vựng chủ đề Gia đình" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="LessonType" class="form-label fw-bold">Loại bài giảng <span class="text-danger">*</span></label>
+                            <select asp-for="LessonType" class="form-select form-select-lg" required id="lessonTypeSelect">
+                                <option value="Video">Video</option>
+                                <option value="Text">Văn bản (Text)</option>
+                            </select>
+                            <span asp-validation-for="LessonType" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SortOrder" class="form-label fw-bold">Thứ tự</label>
+                            <input asp-for="SortOrder" type="number" class="form-control form-control-lg" value="1" min="1" />
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end pb-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" asp-for="IsPreview" role="switch" style="width: 2.5rem; height: 1.25rem;">
+                                <label class="form-check-label ms-2 mt-1" asp-for="IsPreview">Cho phép xem trước</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4" id="videoUrlDiv">
+                        <label asp-for="VideoUrl" class="form-label fw-bold">Đường dẫn Video (YouTube, Vimeo, etc.)</label>
+                        <input asp-for="VideoUrl" class="form-control" placeholder="https://youtube.com/..." />
+                        <span asp-validation-for="VideoUrl" class="text-danger small"></span>
+                        <div class="mt-3">
+                            <label asp-for="Duration" class="form-label fw-bold">Thời lượng (phút)</label>
+                            <input asp-for="Duration" type="number" class="form-control" min="0" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4" id="contentDiv" style="display: none;">
+                        <label asp-for="Content" class="form-label fw-bold">Nội dung bài giảng</label>
+                        <textarea asp-for="Content" class="form-control" rows="8" placeholder="Nhập nội dung văn bản ở đây..."></textarea>
+                        <span asp-validation-for="Content" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold"><i class="bi bi-save me-2"></i> Lưu bài giảng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('lessonTypeSelect').addEventListener('change', function() {
+            if(this.value === 'Video') {
+                document.getElementById('videoUrlDiv').style.display = 'block';
+                document.getElementById('contentDiv').style.display = 'none';
+            } else {
+                document.getElementById('videoUrlDiv').style.display = 'none';
+                document.getElementById('contentDiv').style.display = 'block';
+            }
+        });
+    </script>
+}

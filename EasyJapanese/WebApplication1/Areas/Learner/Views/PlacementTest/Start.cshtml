@@ -1,0 +1,177 @@
+@{
+    ViewData["Title"] = "Bài Kiểm Tra Xếp Lớp";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        body { background-color: #FAFAFA; font-family: 'Inter', sans-serif; }
+        .test-container {
+            max-width: 800px;
+            margin: 60px auto 100px;
+        }
+        .test-hero {
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+            border-radius: 24px;
+            padding: 60px 40px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .test-hero::before {
+            content: "試";
+            position: absolute;
+            font-size: 200px;
+            color: rgba(255,255,255,0.05);
+            font-family: 'Yu Mincho', serif;
+            top: -20px;
+            right: -20px;
+            line-height: 1;
+        }
+        .test-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .info-cards {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            min-width: 160px;
+        }
+        .info-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+            color: #fff;
+        }
+        .info-card-val {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .info-card-lbl {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        .btn-start-test {
+            background: #fff;
+            color: #4e4376;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .btn-start-test:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .test-content-section {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: -30px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+    </style>
+}
+
+<div class="container test-container">
+    <div class="test-hero">
+        <h1 class="test-title">Kiểm tra năng lực tiếng Nhật</h1>
+        <p style="font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+            Bài test sẽ giúp chúng tôi đánh giá chính xác trình độ hiện tại của bạn, từ đó đề xuất lộ trình học N5 - N1 phù hợp nhất, giúp tiết kiệm thời gian học tập.
+        </p>
+        
+        <div class="info-cards">
+            <div class="info-card">
+                <i class="bi bi-clock-history"></i>
+                <div class="info-card-val">~15 Phút</div>
+                <div class="info-card-lbl">Thời gian làm bài</div>
+            </div>
+            <div class="info-card">
+                <i class="bi bi-ui-checks-grid"></i>
+                <div class="info-card-val">30 Câu hỏi</div>
+                <div class="info-card-lbl">Trắc nghiệm</div>
+            </div>
+            <div class="info-card">
+                <i class="bi bi-bullseye"></i>
+                <div class="info-card-val">N5 - N1</div>
+                <div class="info-card-lbl">Trình độ đánh giá</div>
+            </div>
+        </div>
+
+        <a asp-area="Learner" asp-controller="Dashboard" asp-action="Index" class="btn-start-test" onclick="alert('Tính năng làm bài thi thật đang được phát triển. Tạm thời quay về Dashboard.');">
+            Bắt đầu làm bài <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="test-content-section mt-5">
+        <h4 class="mb-4" style="font-family: 'Outfit', sans-serif; font-weight: 700;">Cấu trúc bài thi</h4>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-primary bg-primary bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-translate fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Từ vựng & Kanji</h5>
+                        <p class="text-muted small">Kiểm tra vốn từ vựng và khả năng đọc hiểu chữ Hán ở nhiều cấp độ.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-danger bg-danger bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-journal-text fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Ngữ pháp</h5>
+                        <p class="text-muted small">Đánh giá khả năng hiểu cấu trúc câu và cách sử dụng trợ từ chính xác.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-success bg-success bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-book fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Đọc hiểu</h5>
+                        <p class="text-muted small">Kiểm tra kỹ năng đọc nhanh, tìm ý chính và phân tích văn bản tiếng Nhật.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-warning bg-warning bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-lightbulb fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Lưu ý quan trọng</h5>
+                        <p class="text-muted small">Bài kiểm tra sẽ tự động tăng/giảm độ khó dựa trên câu trả lời của bạn.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

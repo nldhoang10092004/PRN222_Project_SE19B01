@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     @await Html.PartialAsync("_Header")

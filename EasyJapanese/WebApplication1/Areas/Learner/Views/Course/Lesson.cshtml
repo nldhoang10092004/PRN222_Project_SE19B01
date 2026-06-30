@@ -1,5 +1,6 @@
+@model CoreLibrary.Data.Entities.Lesson
 @{
-    ViewData["Title"] = "Bài 1: Giới thiệu bản thân";
+    ViewData["Title"] = Model?.Title ?? "Nội dung bài học";
 }
 
 @section Styles {
@@ -25,37 +26,52 @@
     </style>
 }
 
+@if (Model != null)
+{
 <div class="hj-content container" style="max-width: 1000px; margin: 0 auto; padding-top: 2rem; padding-bottom: 5rem;">
     <!-- Header -->
-    <a href="/learn/Course/Detail/1" class="course-back-link mb-3">
-        &larr; Quay lại danh sách
+    <a href="/learn/Course/Detail/@Model.CourseId" class="course-back-link mb-3">
+        &larr; Quay lại khóa học
     </a>
     
     <div class="course-header mb-4 d-flex justify-content-between align-items-center">
-        <h1 class="course-title m-0">Bài 1: Giới thiệu bản thân</h1>
+        <h1 class="course-title m-0">@Model.Title</h1>
         <button class="btn btn-danger px-4 py-2" style="border-radius: 50px; font-weight: 600; background-color: #e64a51; border: none;">
-            Làm Quiz Cuối Khóa <i class="bi bi-patch-check ms-1"></i>
+            Làm Quiz Cuối Bài <i class="bi bi-patch-check ms-1"></i>
         </button>
     </div>
 
     <!-- Video Player -->
-    <div class="video-container shadow-sm mb-4">
-        <!-- Placeholder for actual video iframe -->
-        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark text-white" style="position: absolute; top:0; left:0;">
-            <div class="text-center">
-                <i class="bi bi-play-circle" style="font-size: 4rem; color: #e64a51; cursor: pointer;"></i>
-                <p class="mt-3 text-muted">Video bài giảng: Nhấn để phát</p>
+    <div class="video-container shadow-sm mb-4" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000; border-radius: 12px;">
+        @if (!string.IsNullOrEmpty(Model.VideoUrl))
+        {
+            <iframe src="@Model.VideoUrl" style="position: absolute; top:0; left:0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+        }
+        else
+        {
+            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white" style="position: absolute; top:0; left:0;">
+                <div class="text-center">
+                    <i class="bi bi-play-circle" style="font-size: 4rem; color: #e64a51; cursor: pointer;"></i>
+                    <p class="mt-3 text-muted">Video bài giảng đang được cập nhật</p>
+                </div>
             </div>
+        }
+    </div>
+
+    <!-- Content -->
+    <div class="hj-card p-4 shadow-sm border-0 mb-4" style="border-radius: 16px;">
+        <h4 class="kanji-section-title">Nội dung tóm tắt</h4>
+        <div class="p-3 bg-light rounded" style="font-size: 1.1rem; line-height: 1.6;">
+            @Html.Raw(Model.Content?.Replace("\n", "<br/>") ?? "Chưa có nội dung.")
         </div>
     </div>
 
-    <!-- Sub Tabs -->
+    <!-- Sub Tabs (Mock data retained for UI purposes) -->
     <div class="course-tabs mb-4">
         <div class="course-tab active" data-target="tab-kanji" style="cursor: pointer;"><i class="bi bi-translate me-2"></i>Kanji</div>
         <div class="course-tab" data-target="tab-grammar" style="cursor: pointer;"><i class="bi bi-journal-text me-2"></i>Ngữ pháp</div>
         <div class="course-tab" data-target="tab-reading" style="cursor: pointer;"><i class="bi bi-book me-2"></i>Đọc</div>
         <div class="course-tab" data-target="tab-listening" style="cursor: pointer;"><i class="bi bi-headphones me-2"></i>Nghe</div>
-        <div class="course-tab" data-target="tab-exercise" style="cursor: pointer;"><i class="bi bi-pencil-square me-2"></i>Ex (Bài tập)</div>
     </div>
 
     <!-- Tab Contents -->
@@ -63,7 +79,7 @@
         
         <!-- Kanji Content -->
         <div id="tab-kanji" class="tab-content-panel active">
-            <h4 class="kanji-section-title">Kanji Bài 1</h4>
+            <h4 class="kanji-section-title">Kanji (Minh họa)</h4>
             <div class="row g-4">
                 <div class="col-md-3">
                     <div class="p-4 border rounded text-center bg-light" style="border-color: #eaeaea !important;">
@@ -77,129 +93,69 @@
                         <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Hito / Jin - Người</p>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="p-4 border rounded text-center bg-light" style="border-color: #eaeaea !important;">
-                        <h1 class="display-3 mb-0" style="font-family: 'Yu Mincho', 'MS Mincho', serif; color: #212529;">先</h1>
-                        <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Sen - Trước</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-4 border rounded text-center bg-light" style="border-color: #eaeaea !important;">
-                        <h1 class="display-3 mb-0" style="font-family: 'Yu Mincho', 'MS Mincho', serif; color: #212529;">生</h1>
-                        <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Sei - Sinh</p>
-                    </div>
-                </div>
             </div>
         </div>
 
         <!-- Grammar Content -->
         <div id="tab-grammar" class="tab-content-panel">
-            <h4 class="kanji-section-title">Ngữ pháp Bài 1</h4>
+            <h4 class="kanji-section-title">Ngữ pháp (Minh họa)</h4>
             <div class="list-group list-group-flush">
                 <div class="list-group-item px-0 py-3 border-bottom">
                     <h5 class="mb-2" style="font-weight: 700; color: #333;">1. N1 は N2 です</h5>
                     <p class="text-muted mb-0">N1 là N2. Dùng để khẳng định.</p>
-                    <div class="bg-light p-3 rounded mt-2" style="border-left: 4px solid #0d6efd;">
-                        <strong>Ví dụ:</strong> わたしは がくせいです。(Tôi là học sinh)
-                    </div>
-                </div>
-                <div class="list-group-item px-0 py-3">
-                    <h5 class="mb-2" style="font-weight: 700; color: #333;">2. N1 は N2 じゃありません</h5>
-                    <p class="text-muted mb-0">N1 không phải là N2. Dùng để phủ định.</p>
-                    <div class="bg-light p-3 rounded mt-2" style="border-left: 4px solid #e64a51;">
-                        <strong>Ví dụ:</strong> わたしは せんせい じゃありません。(Tôi không phải là giáo viên)
-                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Reading Content -->
         <div id="tab-reading" class="tab-content-panel">
-            <h4 class="kanji-section-title">Đọc hiểu Bài 1</h4>
+            <h4 class="kanji-section-title">Đọc hiểu (Minh họa)</h4>
             <div class="bg-light p-4 rounded mb-4 border" style="border-color: #eaeaea !important;">
-                <p class="lead mb-4" style="line-height: 2; font-size: 1.1rem; color: #333;">
-                    はじめまして。<br>
-                    わたしは マイク・ミラーです。<br>
-                    アメリカから きました。<br>
-                    どうぞ よろしく。
+                <p class="lead mb-0" style="line-height: 2; font-size: 1.1rem; color: #333;">
+                    はじめまして。<br>わたしは マイク・ミラーです。
                 </p>
-            </div>
-            <h5 style="font-weight: 700; color: #333;">Câu hỏi:</h5>
-            <div class="form-check mt-3">
-                <input class="form-check-input" type="radio" name="readingQ1" id="q1a">
-                <label class="form-check-label" for="q1a">1. Miller đến từ nước Anh</label>
-            </div>
-            <div class="form-check mt-2">
-                <input class="form-check-input" type="radio" name="readingQ1" id="q1b">
-                <label class="form-check-label" for="q1b">2. Miller đến từ Mỹ</label>
             </div>
         </div>
 
         <!-- Listening Content -->
         <div id="tab-listening" class="tab-content-panel">
-            <h4 class="kanji-section-title">Nghe hiểu Bài 1</h4>
-            <div class="d-flex align-items-center gap-3 bg-light p-3 rounded mb-4 border" style="border-color: #eaeaea !important;">
-                <button class="btn btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: #e64a51; border: none;">
-                    <i class="bi bi-play-fill fs-4 ms-1"></i>
-                </button>
-                <div class="flex-grow-1">
-                    <div class="progress" style="height: 6px; background-color: #dee2e6;">
-                        <div class="progress-bar" style="width: 30%; background-color: #e64a51;"></div>
-                    </div>
-                    <div class="d-flex justify-content-between mt-2">
-                        <small class="text-muted fw-bold">0:12</small>
-                        <small class="text-muted fw-bold">1:45</small>
-                    </div>
+            <h4 class="kanji-section-title">Nghe hiểu (Minh họa)</h4>
+            <div class="d-flex align-items-center bg-light p-4 rounded border">
+                <button class="btn btn-primary rounded-circle p-3 me-4" style="width: 60px; height: 60px;"><i class="bi bi-play-fill fs-4"></i></button>
+                <div>
+                    <h5 class="mb-1" style="font-weight: 700;">Audio Track 1</h5>
+                    <div class="text-muted small">00:00 / 01:25</div>
                 </div>
             </div>
-            <p class="text-muted">Hãy nghe đoạn hội thoại và chọn đáp án đúng.</p>
-        </div>
-
-        <!-- Exercise Content -->
-        <div id="tab-exercise" class="tab-content-panel">
-            <h4 class="kanji-section-title">Bài tập vận dụng (Ex)</h4>
-            <p class="text-muted mb-4">Hoàn thành các bài tập dưới đây để củng cố kiến thức bài 1.</p>
-            
-            <div class="card mb-3 border-0 bg-light">
-                <div class="card-body p-4 border" style="border-radius: 12px; border-color: #eaeaea !important;">
-                    <h6 class="mb-3" style="font-weight: 700;">Bài 1: Điền trợ từ thích hợp vào chỗ trống</h6>
-                    <p class="mb-2 fw-medium">1. わたし (...) マイク・ミラーです。</p>
-                    <input type="text" class="form-control mb-4" style="max-width: 200px;" placeholder="Nhập trợ từ">
-                    
-                    <p class="mb-2 fw-medium">2. サントスさん (...) がくせい じゃありません。</p>
-                    <input type="text" class="form-control mb-3" style="max-width: 200px;" placeholder="Nhập trợ từ">
-                </div>
-            </div>
-            
-            <button class="btn btn-danger px-4 py-2 mt-2" style="border-radius: 8px; font-weight: 600; background-color: #e64a51; border: none;">
-                Nộp bài tập
-            </button>
         </div>
 
     </div>
 </div>
+}
+else
+{
+    <div class="container py-5 text-center">
+        <h2>Không tìm thấy bài học!</h2>
+        <a href="/learn/Course" class="btn btn-primary mt-3">Quay lại danh sách khóa học</a>
+    </div>
+}
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tabs = document.querySelectorAll('.course-tab');
-            const panels = document.querySelectorAll('.tab-content-panel');
+        document.addEventListener('DOMContentLoaded', function() {
+            var tabs = document.querySelectorAll('.course-tab');
+            var panels = document.querySelectorAll('.tab-content-panel');
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function () {
-                    // Remove active from all tabs and panels
-                    tabs.forEach(t => t.classList.remove('active'));
-                    panels.forEach(p => p.classList.remove('active'));
-
-                    // Add active to clicked tab
+            tabs.forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    var targetId = this.getAttribute('data-target');
+                    
+                    tabs.forEach(function(t) { t.classList.remove('active'); });
+                    panels.forEach(function(p) { p.classList.remove('active'); });
+                    
                     this.classList.add('active');
-
-                    // Show corresponding panel
-                    const targetId = this.getAttribute('data-target');
-                    const panel = document.getElementById(targetId);
-                    if (panel) {
-                        panel.classList.add('active');
-                    }
+                    var targetPanel = document.getElementById(targetId);
+                    if(targetPanel) targetPanel.classList.add('active');
                 });
             });
         });

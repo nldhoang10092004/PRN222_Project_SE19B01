@@ -131,15 +131,38 @@ else
                 Hi Japan!
             </a>
 
-            <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
-                <li><a href="/learn/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
-                <li><a href="/learn/Course" class="hj-nav-link @(currentController == "Course" ? "active" : "")">Khóa học</a></li>
-                <li><a href="#" class="hj-nav-link">Tài liệu</a></li>
-                <li><a href="#" class="hj-nav-link">Cộng đồng</a></li>
-            </ul>
+            @{
+                var area = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+            }
+            @if (area == "Admin")
+            {
+                <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
+                    <li><a href="/admin/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
+                    <li><a href="/admin/Users" class="hj-nav-link @(currentController == "Users" ? "active" : "")">Người dùng</a></li>
+                    <li><a href="/admin/Courses" class="hj-nav-link @(currentController == "Courses" ? "active" : "")">Khóa học</a></li>
+                    <li><a href="/admin/Orders" class="hj-nav-link @(currentController == "Orders" ? "active" : "")">Đơn hàng</a></li>
+                </ul>
+            }
+            else if (area == "Teacher")
+            {
+                <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
+                    <li><a href="/teacher/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
+                    <li><a href="/teacher/Courses" class="hj-nav-link @(currentController == "Courses" ? "active" : "")">Khóa học của tôi</a></li>
+                    <li><a href="/teacher/Students" class="hj-nav-link @(currentController == "Students" ? "active" : "")">Học viên</a></li>
+                    <li><a href="/teacher/Earnings" class="hj-nav-link @(currentController == "Earnings" ? "active" : "")">Doanh thu</a></li>
+                </ul>
+            }
+            else
+            {
+                <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
+                    <li><a href="/learn/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
+                    <li><a href="/learn/Course" class="hj-nav-link @(currentController == "Course" ? "active" : "")">Khóa học</a></li>
+                    <li><a href="#" class="hj-nav-link">Tài liệu</a></li>
+                    <li><a href="#" class="hj-nav-link">Cộng đồng</a></li>
+                </ul>
+            }
 
             <div class="d-flex align-items-center gap-3">
-                <a href="/admin" class="text-muted d-none d-lg-inline text-decoration-none" style="font-size: 0.9rem;">Khu vực quản trị</a>
                 <a href="#" class="text-muted fs-5 text-decoration-none ms-2"><i class="bi bi-bell"></i></a>
                 <div class="dropdown">
                     <a href="#" class="d-flex align-items-center text-decoration-none" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false">

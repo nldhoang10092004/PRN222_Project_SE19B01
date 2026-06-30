@@ -5,6 +5,7 @@ using CoreLibrary.Payment;
 using CoreLibrary.Storage;
 using WebApplication1.Areas.Admin;
 using WebApplication1.Areas.Learner;
+using WebApplication1.Areas.Teacher;
 
 namespace CoreWeb
 {
@@ -77,6 +78,9 @@ namespace CoreWeb
 
             // Khu vực quản trị: /admin/...
             app.MapAdminArea();
+
+            // Khu vực giáo viên: /teacher/...
+            app.MapTeacherArea();
 
             app.Run();
         }
