@@ -1,0 +1,159 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Account>
+@using CoreLibrary.Const
+@{
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Quản lý Người dùng</h3>
+    <div>
+        <!-- Additional actions can be placed here -->
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm theo email, tên..." value="@ViewData["SearchString"]">
+            </div>
+            <div class="col-md-4">
+                <select name="roleFilter" class="form-select">
+                    <option value="">-- Tất cả vai trò --</option>
+                    @if(ViewData["RoleFilter"]?.ToString() == RoleConst.STUDENT) { <option value="@RoleConst.STUDENT" selected>Học viên</option> } else { <option value="@RoleConst.STUDENT">Học viên</option> }
+                    @if(ViewData["RoleFilter"]?.ToString() == RoleConst.MENTOR) { <option value="@RoleConst.MENTOR" selected>Giáo viên</option> } else { <option value="@RoleConst.MENTOR">Giáo viên</option> }
+                    @if(ViewData["RoleFilter"]?.ToString() == RoleConst.ADMIN) { <option value="@RoleConst.ADMIN" selected>Admin</option> } else { <option value="@RoleConst.ADMIN">Admin</option> }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i> Lọc</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Người dùng</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var fullName = user.Student?.FullName ?? user.Mentor?.FullName ?? user.Admin?.FullName ?? user.Email;
+                        var avatarUrl = user.Student?.AvatarUrl ?? user.Mentor?.AvatarUrl ?? user.Admin?.AvatarUrl;
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(avatarUrl))
+                                    {
+                                        <img src="@avatarUrl" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center bg-primary text-white fw-bold" style="width: 40px; height: 40px;">
+                                            @fullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="fw-bold text-dark">@fullName</div>
+                                        <small class="text-muted">@user.Email</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (user.Role == RoleConst.ADMIN)
+                                {
+                                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Admin</span>
+                                }
+                                else if (user.Role == RoleConst.MENTOR)
+                                {
+                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">Giáo viên</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">Học viên</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsLocked)
+                                {
+                                    <span class="badge bg-danger rounded-pill"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle-fill"></i> Hoạt động</span>
+                                }
+                            </td>
+                            <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light border dropdown-toggle rounded-3" type="button" data-bs-toggle="dropdown">
+                                        Thao tác
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        <li>
+                                            <form asp-action="ChangeRole" method="post">
+                                                <input type="hidden" name="accountId" value="@user.AccountId" />
+                                                <input type="hidden" name="newRole" value="@RoleConst.STUDENT" />
+                                                <button type="submit" class="dropdown-item py-2"><i class="bi bi-person me-2 text-muted"></i> Cấp quyền Học viên</button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form asp-action="ChangeRole" method="post">
+                                                <input type="hidden" name="accountId" value="@user.AccountId" />
+                                                <input type="hidden" name="newRole" value="@RoleConst.MENTOR" />
+                                                <button type="submit" class="dropdown-item py-2"><i class="bi bi-person-video3 me-2 text-primary"></i> Cấp quyền Giáo viên</button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form asp-action="ChangeRole" method="post">
+                                                <input type="hidden" name="accountId" value="@user.AccountId" />
+                                                <input type="hidden" name="newRole" value="@RoleConst.ADMIN" />
+                                                <button type="submit" class="dropdown-item py-2"><i class="bi bi-shield-lock me-2 text-danger"></i> Cấp quyền Admin</button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-action="ToggleLock" method="post">
+                                                <input type="hidden" name="accountId" value="@user.AccountId" />
+                                                <button type="submit" class="dropdown-item py-2 text-danger">
+                                                    @if(user.IsLocked) {
+                                                        <><i class="bi bi-unlock-fill me-2"></i> Mở khóa tài khoản</>
+                                                    } else {
+                                                        <><i class="bi bi-lock-fill me-2"></i> Khóa tài khoản</>
+                                                    }
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if(!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">Không tìm thấy người dùng nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

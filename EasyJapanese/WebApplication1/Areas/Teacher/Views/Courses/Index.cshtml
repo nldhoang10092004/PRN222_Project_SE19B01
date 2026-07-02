@@ -1,0 +1,96 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Course>
+@{
+    ViewData["Title"] = "Quản lý Khóa học";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Khóa học của tôi</h3>
+    <a href="/teacher/courses/create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Tạo khóa học mới</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Tên khóa học</th>
+                        <th>Cấp độ</th>
+                        <th>Học viên</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">@item.Title</div>
+                                <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">
+                                    @(item.IsFree ? "Miễn phí" : "Có phí")
+                                </small>
+                            </td>
+                            <td><span class="badge bg-info text-dark">@item.Level?.LevelName</span></td>
+                            <td>@(item.Enrollments?.Count ?? 0)</td>
+                            <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (item.IsPublished)
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Đã xuất bản</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Bản nháp</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="/teacher/lessons?courseId=@item.CourseId" class="btn btn-sm btn-outline-primary" title="Quản lý Bài giảng">
+                                        <i class="bi bi-journal-text"></i> Bài giảng
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Thêm</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li><a class="dropdown-item" href="/teacher/courses/edit/@item.CourseId"><i class="bi bi-pencil-square me-2 text-muted"></i>Chỉnh sửa</a></li>
+                                        <li>
+                                            <form asp-action="TogglePublish" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.CourseId" />
+                                                <button type="submit" class="dropdown-item">
+                                                    @if(item.IsPublished){
+                                                        <><i class="bi bi-eye-slash me-2 text-warning"></i> Ẩn khóa học</>
+                                                    } else {
+                                                        <><i class="bi bi-eye me-2 text-success"></i> Xuất bản khóa học</>
+                                                    }
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
+                                Bạn chưa có khóa học nào. Hãy bấm "Tạo khóa học mới" để bắt đầu!
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

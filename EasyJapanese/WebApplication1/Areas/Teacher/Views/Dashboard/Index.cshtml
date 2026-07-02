@@ -1,0 +1,120 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Course>
+@{
+    ViewData["Title"] = "Tổng quan Giáo viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Dashboard Giáo viên</h3>
+    <a href="/teacher/courses/create" class="btn btn-primary btn-sm px-3 rounded-pill"><i class="bi bi-plus-lg me-1"></i> Bài giảng mới</a>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid var(--color-primary) !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Khóa học phụ trách</p>
+                <h4 class="mb-0 fw-bold">@ViewData["TotalCourses"]</h4>
+                <small class="text-muted">@ViewData["ActiveCourses"] đang Active</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #198754 !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Học viên của tôi</p>
+                <h4 class="mb-0 fw-bold">@ViewData["TotalStudents"]</h4>
+                <small class="text-success fw-bold"><i class="bi bi-person-check-fill"></i> Đã đăng ký</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #ffc107 !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Đánh giá trung bình</p>
+                <h4 class="mb-0 fw-bold">@ViewData["AverageRating"] <i class="bi bi-star-fill text-warning fs-5"></i></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #0d6efd !important;">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold text-uppercase">Lượt tương tác (Q&A)</p>
+                <h4 class="mb-0 fw-bold">@ViewData["UnansweredQA"]</h4>
+                <small class="text-danger fw-bold">0 chưa trả lời</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">Khóa học đang hoạt động</h5>
+                <a href="/teacher/courses" class="text-decoration-none text-primary small fw-medium">Xem tất cả</a>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var course in Model)
+                    {
+                        <div class="d-flex align-items-center p-3 border rounded-3 bg-light bg-opacity-50">
+                            <div class="bg-primary text-white d-flex align-items-center justify-content-center rounded-3 me-3" style="width: 80px; height: 60px; font-size: 1.5rem;">
+                                <i class="bi bi-journal-check"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1">@course.Title</h6>
+                                <p class="text-muted small mb-0">@(course.Enrollments?.Count ?? 0) học viên &bull; @(course.IsFree ? "Miễn phí" : "Có phí")</p>
+                            </div>
+                            <a href="/teacher/courses" class="btn btn-sm btn-outline-secondary">Quản lý</a>
+                        </div>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center text-muted py-4">Chưa có khóa học nào được xuất bản.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h5 class="fw-bold mb-0">Danh sách cần xử lý</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <i class="bi bi-chat-left-dots-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">12 câu hỏi Q&A chưa trả lời</h6>
+                            <p class="text-muted small mb-0">Học viên đang chờ phản hồi.</p>
+                        </div>
+                    </div>
+                    <hr class="my-1 border-light">
+                    <div class="d-flex align-items-start">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <i class="bi bi-file-earmark-check-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">Chấm bài tập tự luận N3</h6>
+                            <p class="text-muted small mb-0">Còn 5 bài tập chưa chấm điểm.</p>
+                        </div>
+                    </div>
+                    <hr class="my-1 border-light">
+                    <div class="d-flex align-items-start">
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <i class="bi bi-camera-video-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">Lịch Livestream 20:00</h6>
+                            <p class="text-muted small mb-0">Luyện giải đề N3 tháng 7.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

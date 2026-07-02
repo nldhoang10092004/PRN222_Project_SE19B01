@@ -1,3 +1,4 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Course>
 @{
     ViewData["Title"] = "Danh Sách Khóa Học";
 }
@@ -15,82 +16,45 @@
 
     <!-- Course Grid -->
     <div class="row g-4 justify-content-center">
-        <!-- N5 Course -->
-        <div class="col-md-4">
-            <div class="course-card">
-                <div class="course-cover bg-red">
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" alt="Khóa học N5" />
-                </div>
-                <div class="course-body">
-                    <span class="badge-level n5">N5 Beginner</span>
-                    <h3 class="course-name">Khóa học tiếng Nhật N5</h3>
-                    <p class="course-desc">Khóa học nhập môn dành cho người mới bắt đầu. Nắm vững bảng chữ cái và ngữ pháp cơ bản.</p>
-                    
-                    <div class="teacher-divider"></div>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var course in Model)
+            {
+                var levelClass = course.Level?.LevelName?.ToLower() ?? "n5";
+                var levelText = course.Level?.LevelName ?? "Beginner";
+                
+                <div class="col-md-4">
+                    <div class="course-card">
+                        <div class="course-cover @(levelClass == "n5" ? "bg-red" : "")">
+                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" alt="@course.Title" />
+                        </div>
+                        <div class="course-body">
+                            <span class="badge-level @levelClass">@levelText</span>
+                            <h3 class="course-name">@course.Title</h3>
+                            <p class="course-desc">@course.Description</p>
+                            
+                            <div class="teacher-divider"></div>
 
-                    <div class="course-teacher">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="Avatar" class="teacher-avt" />
-                        <div class="teacher-info">
-                            <div class="teacher-name">Cô Nguyễn Thị A</div>
-                            <div class="teacher-exp">Giáo viên kinh nghiệm 5 năm</div>
+                            <div class="course-teacher">
+                                <img src="@(course.Mentor?.AvatarUrl ?? "https://i.pravatar.cc/100?img=5")" alt="Avatar" class="teacher-avt" />
+                                <div class="teacher-info">
+                                    <div class="teacher-name">@(course.Mentor?.FullName ?? "Đang cập nhật")</div>
+                                    <div class="teacher-exp">@(course.Mentor?.Expertise ?? "Giảng viên EasyJapanese")</div>
+                                </div>
+                            </div>
+
+                            <a href="/learn/Course/Detail/@course.CourseId" class="btn-vao-hoc mt-4">Vào học ngay</a>
                         </div>
                     </div>
-
-                    <a href="/learn/Course/Detail/1" class="btn-vao-hoc mt-4">Vào học ngay</a>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center text-muted py-5">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-3">Hiện chưa có khóa học nào. Vui lòng quay lại sau!</p>
             </div>
-        </div>
-
-        <!-- N4 Course -->
-        <div class="col-md-4">
-            <div class="course-card">
-                <div class="course-cover">
-                    <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&h=400&fit=crop" alt="Khóa học N4" />
-                </div>
-                <div class="course-body">
-                    <span class="badge-level n4">N4 Pre-Intermediate</span>
-                    <h3 class="course-name">Khóa học tiếng Nhật N4</h3>
-                    <p class="course-desc">Nâng cao khả năng giao tiếp và vốn từ vựng. Chuẩn bị nền tảng vững chắc cho N3.</p>
-                    
-                    <div class="teacher-divider"></div>
-
-                    <div class="course-teacher">
-                        <img src="https://i.pravatar.cc/100?img=11" alt="Avatar" class="teacher-avt" />
-                        <div class="teacher-info">
-                            <div class="teacher-name">Thầy Trần Văn B</div>
-                            <div class="teacher-exp">Cựu du học sinh Nhật Bản</div>
-                        </div>
-                    </div>
-
-                    <a href="/learn/Course/Detail/2" class="btn-vao-hoc mt-4">Vào học ngay</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- N3 Course -->
-        <div class="col-md-4">
-            <div class="course-card">
-                <div class="course-cover">
-                    <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&h=400&fit=crop" alt="Khóa học N3" />
-                </div>
-                <div class="course-body">
-                    <span class="badge-level n3">N3 Intermediate</span>
-                    <h3 class="course-name">Khóa học tiếng Nhật N3</h3>
-                    <p class="course-desc">Khóa học trọng tâm giao tiếp kinh doanh và đọc hiểu báo chí Nhật Bản.</p>
-                    
-                    <div class="teacher-divider"></div>
-
-                    <div class="course-teacher">
-                        <img src="https://i.pravatar.cc/100?img=9" alt="Avatar" class="teacher-avt" />
-                        <div class="teacher-info">
-                            <div class="teacher-name">Cô Lê Thị C</div>
-                            <div class="teacher-exp">Chuyên gia đào tạo N3, N2</div>
-                        </div>
-                    </div>
-
-                    <a href="/learn/Course/Detail/3" class="btn-vao-hoc mt-4">Vào học ngay</a>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </div>
