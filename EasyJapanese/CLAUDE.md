@@ -102,6 +102,15 @@ Ví dụ đang có: `Payment/` (PayOS), `Storage/` (R2), `Data/AppDbContextExten
 - **Learner/Admin layouts**: giữ Bootstrap thuần (chưa migrate sang `hj-*`).
 - Ảnh hiện dùng URL remote (Unsplash/pravatar) cho demo — sẽ chuyển sang local sau.
 
+### Icons
+
+- **Mặc định KHÔNG dùng icon** (Bootstrap Icons, emoji, SVG,...) trong view, CSS, JS — chỉ dùng text/typography thuần.
+- **Chỉ thêm icon khi user yêu cầu rõ ràng**, hoặc cho những chỗ thực sự cần thiết mà text không thay thế được:
+  - Action universal đã thành chuẩn UI (close `×`, search `🔍`, hamburger menu `☰`, checkbox/radio trạng thái checked, loading spinner).
+  - Icon nhãn hệ thống đã được user chốt trong design cố định (vd: logo brand ở header).
+- **Không** tự thêm icon "trang trí" kiểu `📋 ⏱ 🎯 🗺️` cạnh text — nếu cần visual hierarchy thì dùng badge, background, color, font-weight.
+- Khi nghi ngờ → hỏi user trước khi thêm.
+
 ### Layouts
 
 | Layout | Route | Đặc điểm |

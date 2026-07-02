@@ -1,0 +1,245 @@
+/* =========================================
+   Hi Japan! — Placement Test Page
+   Style theo common.css tokens, class prefix hj-*
+   Tham khảo UI: hijapan.vercel.app/placement-test.html
+   ========================================= */
+
+/* Page wrapper */
+.hj-test-page {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(180deg, var(--color-primary-soft) 0%, var(--color-bg) 100%);
+  padding: 3rem 0 5rem;
+}
+
+.hj-test-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Intro card (chưa bắt đầu) */
+.hj-test-intro {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.hj-test-intro h1 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.hj-test-intro p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.hj-test-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  color: var(--color-text-subtle);
+  font-size: 0.9rem;
+}
+
+.hj-test-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hj-test-meta i {
+  color: var(--color-primary);
+}
+
+/* Progress bar */
+.hj-test-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hj-test-progress-track {
+  flex: 1;
+  height: 8px;
+  background-color: var(--color-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.hj-test-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.hj-test-progress-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Question card */
+.hj-question-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+  animation: hjFadeIn 0.3s ease;
+}
+
+@keyframes hjFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hj-question-number {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+}
+
+.hj-question-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+}
+
+/* Answer options */
+.hj-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hj-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  transition: all 0.2s ease;
+}
+
+.hj-option:hover {
+  border-color: var(--color-primary-light);
+  background-color: var(--color-primary-soft);
+}
+
+.hj-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hj-option input[type="radio"]:checked + .hj-option-label {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.hj-option:has(input:checked) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.hj-option-label {
+  font-size: 1rem;
+  color: var(--color-text);
+  flex: 1;
+  cursor: pointer;
+}
+
+/* Question navigation */
+.hj-question-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Result card */
+.hj-result-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.hj-result-card h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.hj-result-card p {
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.hj-level-badge--lg {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 800;
+  font-size: 1.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.hj-result-score {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  margin-bottom: 2rem;
+}
+
+.hj-result-score strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+  .hj-test-intro,
+  .hj-question-card,
+  .hj-result-card {
+    padding: 2rem 1.5rem;
+  }
+  .hj-question-nav {
+    flex-direction: column;
+  }
+  .hj-question-nav .btn {
+    width: 100%;
+  }
+}

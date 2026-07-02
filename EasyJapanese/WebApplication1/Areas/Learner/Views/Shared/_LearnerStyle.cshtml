@@ -1,0 +1,425 @@
+﻿<style>
+    /* ── TOKENS ── */
+    :root {
+        --color-primary: #C8102E;
+        --color-navy: #1a2744;
+        --color-navy-light: #eef0f6;
+        --color-accent: #e85d2f;
+        --color-bg: #f7f5f2;
+        --color-border: #e4e0db;
+        --color-text: #1a1a1a;
+        --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
+        --radius-full: 9999px;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+    }
+
+    /* ── NAVBAR ── */
+    .hj-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--color-border);
+        padding: 0 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .hj-brand {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 18px;
+        color: var(--color-navy);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .hj-brand-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hj-nav-link {
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        padding-bottom: 4px;
+        border-bottom: 2px solid transparent;
+        transition: color .15s, border-color .15s;
+    }
+
+        .hj-nav-link:hover, .hj-nav-link.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+    .hj-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--color-navy);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--color-primary);
+    }
+
+    /* ── BANNER ── */
+    .hj-banner {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-navy) 100%);
+        padding: 36px 0 40px;
+        position: relative;
+        overflow: hidden;
+    }
+        /* Seigaiha wave pattern overlay */
+        .hj-banner::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .10;
+            background-image: radial-gradient(circle at 0 60px, transparent 22px, #fff 23px, #fff 24px, transparent 25px), radial-gradient(circle at 50px 60px, transparent 22px, #fff 23px, #fff 24px, transparent 25px), radial-gradient(circle at 100px 60px, transparent 22px, #fff 23px, #fff 24px, transparent 25px);
+            background-size: 100px 60px;
+            pointer-events: none;
+        }
+
+    .hj-banner-kanji {
+        position: absolute;
+        right: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 120px;
+        font-weight: 800;
+        color: rgba(255,255,255,.10);
+        line-height: 1;
+        pointer-events: none;
+        user-select: none;
+        font-family: 'Outfit', serif;
+    }
+
+    .hj-banner-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .hj-banner-jp {
+        font-size: 12px;
+        color: rgba(255,255,255,.65);
+        margin-bottom: 8px;
+        letter-spacing: .04em;
+    }
+
+    .hj-banner-sub {
+        font-size: 14.5px;
+        color: rgba(255,255,255,.88);
+        margin-bottom: 0;
+    }
+
+    .hj-streak-badge {
+        background: rgba(255,255,255,.18);
+        border-radius: 12px;
+        padding: 10px 18px;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        color: #fff;
+    }
+
+    .hj-streak-num {
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .hj-streak-lbl {
+        font-size: 11px;
+        opacity: .8;
+        margin-top: 2px;
+    }
+
+    /* ── LAYOUT ── */
+    .hj-content {
+        padding: 32px 0 64px;
+    }
+
+    .hj-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 16px;
+    }
+
+    /* ── CARDS ── */
+    .hj-card {
+        background: #fff;
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* State 1 – Upgrade banner */
+    .hj-upgrade-card {
+        background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-primary) 100%);
+        border: none;
+        border-radius: 16px;
+        color: #fff;
+    }
+
+    .hj-upgrade-tag {
+        background: rgba(255,255,255,.20);
+        color: #fff;
+        font-weight: 600;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .hj-free-card {
+        border: 1.5px solid #198754;
+        background: #f0fdf4;
+        border-radius: 14px;
+    }
+
+    .hj-lock-card {
+        border: 1.5px solid var(--color-primary);
+        background: rgba(200,16,46,.04);
+        border-radius: 14px;
+    }
+
+    .hj-plan-card {
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+    }
+
+    /* State 2 – Placement test */
+    .hj-placement-card {
+        border: 1.5px dashed var(--color-primary);
+        border-radius: 16px;
+        background: rgba(200,16,46,.03);
+    }
+
+    /* State 3 – Has result, not started */
+    .hj-result-card {
+        background: linear-gradient(180deg, var(--color-navy-light) 0%, #fff 55%);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+    }
+
+    /* State 4 – Full dashboard */
+    .hj-continue-card {
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .hj-continue-thumb {
+        min-height: 160px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 52px;
+        color: rgba(255,255,255,.45);
+        background: linear-gradient(135deg, var(--color-navy), var(--color-primary));
+    }
+
+    .hj-stat-card {
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .hj-stat-num {
+        font-family: 'Outfit', sans-serif;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .hj-stat-lbl {
+        font-size: 12.5px;
+        color: #6b7280;
+        margin-top: 6px;
+    }
+
+    /* Goal ring */
+    .hj-goal-card {
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+    }
+
+    .hj-goal-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+    .hj-goal-note {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    /* Flashcard list */
+    .hj-review-card {
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+    }
+
+    .hj-review-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .hj-vocab-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+        .hj-vocab-item:last-child {
+            border-bottom: none;
+        }
+
+    .hj-vocab-kanji {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .hj-vocab-romaji {
+        font-size: 11.5px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
+    .hj-vocab-meaning {
+        font-size: 13.5px;
+        font-weight: 500;
+    }
+
+    /* Hanko stamp */
+    .hj-hanko {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        border: 2px solid var(--color-primary);
+        border-radius: 8px;
+        color: var(--color-primary);
+        font-weight: 800;
+        font-size: 13px;
+        transform: rotate(-6deg);
+        flex-shrink: 0;
+    }
+
+    /* Progress bar */
+    .hj-progress {
+        height: 8px;
+        border-radius: var(--radius-full);
+        background: var(--color-bg);
+        overflow: hidden;
+    }
+
+    .hj-progress-bar {
+        height: 100%;
+        border-radius: var(--radius-full);
+        background: var(--color-primary);
+    }
+
+    /* Buttons */
+    .btn-hj-primary {
+        background: var(--color-primary);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 10px 24px;
+        transition: opacity .15s;
+    }
+
+        .btn-hj-primary:hover {
+            opacity: .88;
+            color: #fff;
+        }
+
+    .btn-hj-outline {
+        background: transparent;
+        border: 1.5px solid var(--color-primary);
+        color: var(--color-primary);
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 9px 22px;
+        transition: background .15s, color .15s;
+    }
+
+        .btn-hj-outline:hover {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+    .btn-hj-light {
+        background: rgba(255,255,255,.95);
+        color: var(--color-navy);
+        border: none;
+        border-radius: var(--radius-full);
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 24px;
+    }
+
+        .btn-hj-light:hover {
+            background: #fff;
+        }
+
+    /* Fade-in animation */
+    .fade-in {
+        animation: fadeUp .4s ease both;
+    }
+
+
+    .delay-1 {
+        animation-delay: .1s;
+    }
+
+    .delay-2 {
+        animation-delay: .2s;
+    }
+
+    .delay-3 {
+        animation-delay: .3s;
+    }
+
+    .delay-4 {
+        animation-delay: .4s;
+    }
+</style>
