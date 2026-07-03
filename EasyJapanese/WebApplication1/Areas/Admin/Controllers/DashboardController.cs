@@ -23,6 +23,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             _context = context;
         }
 
+        [Route("admin/dashboard")]
         public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Dashboard quản trị";

@@ -15,10 +15,13 @@ namespace WebApplication1.Areas.Learner.Controllers
     public class PlacementTestController : Controller
     {
         private readonly IAuthenticationService _auth;
+        private readonly AppDbContext _db;
+        private const int PASS_THRESHOLD_PER_BAND = 8;
 
-        public PlacementTestController(IAuthenticationService auth)
+        public PlacementTestController(IAuthenticationService auth, AppDbContext db)
         {
             _auth = auth;
+            _db = db;
         }
 
         [HttpGet]
@@ -32,12 +35,6 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             return View();
         }
-    }
-}
-        private readonly AppDbContext _db;
-        private const int PASS_THRESHOLD_PER_BAND = 8;
-
-        public PlacementTestController(AppDbContext db) => _db = db;
 
         // GET: /learn/PlacementTest
         public async Task<IActionResult> Index()
