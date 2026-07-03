@@ -1,169 +1,413 @@
 @model CoreLibrary.Data.Entities.Course
 @{
-    ViewData["Title"] = Model?.Title ?? "Chi tiết khóa học";
-    var levelClass = Model?.Level?.LevelName?.ToLower() ?? "n5";
-    var levelText = Model?.Level?.LevelName ?? "Beginner";
+    ViewData["Title"] = (Model?.Title ?? "Chi tiết khóa học") + " - Hi Japan!";
 }
 
 @section Styles {
     @await Html.PartialAsync("_CourseStyle")
     <style>
-        .accordion-button:not(.collapsed) {
-            color: #333;
-            background-color: #f8f9fa;
-            box-shadow: none;
-            font-weight: 700;
+        /* ── Detail-only overrides ── */
+        .hj-detail-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 16px 72px;
         }
-        .accordion-button:focus {
-            box-shadow: none;
-            border-color: rgba(0,0,0,.125);
+
+        /* Back link */
+        .hj-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            transition: color .15s;
         }
-        .lesson-item {
+
+            .hj-back:hover {
+                color: var(--color-primary);
+            }
+
+        /* Sidebar card */
+        .hj-detail-sidebar {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 80px;
+        }
+
+        .hj-detail-thumb {
+            height: 180px;
+            background: linear-gradient(135deg, var(--color-navy), var(--color-primary));
             display: flex;
             align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+            font-size: 52px;
+            font-weight: 800;
+            color: rgba(255,255,255,.45);
+            font-family: 'Outfit', serif;
+            position: relative;
         }
-        .lesson-item:last-child {
-            border-bottom: none;
+
+        .hj-detail-body {
+            padding: 20px 20px 24px;
         }
-        .lesson-icon {
-            width: 32px;
-            height: 32px;
+
+        .hj-detail-level {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: 4px;
+        }
+
+        .hj-detail-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .hj-detail-desc {
+            font-size: 13.5px;
+            color: #6b7280;
+            line-height: 1.65;
+            margin-bottom: 18px;
+        }
+
+        /* Stats row */
+        .hj-stats-row {
+            display: flex;
+            border-top: 1px dashed var(--color-border);
+            border-bottom: 1px dashed var(--color-border);
+            padding: 12px 0;
+            margin-bottom: 18px;
+        }
+
+        .hj-stat-item {
+            flex: 1;
+            text-align: center;
+            border-right: 1px solid var(--color-border);
+        }
+
+            .hj-stat-item:last-child {
+                border-right: none;
+            }
+
+        .hj-stat-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--color-navy);
+        }
+
+        .hj-stat-lbl {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        /* Mentor row (sidebar) */
+        .hj-sidebar-mentor {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .hj-sidebar-mentor-avt {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid var(--color-border);
+        }
+
+        .hj-sidebar-mentor-fallback {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-navy-light);
+            color: var(--color-navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        /* Progress bar */
+        .hj-progress-bar-wrap {
+            height: 6px;
+            border-radius: 6px;
+            background: var(--color-border);
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .hj-progress-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: var(--color-primary);
+            width: 0%;
+        }
+
+        /* CTA button */
+        .btn-hj-start {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            transition: opacity .15s;
+        }
+
+            .btn-hj-start:hover {
+                opacity: .88;
+                color: #fff;
+            }
+
+        /* Lesson list */
+        .hj-syllabus-card {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .hj-syllabus-head {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hj-syllabus-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--color-navy);
+        }
+
+        .hj-lesson-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 24px;
+            border-bottom: 1px solid var(--color-border);
+            text-decoration: none;
+            transition: background .12s;
+        }
+
+            .hj-lesson-item:last-child {
+                border-bottom: none;
+            }
+
+            .hj-lesson-item:hover {
+                background: var(--color-bg);
+            }
+
+        .hj-lesson-icon {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 1rem;
-            font-size: 0.9rem;
+            flex-shrink: 0;
+            font-size: 14px;
+            background: rgba(200,16,46,.10);
+            color: var(--color-primary);
+            border: 1.5px solid rgba(200,16,46,.25);
         }
-        .lesson-icon.completed { background: #198754; color: #fff; }
-        .lesson-icon.current { background: #0d6efd; color: #fff; }
-        .lesson-icon.locked { background: #f8f9fa; border: 1px solid #ddd; color: #aaa; }
-        
-        .lesson-info { flex: 1; }
-        .lesson-title { font-weight: 700; color: #333; margin-bottom: 0.2rem; }
-        .lesson-title.current { color: #0d6efd; }
-        .lesson-meta { font-size: 0.8rem; color: #888; }
-        .lesson-meta.current { color: #0d6efd; font-weight: 500; }
-        
-        .badge-status { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; }
-        .badge-status.viewed { background: #f8f9fa; border: 1px solid #eee; color: #666; }
-        .badge-status.learning { background: #e3f2fd; border: 1px solid #0d6efd; color: #0d6efd; font-weight: 600; }
-        
-        .progress-sm { height: 6px; border-radius: 6px; background: #e9ecef; margin: 1rem 0 0.5rem; }
-        .progress-bar-sm { height: 100%; border-radius: 6px; background: #0d6efd; }
+
+        .hj-lesson-title {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--color-text);
+            flex: 1;
+        }
+
+        .hj-lesson-type {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .hj-lesson-badge {
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 3px 11px;
+            border-radius: var(--radius-full);
+            background: rgba(200,16,46,.08);
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
     </style>
 }
 
 @if (Model != null)
 {
-<div class="hj-content container py-5" style="max-width: 1200px;">
-    <a href="/learn/Course" class="course-back-link mb-4">
-        &larr; Quay lại Danh sách khóa học
-    </a>
+    var levelName = Model.Level?.LevelName ?? "N5";
+    var firstLesson = Model.Lessons?.OrderBy(l => l.SortOrder).FirstOrDefault();
 
-    <div class="row g-5">
-        <!-- Left Sidebar: Course Info -->
-        <div class="col-lg-4">
-            <div class="course-card shadow-sm border-0">
-                <div class="course-cover @(levelClass == "n5" ? "bg-red" : "")">
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" alt="@Model.Title" />
+    <div class="hj-detail-wrap container">
+
+        <a href="/learn/Course" class="hj-back">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách khóa học
+        </a>
+
+        <div class="row g-5">
+
+            <!-- ── SIDEBAR ── -->
+            <div class="col-lg-4">
+                <div class="hj-detail-sidebar">
+                    <div class="hj-detail-thumb">
+                        <span class="hj-level-badge">@levelName</span>
+                        @if (Model.IsFree)
+                        {
+                            <span class="hj-free-badge">Miễn phí</span>
+                        }
+                    日
                 </div>
-                <div class="course-body">
-                    <span class="badge-level @levelClass">@levelText Beginner</span>
-                    <h3 class="course-name">@Model.Title</h3>
-                    <p class="course-desc">@Model.Description</p>
-                    
-                    <div class="course-stats">
-                        <div class="stat-item">
-                            <div class="stat-val">@(Model.Lessons?.Count ?? 0)</div>
-                            <div class="stat-lbl">Bài học</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-val">50+</div>
-                            <div class="stat-lbl">Giờ video</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-val">12K</div>
-                            <div class="stat-lbl">Học viên</div>
-                        </div>
-                    </div>
+                <div class="hj-detail-body">
+                    <div class="hj-detail-level">@levelName</div>
+                    <h2 class="hj-detail-title">@Model.Title</h2>
+                    <p class="hj-detail-desc">
+                        @(string.IsNullOrEmpty(Model.Description)
+                                                ? "Khóa học đang cập nhật mô tả."
+                                                : Model.Description)
+                    </p>
 
-                    <div class="course-teacher">
-                        <img src="@(Model.Mentor?.AvatarUrl ?? "https://i.pravatar.cc/100?img=5")" alt="Avatar" class="teacher-avt" />
-                        <div class="teacher-info">
-                            <div class="teacher-name">@(Model.Mentor?.FullName ?? "Đang cập nhật")</div>
-                            <div class="teacher-exp">@(Model.Mentor?.Expertise ?? "Giảng viên")</div>
+                        <!-- Stats -->
+                        <div class="hj-stats-row">
+                            <div class="hj-stat-item">
+                                <div class="hj-stat-val">@(Model.Lessons?.Count ?? 0)</div>
+                                <div class="hj-stat-lbl">Bài học</div>
+                            </div>
+                            <div class="hj-stat-item">
+                                <div class="hj-stat-val">@(Model.Enrollments?.Count ?? 0)</div>
+                                <div class="hj-stat-lbl">Học viên</div>
+                            </div>
+                            <div class="hj-stat-item">
+                                <div class="hj-stat-val">
+                                @if (Model.CourseReviews != null && Model.CourseReviews.Any(r => r.IsVisible))
+                                    {
+                                        @(Model.CourseReviews.Where(r => r.IsVisible).Average(r => (double)r.Rating).ToString("0.0"))
+                                    }
+                                    else
+                                    {
+                                        <text>—</text>
+                                    }
+                                </div>
+                                <div class="hj-stat-lbl">Đánh giá</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mt-4">
-                        <div class="progress-sm">
-                            <div class="progress-bar-sm" style="width: 0%"></div>
+                        <!-- Mentor -->
+                        <div class="hj-sidebar-mentor">
+                            @if (!string.IsNullOrEmpty(Model.Mentor?.AvatarUrl))
+                            {
+                                <img src="@Model.Mentor.AvatarUrl" class="hj-sidebar-mentor-avt" alt="@Model.Mentor.FullName">
+                            }
+                            else
+                            {
+                                <div class="hj-sidebar-mentor-fallback">
+                                    @((Model.Mentor?.FullName ?? "G").Substring(0, 1).ToUpper())
+                                </div>
+                            }
+                            <div>
+                                <div class="hj-mentor-name">@(Model.Mentor?.FullName ?? "Đang cập nhật")</div>
+                                <div class="hj-mentor-exp">@(Model.Mentor?.Expertise ?? "Giảng viên Hi Japan!")</div>
+                            </div>
                         </div>
-                        <div class="text-center text-muted" style="font-size: 0.8rem;">Bạn đã hoàn thành 0% khóa học</div>
+
+                        <!-- Progress -->
+                        <div class="hj-progress-bar-wrap">
+                            <div class="hj-progress-bar-fill"></div>
+                        </div>
+                        <p class="text-muted mb-3" style="font-size:12px;">Bạn đã hoàn thành 0% khóa học</p>
+
+                        <!-- CTA -->
+                        @if (firstLesson != null)
+                        {
+                            <a href="/learn/Course/Lesson/@firstLesson.LessonId" class="btn-hj-start">
+                                <i class="bi bi-play-fill me-2"></i>Bắt đầu học ngay
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SYLLABUS ── -->
+            <div class="col-lg-8">
+                <div class="hj-syllabus-card">
+                    <div class="hj-syllabus-head">
+                        <span class="hj-syllabus-title">Nội dung khóa học</span>
+                        <span class="text-muted" style="font-size:13px;">@(Model.Lessons?.Count ?? 0) bài học</span>
                     </div>
 
                     @if (Model.Lessons != null && Model.Lessons.Any())
                     {
-                        var firstLessonId = Model.Lessons.OrderBy(l => l.SortOrder).First().LessonId;
-                        <a href="/learn/Course/Lesson/@firstLessonId" class="btn-hj-primary w-100 mt-3 text-center" style="background-color: #e64a51;">Vào học ngay</a>
+                        @foreach (var lesson in Model.Lessons.OrderBy(l => l.SortOrder))
+                        {
+                            <a href="/learn/Course/Lesson/@lesson.LessonId" class="hj-lesson-item">
+                                <div class="hj-lesson-icon">
+                                    <i class="bi bi-play-fill"></i>
+                                </div>
+                                <div style="flex:1;min-width:0;">
+                                    <div class="hj-lesson-title">@lesson.Title</div>
+                                    <div class="hj-lesson-type">
+                                        <i class="bi bi-@(lesson.LessonType == "Video" ? "camera-video" : "file-text") me-1"></i>
+                                        @lesson.LessonType
+                                        @if (lesson.IsPreview)
+                                        {
+                                            <span class="ms-2 badge rounded-pill"
+                                                  style="background:rgba(25,135,84,.1);color:#198754;font-size:10px;">
+                                                Xem thử
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                                <span class="hj-lesson-badge">Học ngay</span>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                            Chưa có bài học nào.
+                        </div>
                     }
                 </div>
             </div>
-        </div>
 
-        <!-- Right Content: Course Syllabus -->
-        <div class="col-lg-8">
-            <div class="hj-card p-4 shadow-sm border-0" style="border-radius: 16px;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="course-list-title m-0" style="font-size: 1.75rem;">Nội dung khóa học</h2>
-                    <span class="text-muted" style="font-size: 0.9rem;">@(Model.Lessons?.Count ?? 0) Bài học</span>
-                </div>
-
-                <div class="accordion" id="courseAccordion">
-                    <!-- Chapter 1 -->
-                    <div class="accordion-item border-0 mb-3" style="background: #f8f9fa; border-radius: 12px; overflow: hidden;">
-                        <h2 class="accordion-header" id="headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="background: #f8f9fa;">
-                                Danh sách bài học
-                            </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#courseAccordion">
-                            <div class="accordion-body p-0 bg-white">
-                                @if (Model.Lessons != null && Model.Lessons.Any())
-                                {
-                                    foreach (var lesson in Model.Lessons.OrderBy(l => l.SortOrder))
-                                    {
-                                        <a href="/learn/Course/Lesson/@lesson.LessonId" class="lesson-item text-decoration-none">
-                                            <div class="lesson-icon current"><i class="bi bi-play-fill"></i></div>
-                                            <div class="lesson-info">
-                                                <div class="lesson-title current">@lesson.Title</div>
-                                                <div class="lesson-meta current"><i class="bi bi-play-circle me-1"></i> @(string.IsNullOrEmpty(lesson.LessonType) ? "Video" : lesson.LessonType)</div>
-                                            </div>
-                                            <span class="badge-status learning">Học ngay</span>
-                                        </a>
-                                    }
-                                }
-                                else
-                                {
-                                    <div class="p-4 text-center text-muted">Chưa có bài học nào.</div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
         </div>
     </div>
-</div>
 }
 else
 {
     <div class="container py-5 text-center">
-        <h2>Không tìm thấy khóa học!</h2>
-        <a href="/learn/Course" class="btn btn-primary mt-3">Quay lại danh sách</a>
+        <div style="font-size:48px;" class="mb-3">🔍</div>
+        <h4 class="fw-bold mb-2">Không tìm thấy khóa học</h4>
+        <a href="/learn/Course" class="btn-hj-start d-inline-block mt-3" style="width:auto;padding:10px 28px;">
+            Quay lại danh sách
+        </a>
     </div>
 }

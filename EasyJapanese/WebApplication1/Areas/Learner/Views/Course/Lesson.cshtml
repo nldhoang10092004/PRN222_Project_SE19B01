@@ -1,163 +1,437 @@
-@model CoreLibrary.Data.Entities.Lesson
+@model CoreWeb.Areas.Learner.Models.LessonViewModel
+
 @{
-    ViewData["Title"] = Model?.Title ?? "Nội dung bài học";
+    ViewData["Title"] = Model.LessonTitle + " - Hi Japan!";
 }
 
 @section Styles {
-    @await Html.PartialAsync("_CourseStyle")
-    <style>
-        .tab-content-panel {
-            display: none;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        .tab-content-panel.active {
-            display: block;
-        }
-        @@keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .kanji-section-title {
-            color: #0d6efd;
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-        }
-    </style>
+    @await Html.PartialAsync("_LessonStyle")
 }
 
-@if (Model != null)
-{
-<div class="hj-content container" style="max-width: 1000px; margin: 0 auto; padding-top: 2rem; padding-bottom: 5rem;">
-    <!-- Header -->
-    <a href="/learn/Course/Detail/@Model.CourseId" class="course-back-link mb-3">
-        &larr; Quay lại khóa học
-    </a>
-    
-    <div class="course-header mb-4 d-flex justify-content-between align-items-center">
-        <h1 class="course-title m-0">@Model.Title</h1>
-        <button class="btn btn-danger px-4 py-2" style="border-radius: 50px; font-weight: 600; background-color: #e64a51; border: none;">
-            Làm Quiz Cuối Bài <i class="bi bi-patch-check ms-1"></i>
-        </button>
-    </div>
+<div class="lesson-shell">
 
-    <!-- Video Player -->
-    <div class="video-container shadow-sm mb-4" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000; border-radius: 12px;">
-        @if (!string.IsNullOrEmpty(Model.VideoUrl))
-        {
-            <iframe src="@Model.VideoUrl" style="position: absolute; top:0; left:0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
-        }
-        else
-        {
-            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white" style="position: absolute; top:0; left:0;">
-                <div class="text-center">
-                    <i class="bi bi-play-circle" style="font-size: 4rem; color: #e64a51; cursor: pointer;"></i>
-                    <p class="mt-3 text-muted">Video bài giảng đang được cập nhật</p>
-                </div>
+    <!-- ═══════════════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════════════ -->
+    <aside class="lesson-sidebar" id="lessonSidebar">
+        <div class="sidebar-toggle" id="sidebarToggle">
+            <span class="sidebar-toggle-label">Nội dung bài học</span>
+            <div class="sidebar-toggle-icon">
+                <i class="bi bi-layout-sidebar-reverse" id="toggleIcon"></i>
             </div>
-        }
-    </div>
-
-    <!-- Content -->
-    <div class="hj-card p-4 shadow-sm border-0 mb-4" style="border-radius: 16px;">
-        <h4 class="kanji-section-title">Nội dung tóm tắt</h4>
-        <div class="p-3 bg-light rounded" style="font-size: 1.1rem; line-height: 1.6;">
-            @Html.Raw(Model.Content?.Replace("\n", "<br/>") ?? "Chưa có nội dung.")
         </div>
-    </div>
 
-    <!-- Sub Tabs (Mock data retained for UI purposes) -->
-    <div class="course-tabs mb-4">
-        <div class="course-tab active" data-target="tab-kanji" style="cursor: pointer;"><i class="bi bi-translate me-2"></i>Kanji</div>
-        <div class="course-tab" data-target="tab-grammar" style="cursor: pointer;"><i class="bi bi-journal-text me-2"></i>Ngữ pháp</div>
-        <div class="course-tab" data-target="tab-reading" style="cursor: pointer;"><i class="bi bi-book me-2"></i>Đọc</div>
-        <div class="course-tab" data-target="tab-listening" style="cursor: pointer;"><i class="bi bi-headphones me-2"></i>Nghe</div>
-    </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Bài giảng</div>
 
-    <!-- Tab Contents -->
-    <div class="hj-card p-4 shadow-sm border-0" style="border-radius: 16px;">
-        
-        <!-- Kanji Content -->
-        <div id="tab-kanji" class="tab-content-panel active">
-            <h4 class="kanji-section-title">Kanji (Minh họa)</h4>
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="p-4 border rounded text-center bg-light" style="border-color: #eaeaea !important;">
-                        <h1 class="display-3 mb-0" style="font-family: 'Yu Mincho', 'MS Mincho', serif; color: #212529;">私</h1>
-                        <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Watashi - Tôi</p>
+            <div class="sidebar-nav-item active" data-panel="panel-summary">
+                <span class="sidebar-nav-icon">
+                    <i class="bi bi-file-text"></i>
+                </span>
+                <span class="sidebar-nav-label">Tóm tắt</span>
+            </div>
+
+            @if (Model.VocabularyItems.Any())
+            {
+                <div class="sidebar-nav-item" data-panel="panel-vocab">
+                    <span class="sidebar-nav-icon">
+                        <i class="bi bi-card-text"></i>
+                    </span>
+                    <span class="sidebar-nav-label">Từ vựng</span>
+                    <span class="sidebar-count">@Model.VocabularyItems.Count</span>
+                </div>
+            }
+
+            @if (Model.KanjiItems.Any())
+            {
+                <div class="sidebar-nav-item" data-panel="panel-kanji">
+                    <span class="sidebar-nav-icon">
+                        <i class="bi bi-translate"></i>
+                    </span>
+                    <span class="sidebar-nav-label">Kanji</span>
+                    <span class="sidebar-count">@Model.KanjiItems.Count</span>
+                </div>
+            }
+
+            @if (Model.GrammarItems.Any() ||
+                        Model.ReadingItems.Any() ||
+                        Model.ListeningItems.Any())
+            {
+                <div class="sidebar-section-label" style="margin-top:8px;">
+                    Luyện tập
+                </div>
+            }
+
+            @if (Model.GrammarItems.Any())
+            {
+                <div class="sidebar-nav-item" data-panel="panel-grammar">
+                    <span class="sidebar-nav-icon">
+                        <i class="bi bi-journal-text"></i>
+                    </span>
+                    <span class="sidebar-nav-label">Ngữ pháp</span>
+                    <span class="sidebar-count">@Model.GrammarItems.Count</span>
+                </div>
+            }
+
+            @if (Model.ReadingItems.Any())
+            {
+                <div class="sidebar-nav-item" data-panel="panel-reading">
+                    <span class="sidebar-nav-icon">
+                        <i class="bi bi-book"></i>
+                    </span>
+                    <span class="sidebar-nav-label">Đọc hiểu</span>
+                    <span class="sidebar-count">@Model.ReadingItems.Count</span>
+                </div>
+            }
+
+            @if (Model.ListeningItems.Any())
+            {
+                <div class="sidebar-nav-item" data-panel="panel-listening">
+                    <span class="sidebar-nav-icon">
+                        <i class="bi bi-headphones"></i>
+                    </span>
+                    <span class="sidebar-nav-label">Luyện nghe</span>
+                    <span class="sidebar-count">@Model.ListeningItems.Count</span>
+                </div>
+            }
+        </nav>
+    </aside>
+
+    <!-- ═══════════════════════════════════════
+         MAIN
+    ═══════════════════════════════════════ -->
+    <main class="lesson-main">
+
+        <a href="/learn/Course/Detail/@Model.CourseId" class="lesson-back">
+            <i class="bi bi-arrow-left"></i>
+            @Model.CourseTitle
+        </a>
+
+        <div class="lesson-header">
+            <div>
+                <span class="lesson-level">
+                    @Model.LevelName
+                </span>
+
+                <h1 class="lesson-title">@Model.LessonTitle</h1>
+            </div>
+
+            <!-- Quiz này là quiz cả Course -->
+            <a asp-area="Learner"
+               asp-controller="Quiz"
+               asp-action="Start"
+               asp-route-courseId="@Model.CourseId"
+               class="btn-quiz">
+                Làm Quiz cuối khóa
+                <i class="bi bi-patch-check"></i>
+            </a>
+        </div>
+
+        <!-- ═══ VIDEO ═══ -->
+        <div class="lesson-video-wrap">
+            @if (!string.IsNullOrEmpty(Model.VideoUrl))
+            {
+                <iframe src="@Model.VideoUrl"
+                        allowfullscreen>
+                </iframe>
+            }
+            else
+            {
+                <div class="lesson-video-placeholder">
+                    <div class="play-btn">
+                        <i class="bi bi-play-fill"></i>
                     </div>
+
+                    <p>
+                        Video bài giảng đang được cập nhật
+                    </p>
                 </div>
-                <div class="col-md-3">
-                    <div class="p-4 border rounded text-center bg-light" style="border-color: #eaeaea !important;">
-                        <h1 class="display-3 mb-0" style="font-family: 'Yu Mincho', 'MS Mincho', serif; color: #212529;">人</h1>
-                        <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Hito / Jin - Người</p>
+            }
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             PANEL: SUMMARY
+        ═══════════════════════════════════════ -->
+        <div id="panel-summary" class="lesson-panel active">
+            <div class="panel-title">
+                <i class="bi bi-file-text"></i>
+                Tóm tắt bài học
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Content))
+            {
+                <div class="lesson-content">
+                    @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+                </div>
+            }
+            else
+            {
+                <div class="panel-empty">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Nội dung bài học đang được cập nhật.
+                </div>
+            }
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             PANEL: VOCABULARY
+        ═══════════════════════════════════════ -->
+        @if (Model.VocabularyItems.Any())
+        {
+            <div id="panel-vocab" class="lesson-panel">
+                <div class="panel-title">
+                    <i class="bi bi-card-text"></i>
+                    Từ vựng
+                </div>
+
+                @foreach (var item in Model.VocabularyItems)
+                {
+                    <div class="exercise-block">
+
+                        <div class="exercise-block-header">
+                            <div>
+                                <div class="vocab-title">@item.Title</div>
+
+                                @if (!string.IsNullOrEmpty(item.Content))
+                                {
+                                    <div class="vocab-content">
+                                        @item.Content
+                                    </div>
+                                }
+                            </div>
+
+                            <button type="button"
+                                    class="btn-practice"
+                                    data-exercise-id="@item.ExerciseId"
+                                    data-exercise-title="@item.Title">
+                                <i class="bi bi-pencil-square"></i>
+                                Luyện tập
+                            </button>
+                        </div>
+
+                        <div id="practice-@item.ExerciseId"
+                             class="practice-area">
+                        </div>
+
                     </div>
+                }
+            </div>
+        }
+
+        <!-- ═══════════════════════════════════════
+             PANEL: KANJI
+        ═══════════════════════════════════════ -->
+        @if (Model.KanjiItems.Any())
+        {
+            <div id="panel-kanji" class="lesson-panel">
+                <div class="panel-title">
+                    <i class="bi bi-translate"></i>
+                    Kanji trong bài
+                </div>
+
+                <div class="kanji-grid">
+                    @foreach (var item in Model.KanjiItems)
+                    {
+                        <div class="kanji-card">
+
+                            <div class="kanji-char">
+                                @item.Title
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(item.Content))
+                            {
+                                <div class="kanji-meta">
+                                    @item.Content
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(item.StrokeOrderUrl))
+                            {
+                                <a href="@item.StrokeOrderUrl"
+                                   target="_blank"
+                                   class="kanji-stroke-link">
+                                    Xem nét bút
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            }
+
+                            <button type="button"
+                                    class="btn-practice kanji-practice"
+                                    data-exercise-id="@item.ExerciseId"
+                                    data-exercise-title="@item.Title">
+                                <i class="bi bi-pencil-square"></i>
+                                Luyện tập
+                            </button>
+
+                            <div id="practice-@item.ExerciseId"
+                                 class="practice-area">
+                            </div>
+
+                        </div>
+                    }
                 </div>
             </div>
-        </div>
+        }
 
-        <!-- Grammar Content -->
-        <div id="tab-grammar" class="tab-content-panel">
-            <h4 class="kanji-section-title">Ngữ pháp (Minh họa)</h4>
-            <div class="list-group list-group-flush">
-                <div class="list-group-item px-0 py-3 border-bottom">
-                    <h5 class="mb-2" style="font-weight: 700; color: #333;">1. N1 は N2 です</h5>
-                    <p class="text-muted mb-0">N1 là N2. Dùng để khẳng định.</p>
+        <!-- ═══════════════════════════════════════
+             PANEL: GRAMMAR
+        ═══════════════════════════════════════ -->
+        @if (Model.GrammarItems.Any())
+        {
+            <div id="panel-grammar" class="lesson-panel">
+                <div class="panel-title">
+                    <i class="bi bi-journal-text"></i>
+                    Ngữ pháp
                 </div>
-            </div>
-        </div>
 
-        <!-- Reading Content -->
-        <div id="tab-reading" class="tab-content-panel">
-            <h4 class="kanji-section-title">Đọc hiểu (Minh họa)</h4>
-            <div class="bg-light p-4 rounded mb-4 border" style="border-color: #eaeaea !important;">
-                <p class="lead mb-0" style="line-height: 2; font-size: 1.1rem; color: #333;">
-                    はじめまして。<br>わたしは マイク・ミラーです。
-                </p>
-            </div>
-        </div>
+                @{
+                    int grammarIndex = 1;
+                }
 
-        <!-- Listening Content -->
-        <div id="tab-listening" class="tab-content-panel">
-            <h4 class="kanji-section-title">Nghe hiểu (Minh họa)</h4>
-            <div class="d-flex align-items-center bg-light p-4 rounded border">
-                <button class="btn btn-primary rounded-circle p-3 me-4" style="width: 60px; height: 60px;"><i class="bi bi-play-fill fs-4"></i></button>
-                <div>
-                    <h5 class="mb-1" style="font-weight: 700;">Audio Track 1</h5>
-                    <div class="text-muted small">00:00 / 01:25</div>
+                @foreach (var item in Model.GrammarItems)
+                {
+                    <div class="grammar-item">
+
+                        <div class="grammar-title">
+                            @grammarIndex. @item.Title
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(item.Content))
+                        {
+                            <div class="grammar-content">
+                                @Html.Raw(item.Content.Replace("\n", "<br/>"))
+                            </div>
+                        }
+
+                        <button type="button"
+                                class="btn-practice"
+                                data-exercise-id="@item.ExerciseId"
+                                data-exercise-title="@item.Title">
+                            <i class="bi bi-pencil-square"></i>
+                            Luyện tập ngữ pháp
+                        </button>
+
+                        <div id="practice-@item.ExerciseId"
+                             class="practice-area">
+                        </div>
+
+                    </div>
+
+                    grammarIndex++;
+                }
+            </div>
+        }
+
+        <!-- ═══════════════════════════════════════
+             PANEL: READING
+        ═══════════════════════════════════════ -->
+        @if (Model.ReadingItems.Any())
+        {
+            <div id="panel-reading" class="lesson-panel">
+                <div class="panel-title">
+                    <i class="bi bi-book"></i>
+                    Đọc hiểu
                 </div>
-            </div>
-        </div>
 
-    </div>
+                @foreach (var item in Model.ReadingItems)
+                {
+                    <div class="reading-item">
+
+                        <div class="reading-title">
+                            @item.Title
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(item.Content))
+                        {
+                            <div class="reading-passage">
+                                @Html.Raw(item.Content.Replace("\n", "<br/>"))
+                            </div>
+                        }
+
+                        <button type="button"
+                                class="btn-practice"
+                                data-exercise-id="@item.ExerciseId"
+                                data-exercise-title="@item.Title">
+                            <i class="bi bi-pencil-square"></i>
+                            Làm bài đọc hiểu
+                        </button>
+
+                        <div id="practice-@item.ExerciseId"
+                             class="practice-area">
+                        </div>
+
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- ═══════════════════════════════════════
+             PANEL: LISTENING
+        ═══════════════════════════════════════ -->
+        @if (Model.ListeningItems.Any())
+        {
+            <div id="panel-listening" class="lesson-panel">
+                <div class="panel-title">
+                    <i class="bi bi-headphones"></i>
+                    Luyện nghe
+                </div>
+
+                @foreach (var item in Model.ListeningItems)
+                {
+                    <div class="audio-card">
+
+                        <button class="audio-play-btn"
+                                type="button"
+                                @(string.IsNullOrEmpty(item.AudioUrl) ? "disabled" : "")
+                                data-audio="@(item.AudioUrl ?? "")"
+                                title="@(string.IsNullOrEmpty(item.AudioUrl) ? "Audio đang cập nhật" : "Phát audio")">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+
+                        <div class="audio-info">
+                            <div class="audio-title">@item.Title</div>
+
+                            @if (!string.IsNullOrEmpty(item.Content))
+                            {
+                                <div class="audio-content">
+                                    @item.Content
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(item.AudioUrl))
+                            {
+                                <div class="audio-progress">
+                                    <div class="audio-progress-fill"></div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="audio-content">
+                                    Audio đang được cập nhật
+                                </div>
+                            }
+
+                            <button type="button"
+                                    class="btn-practice"
+                                    data-exercise-id="@item.ExerciseId"
+                                    data-exercise-title="@item.Title">
+                                <i class="bi bi-pencil-square"></i>
+                                Làm bài nghe
+                            </button>
+
+                            <div id="practice-@item.ExerciseId"
+                                 class="practice-area">
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        }
+
+    </main>
 </div>
-}
-else
-{
-    <div class="container py-5 text-center">
-        <h2>Không tìm thấy bài học!</h2>
-        <a href="/learn/Course" class="btn btn-primary mt-3">Quay lại danh sách khóa học</a>
-    </div>
-}
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var tabs = document.querySelectorAll('.course-tab');
-            var panels = document.querySelectorAll('.tab-content-panel');
-
-            tabs.forEach(function(tab) {
-                tab.addEventListener('click', function() {
-                    var targetId = this.getAttribute('data-target');
-                    
-                    tabs.forEach(function(t) { t.classList.remove('active'); });
-                    panels.forEach(function(p) { p.classList.remove('active'); });
-                    
-                    this.classList.add('active');
-                    var targetPanel = document.getElementById(targetId);
-                    if(targetPanel) targetPanel.classList.add('active');
-                });
-            });
-        });
-    </script>
+    @await Html.PartialAsync("_LessonScript")
 }

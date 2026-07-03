@@ -22,6 +22,9 @@ public partial class Exercise
     public int SortOrder { get; set; }
 
     public DateTime CreatedAt { get; set; }
+    public int? LessonId { get; set; }
+
+    public virtual Lesson? Lesson { get; set; }
 
     public virtual Course Course { get; set; } = null!;
 

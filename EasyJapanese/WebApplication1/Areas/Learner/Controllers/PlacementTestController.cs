@@ -1,7 +1,4 @@
 using CoreLibrary.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using System.Threading.Tasks;
 using CoreLibrary.Data;
 using CoreLibrary.Data.Entities;
 using CoreLibrary.Utility;
@@ -15,16 +12,23 @@ namespace WebApplication1.Areas.Learner.Controllers
     public class PlacementTestController : Controller
     {
         private readonly IAuthenticationService _auth;
+        private readonly AppDbContext _db;
 
-        public PlacementTestController(IAuthenticationService auth)
+        private const int PASS_THRESHOLD_PER_BAND = 8;
+
+        public PlacementTestController(
+            IAuthenticationService auth,
+            AppDbContext db)
         {
             _auth = auth;
+            _db = db;
         }
 
         [HttpGet]
         public async Task<IActionResult> Start(CancellationToken cancellationToken)
         {
             var currentUser = await _auth.GetCurrentUserAsync(HttpContext);
+
             if (currentUser == null)
             {
                 return RedirectToAction("Index", "Login", new { area = "" });
@@ -32,24 +36,21 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             return View();
         }
-    }
-}
-        private readonly AppDbContext _db;
-        private const int PASS_THRESHOLD_PER_BAND = 8;
 
-        public PlacementTestController(AppDbContext db) => _db = db;
-
-        // GET: /learn/PlacementTest
+        // GET: /Learner/PlacementTest/Index
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var test = await _db.PlacementTests
-                .Include(t => t.Questions).ThenInclude(q => q.AnswerOptions)
+                .Include(t => t.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
                 .FirstOrDefaultAsync(t => t.IsActive);
 
             if (test == null)
+            {
                 return Content("Chưa có bài test trình độ nào được kích hoạt.");
+            }
 
-            // Serialize câu hỏi xuống client (không bao gồm IsCorrect để tránh lộ đáp án)
             var questions = test.Questions
                 .OrderBy(q => q.SortOrder)
                 .Select(q => new
@@ -58,36 +59,65 @@ namespace WebApplication1.Areas.Learner.Controllers
                     text = q.QuestionText,
                     options = q.AnswerOptions
                         .OrderBy(o => o.OptionId)
-                        .Select(o => new { optionId = o.OptionId, text = o.AnswerText })
+                        .Select(o => new
+                        {
+                            optionId = o.OptionId,
+                            text = o.AnswerText
+                        })
                         .ToList()
                 })
                 .ToList();
 
-            ViewBag.QuestionsJson = System.Text.Json.JsonSerializer.Serialize(questions);
+            ViewBag.QuestionsJson =
+                System.Text.Json.JsonSerializer.Serialize(questions);
+
             ViewBag.Duration = test.Duration;
             ViewBag.TestId = test.TestId;
 
             return View();
         }
 
-        // POST: /learn/PlacementTest/SaveResult
+        // POST: /Learner/PlacementTest/SaveResult
         [HttpPost]
-        public async Task<IActionResult> SaveResult([FromBody] PlacementSubmitRequest req)
+        public async Task<IActionResult> SaveResult(
+            [FromBody] PlacementSubmitRequest req)
         {
             var test = await _db.PlacementTests
-                .Include(t => t.Questions).ThenInclude(q => q.AnswerOptions)
-                .FirstOrDefaultAsync(t => t.TestId == req.TestId && t.IsActive);
-            if (test == null) return NotFound();
+                .Include(t => t.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                .FirstOrDefaultAsync(t =>
+                    t.TestId == req.TestId && t.IsActive);
+
+            if (test == null)
+            {
+                return NotFound();
+            }
 
             var correctAnswers = test.Questions
-                .ToDictionary(q => q.QuestionId, q => q.AnswerOptions.First(o => o.IsCorrect).OptionId);
+                .ToDictionary(
+                    q => q.QuestionId,
+                    q => q.AnswerOptions.First(o => o.IsCorrect).OptionId
+                );
 
-            int correctCount = req.Answers.Count(a => correctAnswers.TryGetValue(a.QuestionId, out var oid) && oid == a.SelectedOptionId);
+            int correctCount = req.Answers.Count(a =>
+                correctAnswers.TryGetValue(a.QuestionId, out var correctOptionId)
+                && correctOptionId == a.SelectedOptionId
+            );
+
             int totalPoints = test.Questions.Sum(q => q.Points);
 
-            var recommendedLevelId = MapToLevel(test, correctCount, req.Answers);
+            int recommendedLevelId = MapToLevel(
+                test,
+                correctCount,
+                req.Answers
+            );
 
-            await SaveResultIfLoggedIn(test.TestId, correctCount, totalPoints, recommendedLevelId);
+            await SaveResultIfLoggedIn(
+                test.TestId,
+                correctCount,
+                totalPoints,
+                recommendedLevelId
+            );
 
             var recommendedLevel = await _db.JlptLevels.FindAsync(recommendedLevelId);
 
@@ -100,44 +130,86 @@ namespace WebApplication1.Areas.Learner.Controllers
             });
         }
 
-        // ===== Helpers =====
-
-        private int MapToLevel(PlacementTest test, int correctCount, List<PlacementAnswerDto> answers)
+        private int MapToLevel(
+            PlacementTest test,
+            int correctCount,
+            List<PlacementAnswerDto> answers)
         {
-            var orderedQs = test.Questions.OrderBy(q => q.SortOrder).ToList();
-            var answersByQ = answers.ToDictionary(a => a.QuestionId, a => a.SelectedOptionId);
+            var orderedQuestions = test.Questions
+                .OrderBy(q => q.SortOrder)
+                .ToList();
 
-            int CountCorrectInBand(int startIdx, int endIdx)
+            var answersByQuestion = answers.ToDictionary(
+                a => a.QuestionId,
+                a => a.SelectedOptionId
+            );
+
+            int CountCorrectInBand(int startIndex, int endIndex)
             {
-                var band = orderedQs.Skip(startIdx).Take(endIdx - startIdx);
-                return band.Count(q => answersByQ.TryGetValue(q.QuestionId, out var oid)
-                                       && q.AnswerOptions.Any(o => o.OptionId == oid && o.IsCorrect));
+                var band = orderedQuestions
+                    .Skip(startIndex)
+                    .Take(endIndex - startIndex);
+
+                return band.Count(q =>
+                    answersByQuestion.TryGetValue(
+                        q.QuestionId,
+                        out var selectedOptionId
+                    )
+                    && q.AnswerOptions.Any(o =>
+                        o.OptionId == selectedOptionId
+                        && o.IsCorrect
+                    )
+                );
             }
 
-            var correctN5 = CountCorrectInBand(0, 10);
-            var correctN4 = CountCorrectInBand(10, 20);
-            var correctN3 = CountCorrectInBand(20, 30);
-            var correctN2 = CountCorrectInBand(30, 40);
+            int correctN5 = CountCorrectInBand(0, 10);
+            int correctN4 = CountCorrectInBand(10, 20);
+            int correctN3 = CountCorrectInBand(20, 30);
+            int correctN2 = CountCorrectInBand(30, 40);
 
-            if (correctN2 >= PASS_THRESHOLD_PER_BAND) return GetLevelId("N2");
-            if (correctN3 >= PASS_THRESHOLD_PER_BAND && correctN2 < PASS_THRESHOLD_PER_BAND) return GetLevelId("N3");
-            if (correctN4 >= PASS_THRESHOLD_PER_BAND && correctN3 < PASS_THRESHOLD_PER_BAND) return GetLevelId("N4");
+            if (correctN2 >= PASS_THRESHOLD_PER_BAND)
+                return GetLevelId("N2");
+
+            if (correctN3 >= PASS_THRESHOLD_PER_BAND)
+                return GetLevelId("N3");
+
+            if (correctN4 >= PASS_THRESHOLD_PER_BAND)
+                return GetLevelId("N4");
+
             return GetLevelId("N5");
         }
 
         private int GetLevelId(string levelName)
         {
-            return _db.JlptLevels.First(l => l.LevelName == levelName).LevelId;
+            return _db.JlptLevels
+                .First(l => l.LevelName == levelName)
+                .LevelId;
         }
 
-        private async Task SaveResultIfLoggedIn(int testId, int score, int totalPoints, int recommendedLevelId)
+        private async Task SaveResultIfLoggedIn(
+            int testId,
+            int score,
+            int totalPoints,
+            int recommendedLevelId)
         {
-            var currentUser = HttpContext.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
-            if (currentUser == null) return;
+            var currentUser = HttpContext.Session.GetObject<CurrentUser>(
+                IAuthenticationService.SessionKeyCurrentUser
+            );
+
+            if (currentUser == null)
+            {
+                return;
+            }
 
             var student = await _db.Students
-                .FirstOrDefaultAsync(s => s.StudentNavigation.AccountId == currentUser.AccountId);
-            if (student == null) return;
+                .FirstOrDefaultAsync(s =>
+                    s.StudentNavigation.AccountId == currentUser.AccountId
+                );
+
+            if (student == null)
+            {
+                return;
+            }
 
             _db.StudentPlacementResults.Add(new StudentPlacementResult
             {
@@ -157,12 +229,14 @@ namespace WebApplication1.Areas.Learner.Controllers
     public class PlacementSubmitRequest
     {
         public int TestId { get; set; }
+
         public List<PlacementAnswerDto> Answers { get; set; } = new();
     }
 
     public class PlacementAnswerDto
     {
         public int QuestionId { get; set; }
+
         public int SelectedOptionId { get; set; }
     }
 }
