@@ -195,5 +195,39 @@
             });
         });
 
+        // ==========================================================
+        // Đánh dấu hoàn thành bài học
+        // ==========================================================
+        const completeBtn = document.getElementById('btnCompleteLesson');
+        if (completeBtn) {
+            completeBtn.addEventListener('click', function () {
+                if (completeBtn.classList.contains('completed')) return;
+
+                const lessonId = parseInt(completeBtn.getAttribute('data-lesson-id'), 10);
+                completeBtn.disabled = true;
+
+                fetch('/learn/Course/UpdateProgress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lessonId: lessonId, isCompleted: true })
+                })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('Không thể cập nhật tiến độ.');
+                        return res.json();
+                    })
+                    .then(function () {
+                        completeBtn.classList.add('completed');
+                        const icon = completeBtn.querySelector('i');
+                        const label = completeBtn.querySelector('.btn-complete-label');
+                        if (icon) icon.className = 'bi bi-check-circle-fill';
+                        if (label) label.textContent = 'Đã hoàn thành';
+                    })
+                    .catch(function () {
+                        completeBtn.disabled = false;
+                        alert('Không thể lưu tiến độ. Vui lòng thử lại.');
+                    });
+            });
+        }
+
     })();
 </script>

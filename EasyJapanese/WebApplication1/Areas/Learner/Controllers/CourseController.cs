@@ -1,10 +1,11 @@
 ﻿using CoreLibrary.Authentication;
-using CoreLibrary.Data;
 using CoreLibrary.Const;
-using CoreWeb.Areas.Learner.Models;
+using CoreLibrary.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CoreLibrary.Data;
+using CoreWeb.Areas.Learner.Models;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,12 +32,51 @@ namespace WebApplication1.Areas.Learner.Controllers
             string? q,
             CancellationToken cancellationToken)
         {
+            int? studentId = await GetCurrentStudentIdAsync();
+
+            var hasMembership = studentId.HasValue && await _db.StudentMemberships
+                .AnyAsync(m => m.StudentId == studentId.Value
+                            && m.IsActive
+                            && m.EndDate > DateTime.UtcNow);
+
             var query = _db.Courses
+                .Where(c => c.IsPublished)
                 .Include(c => c.Level)
                 .Include(c => c.Mentor)
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(level))
+            if (!hasMembership)
+                query = query.Where(c => c.IsFree);
+
+            int? recommendedLevelId = null;
+            string? recommendedLevelName = null;
+
+            if (studentId.HasValue)
+            {
+                var placement = await _db.StudentPlacementResults
+                .Where(p => p.StudentId == studentId.Value && p.CompletedAt != null)
+                .OrderByDescending(p => p.CompletedAt)
+                .Select(p => new
+                {
+                    p.RecommendedLevelId,
+                    LevelName = p.RecommendedLevel != null ? p.RecommendedLevel.LevelName : null
+                })
+                .FirstOrDefaultAsync();
+                recommendedLevelId = placement?.RecommendedLevelId;
+                recommendedLevelName = placement?.LevelName;
+            }
+
+            var enrolledIds = new HashSet<int>();
+            if (studentId.HasValue)
+            {
+                var ids = await _db.Enrollments
+                   .Where(e => e.StudentId == studentId.Value)
+                   .Select(e => e.CourseId)
+                   .ToListAsync();
+                enrolledIds = new HashSet<int>(ids);
+            }
+
+                if (!string.IsNullOrWhiteSpace(level))
             {
                 query = query.Where(c => c.Level != null && c.Level.LevelName == level);
             }
@@ -68,6 +108,10 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             var courses = await query.ToListAsync(cancellationToken);
 
+            ViewBag.HasMembership = hasMembership;
+            ViewBag.RecommendedLevelId = recommendedLevelId;
+            ViewBag.RecommendedLevelName = recommendedLevelName;
+            ViewBag.EnrolledCourseIds = enrolledIds;
             ViewBag.CurrentLevel = level ?? "";
             ViewBag.CurrentPrice = price ?? "";
             ViewBag.CurrentSort = string.IsNullOrWhiteSpace(sort) ? "level" : sort.ToLowerInvariant();
@@ -95,6 +139,31 @@ namespace WebApplication1.Areas.Learner.Controllers
                 return RedirectToAction("Index", "Membership");
             }
 
+            var studentId = await GetCurrentStudentIdAsync();
+            var completedLessonIds = new HashSet<int>();
+            var progressPercent = 0;
+
+            if (studentId.HasValue)
+            {
+                var lessonIds = course.Lessons.Select(l => l.LessonId).ToList();
+                if (lessonIds.Count > 0)
+                {
+                    var completed = await _db.LessonProgresses
+                        .Where(lp => lp.StudentId == studentId.Value
+                                  && lp.IsCompleted
+                                  && lessonIds.Contains(lp.LessonId))
+                        .Select(lp => lp.LessonId)
+                        .ToListAsync();
+                    completedLessonIds = new HashSet<int>(completed);
+                    progressPercent = (int)Math.Round(100.0 * completed.Count / lessonIds.Count);
+                }
+            }
+
+            ViewBag.CompletedLessonIds = completedLessonIds;
+            ViewBag.ProgressPercent = progressPercent;
+            ViewBag.IsEnrolled = studentId.HasValue
+                && course.Enrollments.Any(e => e.StudentId == studentId.Value);
+
             return View(course);
         }
 
@@ -115,6 +184,17 @@ namespace WebApplication1.Areas.Learner.Controllers
                 return RedirectToAction("Index", "Membership");
             }
 
+            // Mở bài học = ghi danh khóa + đánh dấu đã truy cập bài
+            bool isCompleted = false;
+            var studentId = await GetCurrentStudentIdAsync();
+            if (studentId.HasValue)
+            {
+                EnsureEnrolled(studentId.Value, lesson.CourseId);
+                var progress = await TrackLessonAccessAsync(studentId.Value, lesson.LessonId);
+                await _db.SaveChangesAsync();
+                isCompleted = progress.IsCompleted;
+            }
+
             // Chỉ lấy bài tập thuộc đúng lesson đang mở
             var exercises = await _db.Exercises
                 .Where(e => e.LessonId == lesson.LessonId)
@@ -130,6 +210,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                 LevelName = lesson.Course?.Level?.LevelName ?? "",
                 Content = lesson.Content,
                 VideoUrl = lesson.VideoUrl,
+                IsCompleted = isCompleted,
 
                 VocabularyItems = MapExercises(exercises, "Vocabulary"),
                 KanjiItems = MapExercises(exercises, "Kanji"),
@@ -139,6 +220,54 @@ namespace WebApplication1.Areas.Learner.Controllers
             };
 
             return View(vm);
+        }
+
+        // POST: /learn/Course/UpdateProgress
+        [HttpPost]
+        public async Task<IActionResult> UpdateProgress([FromBody] LessonProgressRequest request)
+        {
+            var studentId = await GetCurrentStudentIdAsync();
+            if (!studentId.HasValue) return Unauthorized();
+
+            var lesson = await _db.Lessons
+                .Include(l => l.Course)
+                .FirstOrDefaultAsync(l => l.LessonId == request.LessonId);
+            if (lesson == null) return NotFound();
+
+            if (lesson.Course != null && !lesson.Course.IsFree && !await HasAccessAsync())
+                return Forbid();
+
+            var progress = await _db.LessonProgresses
+                .FirstOrDefaultAsync(lp => lp.StudentId == studentId.Value
+                                        && lp.LessonId == request.LessonId);
+            if (progress == null)
+            {
+                progress = new CoreLibrary.Data.Entities.LessonProgress
+                {
+                    StudentId = studentId.Value,
+                    LessonId = request.LessonId
+                };
+                _db.LessonProgresses.Add(progress);
+            }
+
+            // WatchedSeconds chỉ tăng, không lùi
+            if (request.WatchedSeconds > progress.WatchedSeconds)
+                progress.WatchedSeconds = request.WatchedSeconds;
+            if (request.IsCompleted)
+                progress.IsCompleted = true;
+            progress.LastAccessedAt = DateTime.UtcNow;
+
+            EnsureEnrolled(studentId.Value, lesson.CourseId);
+            await _db.SaveChangesAsync();
+
+            var coursePercent = await UpdateCourseCompletionAsync(studentId.Value, lesson.CourseId);
+
+            return Json(new
+            {
+                success = true,
+                isCompleted = progress.IsCompleted,
+                coursePercent
+            });
         }
 
         // GET: /learn/Course/StartBasic
@@ -249,6 +378,79 @@ namespace WebApplication1.Areas.Learner.Controllers
                         .ToList()
                 })
                 .ToList();
+        }
+
+        // Ghi danh nếu chưa có (chưa gọi SaveChanges — caller tự save)
+        private void EnsureEnrolled(int studentId, int courseId)
+        {
+            var exists = _db.Enrollments.Local
+                    .Any(e => e.StudentId == studentId && e.CourseId == courseId)
+                || _db.Enrollments
+                    .Any(e => e.StudentId == studentId && e.CourseId == courseId);
+            if (exists) return;
+
+            _db.Enrollments.Add(new CoreLibrary.Data.Entities.Enrollment
+            {
+                StudentId = studentId,
+                CourseId = courseId,
+                EnrolledAt = DateTime.UtcNow
+            });
+        }
+
+        // Tạo/cập nhật LessonProgress khi mở bài (chưa SaveChanges)
+        private async Task<CoreLibrary.Data.Entities.LessonProgress> TrackLessonAccessAsync(int studentId, int lessonId)
+        {
+            var progress = await _db.LessonProgresses
+                .FirstOrDefaultAsync(lp => lp.StudentId == studentId && lp.LessonId == lessonId);
+            if (progress == null)
+            {
+                progress = new CoreLibrary.Data.Entities.LessonProgress
+                {
+                    StudentId = studentId,
+                    LessonId = lessonId,
+                    LastAccessedAt = DateTime.UtcNow
+                };
+                _db.LessonProgresses.Add(progress);
+            }
+            else
+            {
+                progress.LastAccessedAt = DateTime.UtcNow;
+            }
+            return progress;
+        }
+
+        // Đánh dấu Enrollment.CompletedAt khi học hết bài, trả về % hoàn thành
+        private async Task<int> UpdateCourseCompletionAsync(int studentId, int courseId)
+        {
+            var lessonIds = await _db.Lessons
+                .Where(l => l.CourseId == courseId)
+                .Select(l => l.LessonId)
+                .ToListAsync();
+            if (lessonIds.Count == 0) return 0;
+
+            var completedCount = await _db.LessonProgresses
+                .CountAsync(lp => lp.StudentId == studentId
+                               && lp.IsCompleted
+                               && lessonIds.Contains(lp.LessonId));
+
+            var enrollment = await _db.Enrollments
+                .FirstOrDefaultAsync(e => e.StudentId == studentId && e.CourseId == courseId);
+            if (enrollment != null)
+            {
+                bool allDone = completedCount >= lessonIds.Count;
+                if (allDone && enrollment.CompletedAt == null)
+                {
+                    enrollment.CompletedAt = DateTime.UtcNow;
+                    await _db.SaveChangesAsync();
+                }
+                else if (!allDone && enrollment.CompletedAt != null)
+                {
+                    enrollment.CompletedAt = null;
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            return (int)Math.Round(100.0 * completedCount / lessonIds.Count);
         }
 
         private async Task<int?> GetCurrentStudentIdAsync()

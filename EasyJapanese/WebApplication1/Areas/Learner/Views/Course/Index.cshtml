@@ -7,13 +7,20 @@
     var currentQuery = ViewBag.CurrentQuery as string ?? "";
     var hasFilter = !string.IsNullOrEmpty(currentLevel)
         || !string.IsNullOrEmpty(currentPrice)
-        || !string.IsNullOrEmpty(currentSort) && currentSort != "level"
+        || (!string.IsNullOrEmpty(currentSort) && currentSort != "level")
         || !string.IsNullOrEmpty(currentQuery);
 
-    string BuildUrl(string level = null, string price = null)
+    bool hasMembership = ViewBag.HasMembership ?? false;
+    string? recommendedLevelName = ViewBag.RecommendedLevelName as string;
+    var enrolledIds = (ViewBag.EnrolledCourseIds as HashSet<int>) ?? new HashSet<int>();
+
+    var groups = (Model ?? Enumerable.Empty<CoreLibrary.Data.Entities.Course>())
+        .ToList();
+
+    string BuildUrl(string? level = null, string? price = null, bool resetLevel = false, bool resetPrice = false)
     {
-        var l = level ?? currentLevel;
-        var p = price ?? currentPrice;
+        var l = resetLevel ? null : (level ?? currentLevel);
+        var p = resetPrice ? null : (price ?? currentPrice);
         var s = currentSort == "level" ? null : currentSort;
         var qs = new System.Collections.Generic.List<string>();
         if (!string.IsNullOrEmpty(l)) qs.Add("level=" + Uri.EscapeDataString(l));
@@ -76,16 +83,16 @@
             transition: all 0.15s;
         }
 
-        .hj-filter-chip:hover {
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
+            .hj-filter-chip:hover {
+                border-color: var(--color-primary);
+                color: var(--color-primary);
+            }
 
-        .hj-filter-chip.active {
-            background: var(--color-primary);
-            border-color: var(--color-primary);
-            color: #fff;
-        }
+            .hj-filter-chip.active {
+                background: var(--color-primary);
+                border-color: var(--color-primary);
+                color: #fff;
+            }
 
         .hj-search-input {
             border: 1px solid var(--color-border);
@@ -97,10 +104,10 @@
             transition: border-color 0.15s, box-shadow 0.15s;
         }
 
-        .hj-search-input:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
-        }
+            .hj-search-input:focus {
+                border-color: var(--color-primary);
+                box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+            }
 
         .hj-sort-select {
             border: 1px solid var(--color-border);
@@ -154,6 +161,7 @@
     </div>
 </div>
 
+<div class="container py-4" style="max-width: 1100px;">
     <!-- Filter / Sort / Search -->
     <form method="get" action="/learn/Course" class="hj-filter-bar">
         <div class="hj-filter-row">
@@ -167,7 +175,7 @@
                 <span class="hj-filter-label">Cấp độ</span>
                 <div class="hj-filter-options">
                     <a class="hj-filter-chip @(string.IsNullOrEmpty(currentLevel) ? "active" : "")"
-                       href="@BuildUrl(level: null)">Tất cả</a>
+                       href="@BuildUrl(resetLevel: true)">Tất cả</a>
                     @foreach (var lv in new[] { "N5", "N4", "N3", "N2", "N1" })
                     {
                         var active = string.Equals(currentLevel, lv, StringComparison.OrdinalIgnoreCase);
@@ -181,11 +189,14 @@
                 <span class="hj-filter-label">Học phí</span>
                 <div class="hj-filter-options">
                     <a class="hj-filter-chip @(string.IsNullOrEmpty(currentPrice) ? "active" : "")"
-                       href="@BuildUrl(price: null)">Tất cả</a>
+                       href="@BuildUrl(resetPrice: true)">Tất cả</a>
+                    @if (hasMembership)
+                    {
+                        <a class="hj-filter-chip @(string.Equals(currentPrice, "paid", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                           href="@BuildUrl(price: "paid")">Trả phí</a>
+                    }
                     <a class="hj-filter-chip @(string.Equals(currentPrice, "free", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                        href="@BuildUrl(price: "free")">Miễn phí</a>
-                    <a class="hj-filter-chip @(string.Equals(currentPrice, "paid", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                       href="@BuildUrl(price: "paid")">Trả phí</a>
                 </div>
             </div>
 
@@ -207,7 +218,6 @@
             }
         </div>
 
-        <!-- Preserve level/price/q when changing sort -->
         @if (!string.IsNullOrEmpty(currentLevel)) { <input type="hidden" name="level" value="@currentLevel" /> }
         @if (!string.IsNullOrEmpty(currentPrice)) { <input type="hidden" name="price" value="@currentPrice" /> }
         @if (!string.IsNullOrEmpty(currentQuery)) { <input type="hidden" name="q" value="@currentQuery" /> }
@@ -218,113 +228,94 @@
         @if (hasFilter) { <span>phù hợp với bộ lọc</span> }
     </p>
 
-    <!-- Course Grid -->
-    <div class="row g-4 justify-content-center">
-        @if (Model != null && Model.Any())
-        {
-            @foreach (var group in groups)
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4 justify-content-center">
+            @foreach (var course in Model)
             {
-                var levelClass = course.Level?.LevelName?.ToLower() ?? "n5";
-                var levelText = course.Level?.LevelName ?? "Beginner";
+                var levelClass = (course.Level?.LevelName ?? "n5").ToLower();
+                var isEnrolled = enrolledIds.Contains(course.CourseId);
+                var isAccessible = course.IsFree || hasMembership;
 
                 <div class="col-md-4">
-                    <div class="course-card">
-                        <div class="course-cover @(levelClass == "n5" ? "bg-red" : "")">
-                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" alt="@course.Title" />
+                    <div class="hj-course-card @(isAccessible ? "" : "hj-locked") fade-in">
+                        <div class="hj-course-thumb">
+                            <span class="hj-level-badge">@course.Level?.LevelName</span>
+                            @if (!isAccessible)
+                            {
+                                <span class="hj-locked-badge">🔒 Membership</span>
+                            }
+                            @if (course.IsFree)
+                            {
+                                <span class="hj-free-badge">Miễn phí</span>
+                            }
+                            <span>@course.Level?.LevelName</span>
                         </div>
-                        <div class="course-body">
-                            <span class="badge-level @levelClass">@levelText</span>
-                            <h3 class="course-name">@course.Title</h3>
-                            <p class="course-desc">@course.Description</p>
-
-                            <div class="teacher-divider"></div>
-
-                            <div class="course-teacher">
-                                <img src="@(course.Mentor?.AvatarUrl ?? "https://i.pravatar.cc/100?img=5")" alt="Avatar" class="teacher-avt" />
-                                <div class="teacher-info">
-                                    <div class="teacher-name">@(course.Mentor?.FullName ?? "Đang cập nhật")</div>
-                                    <div class="teacher-exp">@(course.Mentor?.Expertise ?? "Giảng viên EasyJapanese")</div>
-                                </div>
-
-                                <div class="hj-course-body">
-                                    <h3 class="hj-course-title">@course.Title</h3>
-                                    <p class="hj-course-desc">
-                                        @(string.IsNullOrEmpty(course.Description)
-                                                                        ? "Khóa học đang cập nhật mô tả."
-                                                                        : course.Description)
+                        <div class="hj-course-body">
+                            <h3 class="hj-course-title">@course.Title</h3>
+                            <p class="hj-course-desc">
+                                @(string.IsNullOrEmpty(course.Description)
+                                    ? "Khóa học đang cập nhật mô tả."
+                                    : course.Description)
                             </p>
 
-                                        <hr class="hj-divider">
+                            <hr class="hj-divider" />
 
-                                        <!-- Mentor -->
-                                        <div class="hj-mentor-row">
+                            <div class="hj-mentor-row">
                                 @if (!string.IsNullOrEmpty(course.Mentor?.AvatarUrl))
-                                            {
-                                                <img src="@course.Mentor.AvatarUrl"
-                                                     class="hj-mentor-avt"
-                                                     alt="@course.Mentor.FullName">
-                                            }
-                                            else
-                                            {
-                                                <div class="hj-mentor-avt-fallback">
-                                                    @((course.Mentor?.FullName ?? "G").Substring(0, 1).ToUpper())
-                                                </div>
-                                            }
-                                            <div>
-                                                <div class="hj-mentor-name">
-                                                    @(course.Mentor?.FullName ?? "Đang cập nhật")
-                                                </div>
-                                                <div class="hj-mentor-exp">
-                                                    @(course.Mentor?.Expertise ?? "Giảng viên Hi Japan!")
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- CTA -->
-                                        @if (isAccessible)
-                                        {
-                                            <a href="/learn/Course/Detail/@course.CourseId"
-                                               class="btn-hj-course mt-auto @(isEnrolled ? "enrolled" : "")">
-                                                @(isEnrolled ? "Tiếp tục học" : "Vào học ngay")
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <a asp-area="Learner" asp-controller="Membership" asp-action="Plans"
-                                               class="btn-hj-course mt-auto"
-                                               style="border-color:var(--color-navy);color:var(--color-navy);">
-                                                <i class="bi bi-lock me-1"></i>Mở khoá membership
-                                            </a>
-                                        }
+                                {
+                                    <img src="@course.Mentor.AvatarUrl"
+                                         class="hj-mentor-avt"
+                                         alt="@course.Mentor.FullName" />
+                                }
+                                else
+                                {
+                                    <div class="hj-mentor-avt-fallback">
+                                        @(course.Mentor?.FullName?.Substring(0, 1).ToUpper() ?? "?")
                                     </div>
-
+                                }
+                                <div>
+                                    <div class="hj-mentor-name">@(course.Mentor?.FullName ?? "Đang cập nhật")</div>
+                                    <div class="hj-mentor-exp">@(course.Mentor?.Expertise ?? "Giảng viên Hi Japan!")</div>
                                 </div>
                             </div>
-                            if (di < 6) di++;
-                        }
+
+                            @if (isAccessible)
+                            {
+                                <a href="/learn/Course/Detail/@course.CourseId"
+                                   class="btn-hj-course @(isEnrolled ? "enrolled" : "")">
+                                    @(isEnrolled ? "Tiếp tục học" : "Vào học ngay")
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="/learn/Membership/Plans" class="btn-hj-course">
+                                    Mở khoá membership
+                                </a>
+                            }
+                        </div>
                     </div>
-
                 </div>
             }
+        </div>
 
-            <!-- Nếu không có membership, hiện CTA upgrade ở cuối -->
-            @if (!hasMembership)
-            {
-                <div class="text-center pt-2 pb-4 fade-in">
-                    <p class="text-muted mb-3" style="font-size:14px;">
-                        Đăng ký membership để mở khoá tất cả khoá học N5 → N1.
-                    </p>
-                    <a asp-area="Learner" asp-controller="Membership" asp-action="Plans"
-                       class="btn-hj-course d-inline-block"
-                       style="width:auto;padding:11px 32px;
-                                      background:var(--color-primary);color:#fff;border-color:var(--color-primary);">
-                        Xem gói học →
-                    </a>
-                </div>
-            }
-        }
-        else
+        @if (!hasMembership)
         {
+            <div class="text-center pt-2 pb-4">
+                <p class="text-muted mb-3" style="font-size:14px;">
+                    Đăng ký membership để mở khoá tất cả khoá học N5 → N1.
+                </p>
+                <a href="/learn/Membership/Plans"
+                   class="btn-hj-course d-inline-block"
+                   style="width:auto;padding:11px 32px;background:var(--color-primary);color:#fff;border-color:var(--color-primary);">
+                    Xem gói học
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
             <div class="col-12 text-center text-muted py-5">
                 <p class="mt-3">
                     @if (hasFilter)
@@ -338,16 +329,9 @@
                 </p>
                 @if (hasFilter)
                 {
-                    <a href="/learn/Course" class="btn-vao-hoc d-inline-block" style="width:auto; padding:0.5rem 1.5rem;">Xóa bộ lọc</a>
+                    <a href="/learn/Course" class="btn-hj-course d-inline-block" style="width:auto; padding:0.5rem 1.5rem;">Xóa bộ lọc</a>
                 }
             </div>
-        }
-    </div>
+        </div>
+    }
 </div>
-
-@section Scripts {
-    <script>
-        // Submit search form on Enter (default behavior of <input type="search"> in a form)
-        // No extra JS needed — native form GET handles it.
-    </script>
-}

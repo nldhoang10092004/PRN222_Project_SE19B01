@@ -265,6 +265,12 @@
 {
     var levelName = Model.Level?.LevelName ?? "N5";
     var firstLesson = Model.Lessons?.OrderBy(l => l.SortOrder).FirstOrDefault();
+    var completedLessonIds = (ViewBag.CompletedLessonIds as HashSet<int>) ?? new HashSet<int>();
+    var progressPercent = (int)(ViewBag.ProgressPercent ?? 0);
+    bool isEnrolled = ViewBag.IsEnrolled ?? false;
+    var nextLesson = Model.Lessons?
+        .OrderBy(l => l.SortOrder)
+        .FirstOrDefault(l => !completedLessonIds.Contains(l.LessonId)) ?? firstLesson;
 
     <div class="hj-detail-wrap container">
 
@@ -339,15 +345,16 @@
 
                         <!-- Progress -->
                         <div class="hj-progress-bar-wrap">
-                            <div class="hj-progress-bar-fill"></div>
+                            <div class="hj-progress-bar-fill" style="width:@(progressPercent)%;"></div>
                         </div>
-                        <p class="text-muted mb-3" style="font-size:12px;">Bạn đã hoàn thành 0% khóa học</p>
+                        <p class="text-muted mb-3" style="font-size:12px;">Bạn đã hoàn thành @progressPercent% khóa học</p>
 
                         <!-- CTA -->
-                        @if (firstLesson != null)
+                        @if (nextLesson != null)
                         {
-                            <a href="/learn/Course/Lesson/@firstLesson.LessonId" class="btn-hj-start">
-                                <i class="bi bi-play-fill me-2"></i>Bắt đầu học ngay
+                            <a href="/learn/Course/Lesson/@nextLesson.LessonId" class="btn-hj-start">
+                                <i class="bi bi-play-fill me-2"></i>
+                                @(progressPercent >= 100 ? "Ôn tập lại" : isEnrolled ? "Tiếp tục học" : "Bắt đầu học ngay")
                             </a>
                         }
                     </div>
@@ -366,9 +373,10 @@
                     {
                         @foreach (var lesson in Model.Lessons.OrderBy(l => l.SortOrder))
                         {
+                            var done = completedLessonIds.Contains(lesson.LessonId);
                             <a href="/learn/Course/Lesson/@lesson.LessonId" class="hj-lesson-item">
-                                <div class="hj-lesson-icon">
-                                    <i class="bi bi-play-fill"></i>
+                                <div class="hj-lesson-icon" style="@(done ? "background:rgba(25,135,84,.12);color:#198754;border-color:rgba(25,135,84,.3);" : "")">
+                                    <i class="bi bi-@(done ? "check-lg" : "play-fill")"></i>
                                 </div>
                                 <div style="flex:1;min-width:0;">
                                     <div class="hj-lesson-title">@lesson.Title</div>
@@ -384,7 +392,14 @@
                                         }
                                     </div>
                                 </div>
-                                <span class="hj-lesson-badge">Học ngay</span>
+                                @if (done)
+                                {
+                                    <span class="hj-lesson-badge" style="background:rgba(25,135,84,.1);color:#198754;">Hoàn thành</span>
+                                }
+                                else
+                                {
+                                    <span class="hj-lesson-badge">Học ngay</span>
+                                }
                             </a>
                         }
                     }

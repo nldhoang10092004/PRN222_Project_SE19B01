@@ -116,15 +116,26 @@
                 <h1 class="lesson-title">@Model.LessonTitle</h1>
             </div>
 
-            <!-- Quiz này là quiz cả Course -->
-            <a asp-area="Learner"
-               asp-controller="Quiz"
-               asp-action="Start"
-               asp-route-courseId="@Model.CourseId"
-               class="btn-quiz">
-                Làm Quiz cuối khóa
-                <i class="bi bi-patch-check"></i>
-            </a>
+            <div class="lesson-header-actions">
+                <button type="button"
+                        id="btnCompleteLesson"
+                        class="btn-complete-lesson @(Model.IsCompleted ? "completed" : "")"
+                        data-lesson-id="@Model.LessonId"
+                        @(Model.IsCompleted ? "disabled" : "")>
+                    <i class="bi bi-@(Model.IsCompleted ? "check-circle-fill" : "check-circle")"></i>
+                    <span class="btn-complete-label">@(Model.IsCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành")</span>
+                </button>
+
+                <!-- Quiz này là quiz cả Course -->
+                <a asp-area="Learner"
+                   asp-controller="Quiz"
+                   asp-action="Start"
+                   asp-route-courseId="@Model.CourseId"
+                   class="btn-quiz">
+                    Làm Quiz cuối khóa
+                    <i class="bi bi-patch-check"></i>
+                </a>
+            </div>
         </div>
 
         <!-- ═══ VIDEO ═══ -->

@@ -15,6 +15,8 @@ namespace CoreWeb.Areas.Learner.Models
         public string? Content { get; set; }
         public string? VideoUrl { get; set; }
 
+        public bool IsCompleted { get; set; }
+
         // Các exercise được tách theo ExerciseType
         public List<LessonExerciseItemViewModel> VocabularyItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> KanjiItems { get; set; } = new();
@@ -66,5 +68,12 @@ namespace CoreWeb.Areas.Learner.Models
         public int QuestionId { get; set; }
 
         public int OptionId { get; set; }
+    }
+
+    public class LessonProgressRequest
+    {
+        public int LessonId { get; set; }
+        public int WatchedSeconds { get; set; }
+        public bool IsCompleted { get; set; }
     }
 }
