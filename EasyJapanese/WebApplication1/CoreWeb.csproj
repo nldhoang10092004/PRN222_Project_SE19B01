@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Common\" />
+    <Folder Include="wwwroot\static\" />
   </ItemGroup>
 
 </Project>

@@ -74,13 +74,25 @@
                                     <td>@(tx.Plan?.PlanName ?? "Gói/Khóa học")</td>
                                     <td>@tx.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>
-                                        @if(tx.PaymentStatus == "Completed")
+                                        @if(tx.PaymentStatus == "Paid")
                                         {
                                             <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Thành công</span>
                                         }
-                                        else
+                                        else if(tx.PaymentStatus == "Pending")
                                         {
                                             <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2">Đang chờ</span>
+                                        }
+                                        else if(tx.PaymentStatus == "Failed")
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2">Thất bại</span>
+                                        }
+                                        else if(tx.PaymentStatus == "Refunded")
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">Đã hoàn tiền</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark rounded-pill px-3 py-2">@tx.PaymentStatus</span>
                                         }
                                     </td>
                                 </tr>

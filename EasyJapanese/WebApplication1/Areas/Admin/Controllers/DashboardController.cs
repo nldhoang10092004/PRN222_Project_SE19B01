@@ -33,7 +33,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             
             // Total Revenue this month
             var monthlyRevenue = await _context.Transactions
-                .Where(t => t.PaymentStatus == "Completed" && t.CreatedAt >= currentMonthStart)
+                .Where(t => t.PaymentStatus == TransactionStatusConst.PAID && t.CreatedAt >= currentMonthStart)
                 .SumAsync(t => t.FinalAmount);
                 
             // New Students this month

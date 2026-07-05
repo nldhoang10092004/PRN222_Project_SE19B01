@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoreLibrary.Data;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WebApplication1.Areas.Learner.Controllers
@@ -16,12 +18,55 @@ namespace WebApplication1.Areas.Learner.Controllers
         }
 
         // GET: /learn/Course
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? level,
+            string? price,
+            string? sort,
+            string? q,
+            CancellationToken cancellationToken)
         {
-            var courses = await _db.Courses
+            var query = _db.Courses
                 .Include(c => c.Level)
                 .Include(c => c.Mentor)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(level))
+            {
+                query = query.Where(c => c.Level != null && c.Level.LevelName == level);
+            }
+
+            if (string.Equals(price, "free", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => c.IsFree);
+            }
+            else if (string.Equals(price, "paid", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => !c.IsFree);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim();
+                query = query.Where(c =>
+                    c.Title.Contains(term) ||
+                    (c.Description != null && c.Description.Contains(term)));
+            }
+
+            query = sort?.ToLowerInvariant() switch
+            {
+                "name" => query.OrderBy(c => c.Title),
+                "name-desc" => query.OrderByDescending(c => c.Title),
+                _ => query.OrderBy(c => c.Level!.SortOrder)
+                         .ThenByDescending(c => c.CreatedAt)
+            };
+
+            var courses = await query.ToListAsync(cancellationToken);
+
+            ViewBag.CurrentLevel = level ?? "";
+            ViewBag.CurrentPrice = price ?? "";
+            ViewBag.CurrentSort = string.IsNullOrWhiteSpace(sort) ? "level" : sort.ToLowerInvariant();
+            ViewBag.CurrentQuery = q ?? "";
+
             return View(courses);
         }
 
