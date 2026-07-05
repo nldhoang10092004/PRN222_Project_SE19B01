@@ -21,7 +21,9 @@ namespace WebApplication1.Areas.Admin.Controllers
             _context = context;
         }
 
-        // GET: /admin/users
+        // GET: /admin
+        [Route("admin")]
+        [Route("admin/users")] // Keep old route as fallback
         public async Task<IActionResult> Index(string searchString, string roleFilter)
         {
             ViewData["Title"] = "Quản lý Người dùng";

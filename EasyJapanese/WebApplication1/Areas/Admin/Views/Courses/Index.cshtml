@@ -1,0 +1,94 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Course>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 fw-bold">Quản lý Khóa học</h3>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <form method="get" class="mb-4 d-flex gap-2">
+            <input type="text" name="searchString" value="@ViewData["SearchString"]" class="form-control" placeholder="Tìm kiếm tên khóa học..." style="max-width: 300px;">
+            <button type="submit" class="btn btn-danger">Tìm kiếm</button>
+            <a href="/admin/courses" class="btn btn-light">Xóa bộ lọc</a>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên khóa học</th>
+                        <th>Cấp độ</th>
+                        <th>Giảng viên</th>
+                        <th>Loại</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.CourseId</td>
+                            <td class="fw-bold">@item.Title</td>
+                            <td><span class="badge bg-danger">@item.Level?.LevelName</span></td>
+                            <td>@(item.Mentor?.FullName ?? "N/A")</td>
+                            <td>
+                                @if(item.IsFree) {
+                                    <span class="badge bg-success">Miễn phí</span>
+                                } else {
+                                    <span class="badge bg-warning text-dark">Trả phí</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.IsPublished)
+                                {
+                                    <span class="badge bg-primary">Đang hiển thị</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Đã ẩn</span>
+                                }
+                            </td>
+                            <td>
+                                <form method="post" action="/admin/courses/toggle-publish" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.CourseId" />
+                                    @if (item.IsPublished)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Ẩn khóa học" onclick="return confirm('Bạn có chắc chắn muốn ẩn/khóa khóa học này khỏi trang học viên?');">
+                                            <i class="bi bi-eye-slash"></i> Ẩn / Khóa
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Hiển thị lại">
+                                            <i class="bi bi-eye"></i> Hiện
+                                        </button>
+                                    }
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Không tìm thấy khóa học nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
