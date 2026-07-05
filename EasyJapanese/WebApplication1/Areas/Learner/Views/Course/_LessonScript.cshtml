@@ -1,0 +1,199 @@
+﻿<script>
+    (function () {
+        const sidebar = document.getElementById('lessonSidebar');
+        const toggleEl = document.getElementById('sidebarToggle');
+        const icon = document.getElementById('toggleIcon');
+
+        const navItems = document.querySelectorAll('.sidebar-nav-item');
+        const panels = document.querySelectorAll('.lesson-panel');
+
+        // ==========================================================
+        // Toggle sidebar
+        // ==========================================================
+        if (toggleEl && sidebar && icon) {
+            toggleEl.addEventListener('click', function () {
+                const collapsed = sidebar.classList.toggle('collapsed');
+
+                icon.className = collapsed
+                    ? 'bi bi-layout-sidebar'
+                    : 'bi bi-layout-sidebar-reverse';
+            });
+        }
+
+        // ==========================================================
+        // Chuyển tab nội dung
+        // ==========================================================
+        navItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-panel');
+
+                // Nếu sidebar đang thu nhỏ thì mở lại
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.remove('collapsed');
+
+                    if (icon) {
+                        icon.className = 'bi bi-layout-sidebar-reverse';
+                    }
+                }
+
+                // Bỏ active ở menu cũ
+                navItems.forEach(function (nav) {
+                    nav.classList.remove('active');
+                });
+
+                // Active menu vừa click
+                this.classList.add('active');
+
+                // Ẩn toàn bộ panel
+                panels.forEach(function (panel) {
+                    panel.classList.remove('active');
+                });
+
+                // Hiện panel tương ứng
+                const targetPanel = document.getElementById(targetId);
+
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+            });
+        });
+
+        // ==========================================================
+        // Audio player
+        // ==========================================================
+        let currentAudio = null;
+        let currentButton = null;
+        let currentProgressFill = null;
+
+        document.querySelectorAll('.audio-play-btn[data-audio]').forEach(function (btn) {
+
+            const audioUrl = btn.getAttribute('data-audio');
+
+            if (!audioUrl) return;
+
+            btn.addEventListener('click', function () {
+
+                const url = this.getAttribute('data-audio');
+
+                if (!url) return;
+
+                const card = this.closest('.audio-card');
+                const progressFill = card
+                    ? card.querySelector('.audio-progress-fill')
+                    : null;
+
+                const iconEl = this.querySelector('i');
+
+                // Nếu click đúng bài đang phát thì pause
+                if (currentAudio && currentAudio._url === url) {
+
+                    if (!currentAudio.paused) {
+                        currentAudio.pause();
+
+                        if (iconEl) {
+                            iconEl.className = 'bi bi-play-fill';
+                        }
+
+                        return;
+                    }
+
+                    currentAudio.play();
+
+                    if (iconEl) {
+                        iconEl.className = 'bi bi-pause-fill';
+                    }
+
+                    return;
+                }
+
+                // Dừng audio cũ nếu đang phát
+                if (currentAudio) {
+                    currentAudio.pause();
+
+                    if (currentButton) {
+                        const oldIcon = currentButton.querySelector('i');
+
+                        if (oldIcon) {
+                            oldIcon.className = 'bi bi-play-fill';
+                        }
+                    }
+
+                    if (currentProgressFill) {
+                        currentProgressFill.style.width = '0%';
+                    }
+                }
+
+                // Tạo audio mới
+                currentAudio = new Audio(url);
+                currentAudio._url = url;
+
+                currentButton = this;
+                currentProgressFill = progressFill;
+
+                if (iconEl) {
+                    iconEl.className = 'bi bi-pause-fill';
+                }
+
+                currentAudio.addEventListener('timeupdate', function () {
+                    if (this.duration && progressFill) {
+                        const percent = (this.currentTime / this.duration) * 100;
+                        progressFill.style.width = percent + '%';
+                    }
+                });
+
+                currentAudio.addEventListener('ended', function () {
+                    if (iconEl) {
+                        iconEl.className = 'bi bi-play-fill';
+                    }
+
+                    if (progressFill) {
+                        progressFill.style.width = '0%';
+                    }
+
+                    currentAudio = null;
+                    currentButton = null;
+                    currentProgressFill = null;
+                });
+
+                currentAudio.addEventListener('error', function () {
+                    if (iconEl) {
+                        iconEl.className = 'bi bi-play-fill';
+                    }
+
+                    if (progressFill) {
+                        progressFill.style.width = '0%';
+                    }
+
+                    alert('Không thể phát audio. Kiểm tra lại AudioUrl trong database.');
+
+                    currentAudio = null;
+                    currentButton = null;
+                    currentProgressFill = null;
+                });
+
+                currentAudio.play().catch(function () {
+                    if (iconEl) {
+                        iconEl.className = 'bi bi-play-fill';
+                    }
+
+                    alert('Không thể phát audio. Kiểm tra lại AudioUrl trong database.');
+                });
+            });
+        });
+
+        // ==========================================================
+        // Nút Practice của từng Exercise
+        // ==========================================================
+        document.querySelectorAll('.btn-practice').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const exerciseId = this.getAttribute('data-exercise-id');
+
+                if (!exerciseId) return;
+
+                window.location.href =
+                    '/learn/Exercise/Practice?exerciseId=' + exerciseId;
+            });
+        });
+
+    })();
+</script>
