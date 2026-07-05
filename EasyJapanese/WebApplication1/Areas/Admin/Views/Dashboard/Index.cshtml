@@ -3,45 +3,77 @@
     ViewData["Title"] = "Tổng quan hệ thống";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Dashboard Quản trị</h3>
-    <button class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i> Xuất báo cáo</button>
+<!-- ═══ BANNER ═══ -->
+<div class="jp-banner mb-5">
+    <div class="jp-banner-kanji">管</div>
+    <p class="jp-banner-jp mb-0">ようこそ — CHÀO MỪNG QUAY TRỞ LẠI</p>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="jp-banner-title">Dashboard Quản trị 👋</h1>
+            <p class="jp-banner-sub">Hệ thống của Hi Japan! đang vận hành ổn định và bảo mật.</p>
+        </div>
+        <button class="btn btn-jp-outline-light"><i class="bi bi-download me-1"></i> Xuất báo cáo</button>
+    </div>
 </div>
 
 <div class="row g-4 mb-5">
+    <!-- Card 1 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #C8102E !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Doanh thu tháng này</p>
-                <h4 class="mb-0 fw-bold">@(((decimal)ViewData["MonthlyRevenue"]!).ToString("N0"))đ</h4>
-                <small class="text-success fw-bold"><i class="bi bi-arrow-up-short"></i> (Thực tế)</small>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Doanh thu</p>
+                    <h3 class="jp-stat-value">@(((decimal)ViewData["MonthlyRevenue"]!).ToString("N0"))đ</h3>
+                    <small class="text-success fw-bold"><i class="bi bi-arrow-up-short"></i> Tháng này</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Card 2 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #0d6efd !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Học viên mới</p>
-                <h4 class="mb-0 fw-bold">@ViewData["NewStudents"]</h4>
-                <small class="text-success fw-bold"><i class="bi bi-arrow-up-short"></i> (Tháng này)</small>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Học viên mới</p>
+                    <h3 class="jp-stat-value">@ViewData["NewStudents"]</h3>
+                    <small class="text-success fw-bold"><i class="bi bi-arrow-up-short"></i> Tháng này</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-people-fill"></i>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Card 3 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #ffc107 !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Giao dịch chờ duyệt</p>
-                <h4 class="mb-0 fw-bold">0</h4>
-                <a href="/admin/orders" class="small text-decoration-none text-primary fw-medium">Xem chi tiết <i class="bi bi-arrow-right"></i></a>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Chờ duyệt</p>
+                    <h3 class="jp-stat-value">0</h3>
+                    <a href="/admin/orders" class="small text-decoration-none text-danger fw-semibold">Xem chi tiết <i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-clock-history"></i>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Card 4 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #198754 !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Khóa học active</p>
-                <h4 class="mb-0 fw-bold">@ViewData["ActiveCourses"]</h4>
-                <small class="text-muted">Không thay đổi</small>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Khóa học active</p>
+                    <h3 class="jp-stat-value">@ViewData["ActiveCourses"]</h3>
+                    <small class="text-muted">Đang hoạt động</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-book-half"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -49,7 +81,7 @@
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="jp-omni-card rounded-4 h-100">
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
                 <h5 class="fw-bold mb-0">Hoạt động đăng ký gần đây</h5>
             </div>
@@ -111,7 +143,7 @@
     </div>
     
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="jp-omni-card rounded-4 h-100">
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
                 <h5 class="fw-bold mb-0">Thao tác nhanh</h5>
             </div>

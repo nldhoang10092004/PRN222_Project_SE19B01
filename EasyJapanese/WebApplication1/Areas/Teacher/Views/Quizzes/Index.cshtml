@@ -1,0 +1,310 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Quiz>
+@{
+    Layout = "~/Areas/Teacher/Views/Shared/_TeacherLayout.cshtml";
+    var courses = ViewBag.Courses as List<CoreLibrary.Data.Entities.Course> ?? new List<CoreLibrary.Data.Entities.Course>();
+    int? selectedCourseId = ViewBag.SelectedCourseId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="mb-1 fw-bold">Danh sách Quizzes</h3>
+        <p class="text-muted small mb-0">Quản lý các bài trắc nghiệm nhanh đính kèm trong các khóa học giảng dạy.</p>
+    </div>
+    @if (courses.Any())
+    {
+        <div class="d-flex gap-2">
+            <button class="btn btn-jp-outline" data-bs-toggle="modal" data-bs-target="#importQuizSetModal">
+                <i class="bi bi-file-earmark-excel-fill text-success me-1"></i> Nhập từ Excel
+            </button>
+            <button class="btn btn-jp-primary" data-bs-toggle="modal" data-bs-target="#createQuizModal">
+                <i class="bi bi-plus-lg me-1"></i> Tạo Quiz mới
+            </button>
+        </div>
+    }
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 jp-omni-card rounded-4 p-4 mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-9">
+            <label class="form-label small fw-bold text-muted">Lọc theo Khóa học</label>
+            <select name="courseId" class="form-select rounded-3">
+                <option value="">Tất cả các khóa học</option>
+                @foreach (var c in courses)
+                {
+                    <option value="@c.CourseId" selected="@(selectedCourseId == c.CourseId)">@c.Title</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-jp-primary w-100 rounded-3">Lọc danh sách</button>
+        </div>
+    </form>
+</div>
+
+<div class="row g-4">
+    @foreach (var quiz in Model)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 jp-omni-card h-100 rounded-4">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 fw-bold small">
+                            @quiz.Course?.Title
+                        </span>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical fs-5"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                <li>
+                                    <button class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#editQuizModal-@quiz.QuizId">
+                                        <i class="bi bi-pencil me-2 text-muted"></i> Chỉnh sửa
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#importExcelModal-@quiz.QuizId">
+                                        <i class="bi bi-file-earmark-excel-fill me-2 text-success"></i> Nhập từ Excel
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-action="Delete" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa Quiz này và các câu hỏi liên quan?');">
+                                        <input type="hidden" name="quizId" value="@quiz.QuizId" />
+                                        <button type="submit" class="dropdown-item py-2 text-danger">
+                                            <i class="bi bi-trash3 me-2"></i> Xóa Quiz
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-2">@quiz.Title</h5>
+                    
+                    <div class="border-top border-light pt-3 mt-auto">
+                        <div class="row g-2 text-center text-muted small">
+                            <div class="col-6 border-end">
+                                <span class="d-block">Thời gian</span>
+                                <span class="fw-bold text-dark">@(quiz.Duration.HasValue ? $"{quiz.Duration} phút" : "Không giới hạn")</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="d-block">Câu hỏi</span>
+                                <span class="fw-bold text-dark">@(quiz.Questions?.Count ?? 0) câu</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="/teacher/quizzes/questions/@quiz.QuizId" class="btn btn-jp-outline w-100 mt-4 text-decoration-none">
+                        <i class="bi bi-gear-fill me-1"></i> Soạn câu hỏi
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editQuizModal-@quiz.QuizId" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Chỉnh sửa Quiz</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="QuizId" value="@quiz.QuizId" />
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Khóa học liên kết</label>
+                                <select name="CourseId" class="form-select rounded-3" required>
+                                    @foreach (var c in courses)
+                                    {
+                                        <option value="@c.CourseId" selected="@(quiz.CourseId == c.CourseId)">@c.Title</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Tiêu đề Quiz</label>
+                                <input type="text" name="Title" class="form-control rounded-3" value="@quiz.Title" placeholder="Ví dụ: Quiz ôn tập Từ vựng Bài 1" required />
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Thời gian (phút)</label>
+                                    <input type="number" name="Duration" class="form-control rounded-3" value="@quiz.Duration" placeholder="Để trống nếu không giới hạn" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Điểm đạt (%)</label>
+                                    <input type="number" name="PassScore" class="form-control rounded-3" value="@quiz.PassScore" min="1" max="100" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-jp-primary rounded-3">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Excel Modal -->
+        <div class="modal fade" id="importExcelModal-@quiz.QuizId" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-excel-fill text-success me-2"></i>Nhập Câu hỏi từ Excel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form asp-action="ImportExcel" asp-route-quizId="@quiz.QuizId" method="post" enctype="multipart/form-data">
+                        <div class="modal-body p-4 text-start">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Quiz nhận câu hỏi</label>
+                                <input type="text" class="form-control rounded-3 bg-light" value="@quiz.Title" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Chọn file Excel (.xlsx)</label>
+                                <input type="file" name="excelFile" class="form-control rounded-3" accept=".xlsx" required />
+                            </div>
+                            <div class="bg-light p-3 rounded-3 small text-muted">
+                                <div class="fw-bold mb-1"><i class="bi bi-info-circle me-1"></i>Cấu trúc file Excel mẫu:</div>
+                                <ul class="mb-2 ps-3">
+                                    <li>Cột A: Nội dung câu hỏi</li>
+                                    <li>Cột B: Điểm số (ví dụ: 10)</li>
+                                    <li>Cột C, D, E, F: Đáp án A, B, C, D</li>
+                                    <li>Cột G: Số thứ tự đáp án đúng (từ 1 đến 4)</li>
+                                    <li>Dòng 1 là tiêu đề (Header), hệ thống tự động bỏ qua.</li>
+                                </ul>
+                                <div class="text-end">
+                                    <a href="/templates/quizzes_template.xlsx" download class="btn btn-sm btn-link text-decoration-none p-0 text-success fw-bold"><i class="bi bi-download me-1"></i>Tải file Excel mẫu</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-jp-primary rounded-3">Bắt đầu nhập</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-patch-question fs-1 mb-3"></i>
+            <h5>Chưa có Quiz nào được tạo</h5>
+            <p class="small">Chọn khóa học hoặc bấm "Tạo Quiz mới" để bắt đầu thiết lập bài tập trắc nghiệm.</p>
+        </div>
+    }
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createQuizModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Tạo Quiz mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Khóa học liên kết</label>
+                        <select name="CourseId" class="form-select rounded-3" required>
+                            @foreach (var c in courses)
+                            {
+                                <option value="@c.CourseId" selected="@(selectedCourseId == c.CourseId)">@c.Title</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Tiêu đề Quiz</label>
+                        <input type="text" name="Title" class="form-control rounded-3" placeholder="Ví dụ: Quiz trắc nghiệm Kanji N5" required />
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Thời gian (phút)</label>
+                            <input type="number" name="Duration" class="form-control rounded-3" value="15" placeholder="Để trống nếu không giới hạn" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Điểm đạt (%)</label>
+                            <input type="number" name="PassScore" class="form-control rounded-3" value="50" min="1" max="100" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-jp-primary rounded-3">Tạo Quiz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Quiz Set Modal (Create & Import Questions) -->
+<div class="modal fade" id="importQuizSetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-excel-fill text-success me-2"></i>Nhập Bộ bài Quiz từ Excel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ImportQuizSet" method="post" enctype="multipart/form-data">
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Khóa học liên kết</label>
+                        <select name="courseId" class="form-select rounded-3" required>
+                            @foreach (var c in courses)
+                            {
+                                <option value="@c.CourseId" selected="@(selectedCourseId == c.CourseId)">@c.Title</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Tiêu đề Quiz</label>
+                        <input type="text" name="title" class="form-control rounded-3" placeholder="Ví dụ: Quiz trắc nghiệm Kanji N5" required />
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Thời gian (phút)</label>
+                            <input type="number" name="duration" class="form-control rounded-3" value="15" placeholder="Để trống nếu không giới hạn" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Điểm đạt (%)</label>
+                            <input type="number" name="passScore" class="form-control rounded-3" value="50" min="1" max="100" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Chọn file Excel câu hỏi (.xlsx)</label>
+                        <input type="file" name="excelFile" class="form-control rounded-3" accept=".xlsx" required />
+                    </div>
+                    <div class="bg-light p-3 rounded-3 small text-muted">
+                        <div class="fw-bold mb-1"><i class="bi bi-info-circle me-1"></i>Cấu trúc file Excel mẫu:</div>
+                        <ul class="mb-2 ps-3">
+                            <li>Cột A: Nội dung câu hỏi</li>
+                            <li>Cột B: Điểm số (ví dụ: 10)</li>
+                            <li>Cột C, D, E, F: Đáp án A, B, C, D</li>
+                            <li>Cột G: Số thứ tự đáp án đúng (từ 1 đến 4)</li>
+                            <li>Dòng 1 là tiêu đề (Header), hệ thống tự động bỏ qua.</li>
+                        </ul>
+                        <div class="text-end">
+                            <a href="/templates/quizzes_template.xlsx" download class="btn btn-sm btn-link text-decoration-none p-0 text-success fw-bold"><i class="bi bi-download me-1"></i>Tải file Excel mẫu</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-jp-primary rounded-3">Tạo & Nhập câu hỏi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

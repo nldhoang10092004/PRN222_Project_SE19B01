@@ -1,0 +1,449 @@
+@model IEnumerable<WebApplication1.Areas.Admin.Controllers.TicketsController.SupportTicket>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var selectedTicket = ViewBag.SelectedTicket as WebApplication1.Areas.Admin.Controllers.TicketsController.SupportTicket;
+}
+
+<style>
+    /* Premium Traditional Japanese Chat Panel Styles */
+    .support-chat-container {
+        display: flex;
+        background-color: var(--color-card);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        height: calc(100vh - 180px);
+        min-height: 550px;
+        overflow: hidden;
+    }
+
+    /* Left Panel: Ticket List */
+    .support-sidebar {
+        width: 350px;
+        border-right: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+        background-color: #FCFAF6; /* Soft cream paper tone */
+        flex-shrink: 0;
+    }
+
+    .support-sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--color-border);
+        background-color: var(--color-card);
+    }
+
+    .support-ticket-list {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    /* Custom Scrollbar for Sidebar */
+    .support-ticket-list::-webkit-scrollbar {
+        width: 4px;
+    }
+    .support-ticket-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .support-ticket-list::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+    }
+
+    .support-ticket-item {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--color-border);
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .support-ticket-item:hover {
+        background-color: var(--color-accent-soft);
+    }
+
+    .support-ticket-item.active {
+        background-color: #FFF5F5; /* Soft crimson tint */
+    }
+
+    .support-ticket-item.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: var(--color-kurenai);
+    }
+
+    /* Right Panel: Chat Workspace */
+    .support-workspace {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--color-card);
+    }
+
+    .support-workspace-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--color-border);
+        background-color: var(--color-card);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-user-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: var(--color-accent-soft);
+        border: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--color-kurenai);
+        font-size: 1.1rem;
+    }
+
+    /* Message stream area */
+    .support-chat-stream {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 24px;
+        background-color: var(--color-washi);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .support-chat-stream::-webkit-scrollbar {
+        width: 5px;
+    }
+    .support-chat-stream::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .support-chat-stream::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+    }
+
+    .chat-bubble-wrapper {
+        display: flex;
+        flex-direction: column;
+        max-width: 70%;
+    }
+
+    .chat-bubble-wrapper.admin-side {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+
+    .chat-bubble-wrapper.user-side {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+
+    .support-chat-bubble {
+        padding: 14px 18px;
+        border-radius: 16px;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chat-bubble-wrapper.user-side .support-chat-bubble {
+        background-color: var(--color-card);
+        color: var(--color-sumi);
+        border: 1px solid var(--color-border);
+        border-top-left-radius: 4px;
+    }
+
+    .chat-bubble-wrapper.admin-side .support-chat-bubble {
+        background-color: var(--color-kurenai);
+        color: #FFFFFF;
+        border-top-right-radius: 4px;
+    }
+
+    .chat-meta {
+        font-size: 0.78rem;
+        color: var(--color-text-muted);
+        margin-top: 6px;
+        padding: 0 4px;
+    }
+
+    /* Footer / Input area */
+    .support-chat-footer {
+        padding: 20px 24px;
+        background-color: var(--color-card);
+        border-top: 1px solid var(--color-border);
+    }
+
+    .chat-input-box {
+        display: flex;
+        gap: 12px;
+        background-color: var(--color-accent-soft);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        padding: 8px 12px;
+        align-items: center;
+        transition: border-color 0.2s;
+    }
+
+    .chat-input-box:focus-within {
+        border-color: var(--color-kurenai);
+        background-color: var(--color-card);
+    }
+
+    .chat-input-box textarea {
+        flex-grow: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        resize: none;
+        padding: 4px 8px;
+        font-size: 0.95rem;
+        color: var(--color-sumi);
+    }
+
+    .chat-send-btn {
+        background-color: var(--color-kurenai);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 8px;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+
+    .chat-send-btn:hover {
+        background-color: #8C141A;
+    }
+
+    /* Empty state */
+    .chat-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+        color: var(--color-text-muted);
+        padding: 40px;
+        background-color: var(--color-washi);
+    }
+
+    /* Custom select style for status selector */
+    .status-select-wrapper {
+        position: relative;
+    }
+    
+    .status-badge-select {
+        border: 1px solid var(--color-border);
+        background-color: var(--color-card);
+        border-radius: 8px;
+        padding: 6px 32px 6px 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        appearance: none;
+        outline: none;
+    }
+    
+    .status-badge-select:focus {
+        border-color: var(--color-kurenai);
+    }
+
+    .status-select-wrapper::after {
+        content: "▼";
+        font-size: 0.7rem;
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--color-text-muted);
+    }
+</style>
+
+<div class="mb-4">
+    <h3 class="fw-bold mb-1"><i class="bi bi-headset text-danger me-2"></i>Live Support Ticket</h3>
+    <p class="text-muted small mb-0">Hộp hội thoại và trao đổi trực tiếp với học viên cần hỗ trợ.</p>
+</div>
+
+<div class="support-chat-container">
+    
+    <!-- Left Sidebar: Ticket List -->
+    <div class="support-sidebar">
+        <div class="support-sidebar-header">
+            <form method="get" class="m-0">
+                <select name="statusFilter" class="form-select rounded-3 border-light-subtle shadow-sm" onchange="this.form.submit()">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Open" selected="@(ViewData["StatusFilter"]?.ToString() == "Open")">Chưa xử lý (Open)</option>
+                    <option value="InProgress" selected="@(ViewData["StatusFilter"]?.ToString() == "InProgress")">Đang xử lý (Handling)</option>
+                    <option value="Resolved" selected="@(ViewData["StatusFilter"]?.ToString() == "Resolved")">Đã giải quyết (Resolved)</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="support-ticket-list">
+            @foreach (var ticket in Model)
+            {
+                var lastMessage = ticket.ChatHistory.LastOrDefault()?.MessageText ?? "Chưa có tin nhắn mới";
+                if (lastMessage.Length > 60) lastMessage = lastMessage.Substring(0, 57) + "...";
+                
+                <a href="/admin/tickets?selectedTicketId=@ticket.TicketId&statusFilter=@ViewData["StatusFilter"]" 
+                   class="support-ticket-item @(selectedTicket?.TicketId == ticket.TicketId ? "active" : "")">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2.5 py-1 fw-semibold" style="font-size: 0.75rem;">
+                            @ticket.Category
+                        </span>
+                        <span class="text-muted small" style="font-size: 0.75rem;">
+                            @ticket.CreatedAt.ToString("dd/MM")
+                        </span>
+                    </div>
+                    
+                    <h6 class="fw-bold text-dark mb-1 text-truncate" style="font-size: 0.92rem;">@ticket.Subject</h6>
+                    <div class="text-muted small mb-2 text-truncate" style="font-size: 0.8rem;">Gửi bởi: @ticket.UserFullName</div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-muted text-truncate me-2 small" style="font-size: 0.8rem; font-style: italic;">
+                            @lastMessage
+                        </span>
+                        
+                        @if (ticket.Status == "Open")
+                        {
+                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">Open</span>
+                        }
+                        else if (ticket.Status == "InProgress")
+                        {
+                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">Handling</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">Resolved</span>
+                        }
+                    </div>
+                </a>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-2 mb-2 d-block"></i>
+                    <span class="small">Không có Ticket nào</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Workspace: Conversation -->
+    <div class="support-workspace">
+        @if (selectedTicket != null)
+        {
+            <!-- Workspace Header -->
+            <div class="support-workspace-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="chat-user-avatar">
+                        @selectedTicket.UserFullName.Substring(0, 1).ToUpper()
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 class="fw-bold text-dark mb-0" style="font-size: 1rem;">@selectedTicket.UserFullName</h6>
+                            <span class="text-muted small">#@selectedTicket.TicketId</span>
+                        </div>
+                        <span class="text-muted small" style="font-size: 0.8rem;">@selectedTicket.UserEmail &bull; @selectedTicket.Subject</span>
+                    </div>
+                </div>
+
+                <!-- Status Select Changer -->
+                <form asp-action="SendMessage" method="post" id="statusChangerForm" class="status-select-wrapper">
+                    <input type="hidden" name="ticketId" value="@selectedTicket.TicketId" />
+                    <select name="newStatus" class="status-badge-select" onchange="document.getElementById('statusChangerForm').submit()">
+                        <option value="Open" selected="@(selectedTicket.Status == "Open")">Chưa xử lý (Open)</option>
+                        <option value="InProgress" selected="@(selectedTicket.Status == "InProgress")">Đang xử lý (Handling)</option>
+                        <option value="Resolved" selected="@(selectedTicket.Status == "Resolved")">Đã giải quyết (Resolved)</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- Message Stream -->
+            <div class="support-chat-stream" id="chatStream">
+                <div class="text-center">
+                    <span class="bg-secondary bg-opacity-5 text-muted rounded-pill px-3 py-1.5 small" style="font-size: 0.78rem;">
+                        Ticket được tạo thành công vào @selectedTicket.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                </div>
+
+                @foreach (var msg in selectedTicket.ChatHistory)
+                {
+                    <div class="chat-bubble-wrapper @(msg.Sender == "Admin" ? "admin-side" : "user-side")">
+                        <div class="support-chat-bubble">
+                            @msg.MessageText
+                        </div>
+                        <div class="chat-meta">
+                            @(msg.Sender == "Admin" ? "Hệ thống" : selectedTicket.UserFullName) &bull; @msg.SentAt.ToString("HH:mm")
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Workspace Footer (Input Bar) -->
+            <div class="support-chat-footer">
+                <form asp-action="SendMessage" method="post">
+                    <input type="hidden" name="ticketId" value="@selectedTicket.TicketId" />
+                    <div class="chat-input-box">
+                        <textarea name="messageText" id="chatTextarea" rows="1" placeholder="Nhập câu trả lời cho học viên..." required></textarea>
+                        <button type="submit" class="chat-send-btn">
+                            <i class="bi bi-send-fill" style="font-size: 0.95rem;"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+        else
+        {
+            <!-- Empty state -->
+            <div class="chat-empty-state">
+                <div class="mb-3" style="width: 80px; height: 80px; border-radius: 50%; background-color: rgba(166, 29, 36, 0.05); display: flex; align-items: center; justify-content: center; color: var(--color-kurenai);">
+                    <i class="bi bi-chat-square-text fs-2"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Hộp thư hỗ trợ trực tuyến</h5>
+                <p class="small text-muted mb-0" style="max-width: 320px;">Vui lòng chọn một ticket hỗ trợ ở cột danh sách bên trái để xem nội dung chi tiết và bắt đầu chat với học viên.</p>
+            </div>
+        }
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var chatStream = document.getElementById("chatStream");
+        if (chatStream) {
+            chatStream.scrollTop = chatStream.scrollHeight;
+        }
+
+        // Auto adjust textarea height
+        var tx = document.getElementById("chatTextarea");
+        if (tx) {
+            tx.addEventListener("input", function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Allow Ctrl+Enter to submit
+            tx.addEventListener("keydown", function(e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    this.form.submit();
+                }
+            });
+        }
+    });
+</script>

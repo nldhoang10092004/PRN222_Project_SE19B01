@@ -15,4 +15,8 @@
     <Folder Include="wwwroot\static\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="8.6.1" />
+  </ItemGroup>
+
 </Project>

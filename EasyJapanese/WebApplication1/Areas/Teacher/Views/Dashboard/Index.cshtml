@@ -3,44 +3,77 @@
     ViewData["Title"] = "Tổng quan Giáo viên";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Dashboard Giáo viên</h3>
-    <a href="/teacher/courses/create" class="btn btn-primary btn-sm px-3 rounded-pill"><i class="bi bi-plus-lg me-1"></i> Bài giảng mới</a>
+<!-- ═══ BANNER ═══ -->
+<div class="jp-banner mb-5">
+    <div class="jp-banner-kanji">教</div>
+    <p class="jp-banner-jp mb-0">ようこそ — CHÀO MỪNG QUAY TRỞ LẠI</p>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="jp-banner-title">Dashboard Giảng viên 👋</h1>
+            <p class="jp-banner-sub">Cảm ơn sự đóng góp của bạn cho sự nghiệp truyền tải tri thức Nhật Bản.</p>
+        </div>
+        <a href="/teacher/courses/create" class="btn btn-jp-outline-light text-decoration-none"><i class="bi bi-plus-lg me-1"></i> Bài giảng mới</a>
+    </div>
 </div>
 
 <div class="row g-4 mb-5">
+    <!-- Card 1 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid var(--color-primary) !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Khóa học phụ trách</p>
-                <h4 class="mb-0 fw-bold">@ViewData["TotalCourses"]</h4>
-                <small class="text-muted">@ViewData["ActiveCourses"] đang Active</small>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Khóa học phụ trách</p>
+                    <h3 class="jp-stat-value">@ViewData["TotalCourses"]</h3>
+                    <small class="text-muted">@ViewData["ActiveCourses"] đang hoạt động</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-journal-code"></i>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Card 2 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #198754 !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Học viên của tôi</p>
-                <h4 class="mb-0 fw-bold">@ViewData["TotalStudents"]</h4>
-                <small class="text-success fw-bold"><i class="bi bi-person-check-fill"></i> Đã đăng ký</small>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Học viên</p>
+                    <h3 class="jp-stat-value">@ViewData["TotalStudents"]</h3>
+                    <small class="text-success fw-bold"><i class="bi bi-person-check-fill"></i> Đã đăng ký học</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-people-fill"></i>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Card 3 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #ffc107 !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Đánh giá trung bình</p>
-                <h4 class="mb-0 fw-bold">@ViewData["AverageRating"] <i class="bi bi-star-fill text-warning fs-5"></i></h4>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Đánh giá trung bình</p>
+                    <h3 class="jp-stat-value">@ViewData["AverageRating"]</h3>
+                    <small class="text-warning fw-bold"><i class="bi bi-star-fill text-warning"></i> Điểm đánh giá</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-star-half"></i>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Card 4 -->
     <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 4px solid #0d6efd !important;">
-            <div class="card-body">
-                <p class="text-muted mb-1 small fw-bold text-uppercase">Lượt tương tác (Q&A)</p>
-                <h4 class="mb-0 fw-bold">@ViewData["UnansweredQA"]</h4>
-                <small class="text-danger fw-bold">0 chưa trả lời</small>
+        <div class="card border-0 jp-omni-card h-100 rounded-4">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <p class="jp-stat-title">Tương tác Q&A</p>
+                    <h3 class="jp-stat-value">@ViewData["UnansweredQA"]</h3>
+                    <small class="text-danger fw-bold">Câu hỏi chưa trả lời</small>
+                </div>
+                <div class="jp-stat-icon-neutral">
+                    <i class="bi bi-chat-left-text-fill"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -48,7 +81,7 @@
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="jp-omni-card rounded-4 h-100">
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0">Khóa học đang hoạt động</h5>
                 <a href="/teacher/courses" class="text-decoration-none text-primary small fw-medium">Xem tất cả</a>
@@ -78,7 +111,7 @@
     </div>
     
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="jp-omni-card rounded-4 h-100">
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
                 <h5 class="fw-bold mb-0">Danh sách cần xử lý</h5>
             </div>

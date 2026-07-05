@@ -49,7 +49,7 @@ namespace WebApplication1.Controllers
             }
             if (role == CoreLibrary.Const.RoleConst.MENTOR)
             {
-                return RedirectToAction("Index", "Dashboard", new { area = "Learner" });
+                return RedirectToAction("Index", "Dashboard", new { area = "Teacher" });
             }
             return RedirectToAction("Index", "Dashboard", new { area = "Learner" });
         }

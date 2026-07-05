@@ -138,18 +138,22 @@ else
             {
                 <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
                     <li><a href="/admin/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
-                    <li><a href="/admin/Users" class="hj-nav-link @(currentController == "Users" ? "active" : "")">Người dùng</a></li>
-                    <li><a href="/admin/Courses" class="hj-nav-link @(currentController == "Courses" ? "active" : "")">Khóa học</a></li>
-                    <li><a href="/admin/Orders" class="hj-nav-link @(currentController == "Orders" ? "active" : "")">Đơn hàng</a></li>
+                    <li><a href="/admin" class="hj-nav-link @(currentController == "Users" ? "active" : "")">Người dùng</a></li>
+                    <li><a href="/admin/courses" class="hj-nav-link @(currentController == "Courses" ? "active" : "")">Khóa học</a></li>
+                    <li><a href="/admin/transactions" class="hj-nav-link @(currentController == "Transactions" ? "active" : "")">Giao dịch</a></li>
+                    <li><a href="/admin/vouchers" class="hj-nav-link @(currentController == "Vouchers" ? "active" : "")">Vouchers</a></li>
+                    <li><a href="/admin/tickets" class="hj-nav-link @(currentController == "Tickets" ? "active" : "")">Ticket Support</a></li>
                 </ul>
             }
             else if (area == "Teacher")
             {
                 <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
                     <li><a href="/teacher/dashboard" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
-                    <li><a href="/teacher/Courses" class="hj-nav-link @(currentController == "Courses" ? "active" : "")">Khóa học của tôi</a></li>
-                    <li><a href="/teacher/Students" class="hj-nav-link @(currentController == "Students" ? "active" : "")">Học viên</a></li>
-                    <li><a href="/teacher/Earnings" class="hj-nav-link @(currentController == "Earnings" ? "active" : "")">Doanh thu</a></li>
+                    <li><a href="/teacher/courses" class="hj-nav-link @(currentController == "Courses" ? "active" : "")">Khóa học</a></li>
+                    <li><a href="/teacher/lessons" class="hj-nav-link @(currentController == "Lessons" ? "active" : "")">Bài học</a></li>
+                    <li><a href="/teacher/flashcards" class="hj-nav-link @(currentController == "Flashcards" ? "active" : "")">Flashcards</a></li>
+                    <li><a href="/teacher/quizzes" class="hj-nav-link @(currentController == "Quizzes" ? "active" : "")">Quizzes</a></li>
+                    <li><a href="/teacher/reviews" class="hj-nav-link @(currentController == "Reviews" ? "active" : "")">Đánh giá</a></li>
                 </ul>
             }
             else

@@ -133,11 +133,11 @@
                                             <form asp-action="ToggleLock" method="post">
                                                 <input type="hidden" name="accountId" value="@user.AccountId" />
                                                 <button type="submit" class="dropdown-item py-2 text-danger">
-                                                    @if(user.IsLocked) {
-                                                        <><i class="bi bi-unlock-fill me-2"></i> Mở khóa tài khoản</>
-                                                    } else {
-                                                        <><i class="bi bi-lock-fill me-2"></i> Khóa tài khoản</>
-                                                    }
+                                                     @if(user.IsLocked) {
+                                                         <span><i class="bi bi-unlock-fill me-2"></i> Mở khóa tài khoản</span>
+                                                     } else {
+                                                         <span><i class="bi bi-lock-fill me-2"></i> Khóa tài khoản</span>
+                                                     }
                                                 </button>
                                             </form>
                                         </li>
