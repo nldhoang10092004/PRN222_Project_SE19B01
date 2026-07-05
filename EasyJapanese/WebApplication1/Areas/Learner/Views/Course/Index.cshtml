@@ -1,31 +1,134 @@
 @model IEnumerable<CoreLibrary.Data.Entities.Course>
 @{
-    ViewData["Title"] = "Danh Sách Khóa Học - Hi Japan!";
+    ViewData["Title"] = "Danh Sách Khóa Học";
+    var currentLevel = ViewBag.CurrentLevel as string ?? "";
+    var currentPrice = ViewBag.CurrentPrice as string ?? "";
+    var currentSort = ViewBag.CurrentSort as string ?? "level";
+    var currentQuery = ViewBag.CurrentQuery as string ?? "";
+    var hasFilter = !string.IsNullOrEmpty(currentLevel)
+        || !string.IsNullOrEmpty(currentPrice)
+        || !string.IsNullOrEmpty(currentSort) && currentSort != "level"
+        || !string.IsNullOrEmpty(currentQuery);
 
-    bool hasMembership = ViewBag.HasMembership ?? false;
-    int? recommendedLevelId = ViewBag.RecommendedLevelId as int?;
-    string? recommendedLevelName = ViewBag.RecommendedLevelName as string;
-    var enrolledIds = (ViewBag.EnrolledCourseIds as HashSet<int>) ?? new HashSet<int>();
-
-    // Group theo Level.SortOrder rồi Level.LevelName
-    var groups = (Model ?? Enumerable.Empty<CoreLibrary.Data.Entities.Course>())
-        .GroupBy(c => new { c.Level?.LevelName, SortOrder = c.Level?.SortOrder ?? 99 })
-        .OrderBy(g => g.Key.SortOrder)
-        .ToList();
-
-    string LevelDesc(string? lvl) => lvl switch
+    string BuildUrl(string level = null, string price = null)
     {
-        "N5" => "Sơ cấp — Cơ bản tiếng Nhật",
-        "N4" => "Tiền trung cấp — Giao tiếp hàng ngày",
-        "N3" => "Trung cấp — Đọc hiểu & Hội thoại",
-        "N2" => "Cao cấp — Tiếng Nhật chuyên sâu",
-        "N1" => "Thành thạo — Gần như người bản ngữ",
-        _ => lvl ?? ""
-    };
+        var l = level ?? currentLevel;
+        var p = price ?? currentPrice;
+        var s = currentSort == "level" ? null : currentSort;
+        var qs = new System.Collections.Generic.List<string>();
+        if (!string.IsNullOrEmpty(l)) qs.Add("level=" + Uri.EscapeDataString(l));
+        if (!string.IsNullOrEmpty(p)) qs.Add("price=" + Uri.EscapeDataString(p));
+        if (!string.IsNullOrEmpty(s)) qs.Add("sort=" + Uri.EscapeDataString(s));
+        if (!string.IsNullOrEmpty(currentQuery)) qs.Add("q=" + Uri.EscapeDataString(currentQuery));
+        return "/learn/Course" + (qs.Count > 0 ? "?" + string.Join("&", qs) : "");
+    }
 }
 
 @section Styles {
     @await Html.PartialAsync("_CourseStyle")
+    <style>
+        .hj-filter-bar {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .hj-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+            align-items: flex-end;
+        }
+
+        .hj-filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 0;
+        }
+
+        .hj-filter-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6c757d;
+        }
+
+        .hj-filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .hj-filter-chip {
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--color-border);
+            background: #fff;
+            color: var(--color-text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .hj-filter-chip:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .hj-filter-chip.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+        .hj-search-input {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.9rem;
+            min-width: 220px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .hj-search-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+        }
+
+        .hj-sort-select {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 0.55rem 2rem 0.55rem 0.9rem;
+            font-size: 0.9rem;
+            background: #fff;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        .hj-filter-clear {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-decoration: none;
+            padding: 0.55rem 0.75rem;
+        }
+
+        .hj-filter-clear:hover {
+            color: var(--color-primary);
+        }
+
+        .hj-result-meta {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+    </style>
 }
 
 <!-- ═══ HERO — full width ═══ -->
@@ -51,95 +154,96 @@
     </div>
 </div>
 
-<!-- ═══ COURSE LIST — full width bg ═══ -->
-<div class="hj-course-list-section">
-    <div class="container">
-
-        @if (!groups.Any())
-        {
-            <div class="hj-empty text-center py-5 fade-in">
-                <div style="font-size:40px;" class="mb-3">📚</div>
-                <h5 class="fw-bold mb-2">Chưa có khóa học nào</h5>
-                <p class="text-muted mb-0">
-                    @if (!hasMembership)
-                    {
-                        <text>Đăng ký membership để xem toàn bộ khóa học.</text>
-                    }
-                    else
-                    {
-                        <text>Khóa học sẽ sớm được cập nhật.</text>
-                    }
-                </p>
-                @if (!hasMembership)
-                {
-                    <a asp-area="Learner" asp-controller="Membership" asp-action="Plans"
-                       class="btn-hj-course d-inline-block mt-4" style="width:auto;padding:10px 28px;">
-                        Xem gói học →
-                    </a>
-                }
+    <!-- Filter / Sort / Search -->
+    <form method="get" action="/learn/Course" class="hj-filter-bar">
+        <div class="hj-filter-row">
+            <div class="hj-filter-group" style="flex: 1 1 320px;">
+                <label class="hj-filter-label" for="course-search">Tìm kiếm</label>
+                <input id="course-search" name="q" type="search" class="hj-search-input"
+                       placeholder="Tên hoặc mô tả khóa học..." value="@currentQuery" />
             </div>
-        }
-        else
+
+            <div class="hj-filter-group" style="flex: 2 1 480px;">
+                <span class="hj-filter-label">Cấp độ</span>
+                <div class="hj-filter-options">
+                    <a class="hj-filter-chip @(string.IsNullOrEmpty(currentLevel) ? "active" : "")"
+                       href="@BuildUrl(level: null)">Tất cả</a>
+                    @foreach (var lv in new[] { "N5", "N4", "N3", "N2", "N1" })
+                    {
+                        var active = string.Equals(currentLevel, lv, StringComparison.OrdinalIgnoreCase);
+                        <a class="hj-filter-chip @(active ? "active" : "")"
+                           href="@BuildUrl(level: lv)">@lv</a>
+                    }
+                </div>
+            </div>
+
+            <div class="hj-filter-group">
+                <span class="hj-filter-label">Học phí</span>
+                <div class="hj-filter-options">
+                    <a class="hj-filter-chip @(string.IsNullOrEmpty(currentPrice) ? "active" : "")"
+                       href="@BuildUrl(price: null)">Tất cả</a>
+                    <a class="hj-filter-chip @(string.Equals(currentPrice, "free", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       href="@BuildUrl(price: "free")">Miễn phí</a>
+                    <a class="hj-filter-chip @(string.Equals(currentPrice, "paid", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       href="@BuildUrl(price: "paid")">Trả phí</a>
+                </div>
+            </div>
+
+            <div class="hj-filter-group">
+                <label class="hj-filter-label" for="course-sort">Sắp xếp</label>
+                <select id="course-sort" name="sort" class="hj-sort-select" onchange="this.form.submit()">
+                    <option value="level" selected="@(currentSort == "level")">Theo cấp độ (N5 → N1)</option>
+                    <option value="name" selected="@(currentSort == "name")">Tên A → Z</option>
+                    <option value="name-desc" selected="@(currentSort == "name-desc")">Tên Z → A</option>
+                </select>
+            </div>
+
+            @if (hasFilter)
+            {
+                <div class="hj-filter-group">
+                    <span class="hj-filter-label">&nbsp;</span>
+                    <a href="/learn/Course" class="hj-filter-clear">Xóa bộ lọc</a>
+                </div>
+            }
+        </div>
+
+        <!-- Preserve level/price/q when changing sort -->
+        @if (!string.IsNullOrEmpty(currentLevel)) { <input type="hidden" name="level" value="@currentLevel" /> }
+        @if (!string.IsNullOrEmpty(currentPrice)) { <input type="hidden" name="price" value="@currentPrice" /> }
+        @if (!string.IsNullOrEmpty(currentQuery)) { <input type="hidden" name="q" value="@currentQuery" /> }
+    </form>
+
+    <p class="hj-result-meta">
+        Tìm thấy <strong>@(Model?.Count() ?? 0)</strong> khóa học
+        @if (hasFilter) { <span>phù hợp với bộ lọc</span> }
+    </p>
+
+    <!-- Course Grid -->
+    <div class="row g-4 justify-content-center">
+        @if (Model != null && Model.Any())
         {
             @foreach (var group in groups)
             {
-                var levelName = group.Key.LevelName ?? "N5";
-                bool isRecommended = recommendedLevelId.HasValue
-                && group.First().LevelId == recommendedLevelId.Value;
+                var levelClass = course.Level?.LevelName?.ToLower() ?? "n5";
+                var levelText = course.Level?.LevelName ?? "Beginner";
 
-                <div class="hj-level-group fade-in">
+                <div class="col-md-4">
+                    <div class="course-card">
+                        <div class="course-cover @(levelClass == "n5" ? "bg-red" : "")">
+                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" alt="@course.Title" />
+                        </div>
+                        <div class="course-body">
+                            <span class="badge-level @levelClass">@levelText</span>
+                            <h3 class="course-name">@course.Title</h3>
+                            <p class="course-desc">@course.Description</p>
 
-                    <!-- Group header -->
-                    <div class="hj-level-group-header">
-                        <span class="hj-level-group-badge"
-                              style="@(isRecommended ? "background:var(--color-primary);box-shadow:0 2px 8px rgba(200,16,46,.35);" : "")">
-                            @levelName
-                        </span>
-                        <span class="hj-level-group-title">
-                            @LevelDesc(levelName)
-                        </span>
-                        @if (isRecommended)
-                        {
-                            <span style="font-size:11.5px;font-weight:700;color:var(--color-primary);
-                                                     background:rgba(200,16,46,.08);padding:3px 12px;
-                                                     border-radius:var(--radius-full);white-space:nowrap;">
-                                ⭐ Phù hợp với bạn
-                            </span>
-                        }
-                        <div class="hj-level-group-line"></div>
-                        <span class="text-muted" style="font-size:13px;white-space:nowrap;">
-                            @group.Count() khoá
-                        </span>
-                    </div>
+                            <div class="teacher-divider"></div>
 
-                    <!-- Cards -->
-                    <div class="row g-4">
-                        @{
-                            int di = 1;
-                        }
-                        @foreach (var course in group)
-                        {
-                            bool isEnrolled = enrolledIds.Contains(course.CourseId);
-                            bool isAccessible = course.IsFree || hasMembership;
-
-                            <div class="col-md-6 col-lg-4 fade-in d@(di)">
-                                <div class="hj-course-card @(!isAccessible ? "hj-locked" : "")">
-
-                                    <div class="hj-course-thumb">
-                                        <span class="hj-level-badge">@levelName</span>
-
-                                        @if (course.IsFree)
-                                        {
-                                            <span class="hj-free-badge">Miễn phí</span>
-                                        }
-                                        else if (!isAccessible)
-                                        {
-                                            <span class="hj-locked-badge">
-                                                <i class="bi bi-lock-fill"></i> Khoá
-                                            </span>
-                                        }
-
-                                    日
+                            <div class="course-teacher">
+                                <img src="@(course.Mentor?.AvatarUrl ?? "https://i.pravatar.cc/100?img=5")" alt="Avatar" class="teacher-avt" />
+                                <div class="teacher-info">
+                                    <div class="teacher-name">@(course.Mentor?.FullName ?? "Đang cập nhật")</div>
+                                    <div class="teacher-exp">@(course.Mentor?.Expertise ?? "Giảng viên EasyJapanese")</div>
                                 </div>
 
                                 <div class="hj-course-body">
@@ -219,6 +323,31 @@
                 </div>
             }
         }
-
+        else
+        {
+            <div class="col-12 text-center text-muted py-5">
+                <p class="mt-3">
+                    @if (hasFilter)
+                    {
+                        <span>Không tìm thấy khóa học phù hợp với bộ lọc hiện tại.</span>
+                    }
+                    else
+                    {
+                        <span>Hiện chưa có khóa học nào. Vui lòng quay lại sau!</span>
+                    }
+                </p>
+                @if (hasFilter)
+                {
+                    <a href="/learn/Course" class="btn-vao-hoc d-inline-block" style="width:auto; padding:0.5rem 1.5rem;">Xóa bộ lọc</a>
+                }
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Submit search form on Enter (default behavior of <input type="search"> in a form)
+        // No extra JS needed — native form GET handles it.
+    </script>
+}

@@ -1,4 +1,5 @@
 using CoreLibrary.Authentication;
+using CoreLibrary.Const;
 using CoreLibrary.Data;
 using CoreLibrary.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -73,7 +74,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                 DiscountAmount = 0,
                 FinalAmount = plan.Price,
                 PaymentMethod = paymentMethod,
-                PaymentStatus = "Completed",
+                PaymentStatus = TransactionStatusConst.PAID,
                 PaidAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };

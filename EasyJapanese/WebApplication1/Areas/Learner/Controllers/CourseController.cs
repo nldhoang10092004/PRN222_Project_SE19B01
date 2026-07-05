@@ -4,9 +4,9 @@ using CoreLibrary.Const;
 using CoreWeb.Areas.Learner.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+using CoreLibrary.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WebApplication1.Areas.Learner.Controllers
@@ -24,68 +24,54 @@ namespace WebApplication1.Areas.Learner.Controllers
         }
 
         // GET: /learn/Course
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? level,
+            string? price,
+            string? sort,
+            string? q,
+            CancellationToken cancellationToken)
         {
-            int? studentId = await GetCurrentStudentIdAsync();
-
-            var hasMembership = studentId.HasValue && await _db.StudentMemberships
-                .AnyAsync(m => m.StudentId == studentId.Value
-                            && m.IsActive
-                            && m.EndDate > DateTime.UtcNow);
-
-            // ── Logic hiển thị ──
-            // Không có membership  → chỉ lấy IsFree = true
-            // Có membership + đã làm placement test → hiện TẤT CẢ, ViewBag.RecommendedLevelId để highlight
-            // Có membership + chưa làm test          → hiện TẤT CẢ
             var query = _db.Courses
-                .Where(c => c.IsPublished)
                 .Include(c => c.Level)
                 .Include(c => c.Mentor)
                 .AsQueryable();
 
-            if (!hasMembership)
+            if (!string.IsNullOrWhiteSpace(level))
+            {
+                query = query.Where(c => c.Level != null && c.Level.LevelName == level);
+            }
+
+            if (string.Equals(price, "free", StringComparison.OrdinalIgnoreCase))
+            {
                 query = query.Where(c => c.IsFree);
-
-            var courses = await query
-                .OrderBy(c => c.Level.SortOrder)
-                .ThenBy(c => c.Title)
-                .ToListAsync();
-
-            // Placement result (chỉ dùng để highlight, không filter bỏ level)
-            int? recommendedLevelId = null;
-            string? recommendedLevelName = null;
-
-            if (studentId.HasValue)
+            }
+            else if (string.Equals(price, "paid", StringComparison.OrdinalIgnoreCase))
             {
-                var placement = await _db.StudentPlacementResults
-                    .Where(p => p.StudentId == studentId.Value && p.CompletedAt != null)
-                    .OrderByDescending(p => p.CompletedAt)
-                    .Select(p => new
-                    {
-                        p.RecommendedLevelId,
-                        LevelName = p.RecommendedLevel != null ? p.RecommendedLevel.LevelName : null
-                    })
-                    .FirstOrDefaultAsync();
-
-                recommendedLevelId = placement?.RecommendedLevelId;
-                recommendedLevelName = placement?.LevelName;
+                query = query.Where(c => !c.IsFree);
             }
 
-            // Enrollments của student hiện tại (để đánh dấu "Tiếp tục học")
-            var enrolledIds = new HashSet<int>();
-            if (studentId.HasValue)
+            if (!string.IsNullOrWhiteSpace(q))
             {
-                var ids = await _db.Enrollments
-                    .Where(e => e.StudentId == studentId.Value)
-                    .Select(e => e.CourseId)
-                    .ToListAsync();
-                enrolledIds = new HashSet<int>(ids);
+                var term = q.Trim();
+                query = query.Where(c =>
+                    c.Title.Contains(term) ||
+                    (c.Description != null && c.Description.Contains(term)));
             }
 
-            ViewBag.HasMembership = hasMembership;
-            ViewBag.RecommendedLevelId = recommendedLevelId;
-            ViewBag.RecommendedLevelName = recommendedLevelName;
-            ViewBag.EnrolledCourseIds = enrolledIds;
+            query = sort?.ToLowerInvariant() switch
+            {
+                "name" => query.OrderBy(c => c.Title),
+                "name-desc" => query.OrderByDescending(c => c.Title),
+                _ => query.OrderBy(c => c.Level!.SortOrder)
+                         .ThenByDescending(c => c.CreatedAt)
+            };
+
+            var courses = await query.ToListAsync(cancellationToken);
+
+            ViewBag.CurrentLevel = level ?? "";
+            ViewBag.CurrentPrice = price ?? "";
+            ViewBag.CurrentSort = string.IsNullOrWhiteSpace(sort) ? "level" : sort.ToLowerInvariant();
+            ViewBag.CurrentQuery = q ?? "";
 
             return View(courses);
         }
