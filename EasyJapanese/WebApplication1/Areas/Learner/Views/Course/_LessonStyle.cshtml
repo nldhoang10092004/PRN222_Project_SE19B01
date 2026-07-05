@@ -255,6 +255,41 @@
             color: #fff;
         }
 
+    .lesson-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .btn-complete-lesson {
+        background: #fff;
+        color: #198754;
+        border: 1.5px solid #198754;
+        border-radius: var(--radius-full);
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 22px;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: background .15s, color .15s, opacity .15s;
+    }
+
+        .btn-complete-lesson:hover:not(:disabled) {
+            background: #198754;
+            color: #fff;
+        }
+
+        .btn-complete-lesson.completed {
+            background: #198754;
+            color: #fff;
+            cursor: default;
+            opacity: .9;
+        }
+
     /* VIDEO */
     .lesson-video-wrap {
         position: relative;
