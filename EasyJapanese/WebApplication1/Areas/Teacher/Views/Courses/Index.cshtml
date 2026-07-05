@@ -68,10 +68,18 @@
                                                 <input type="hidden" name="id" value="@item.CourseId" />
                                                 <button type="submit" class="dropdown-item">
                                                     @if(item.IsPublished){
-                                                        <><i class="bi bi-eye-slash me-2 text-warning"></i> Ẩn khóa học</>
+                                                        <span><i class="bi bi-eye-slash me-2 text-warning"></i> Ẩn khóa học</span>
                                                     } else {
-                                                        <><i class="bi bi-eye me-2 text-success"></i> Xuất bản khóa học</>
+                                                        <span><i class="bi bi-eye me-2 text-success"></i> Xuất bản khóa học</span>
                                                     }
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-action="Delete" asp-route-id="@item.CourseId" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa khóa học này cùng toàn bộ bài học, flashcards và quizzes liên quan? Hủy thao tác nếu không chắc chắn.');" class="d-inline">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-trash me-2"></i> Xóa khóa học
                                                 </button>
                                             </form>
                                         </li>

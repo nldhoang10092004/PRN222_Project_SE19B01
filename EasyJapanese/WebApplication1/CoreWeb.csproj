@@ -14,4 +14,8 @@
     <Folder Include="Common\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="8.6.1" />
+  </ItemGroup>
+
 </Project>

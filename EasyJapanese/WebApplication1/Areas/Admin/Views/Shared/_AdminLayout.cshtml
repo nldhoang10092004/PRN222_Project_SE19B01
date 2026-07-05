@@ -10,48 +10,42 @@
     @await RenderSectionAsync("Styles", required: false)
 }
 
-<div class="container-fluid py-5" style="background-color: var(--bg-page); min-height: calc(100vh - 80px);">
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-lg-3 mb-4">
-                <div class="bg-white rounded-4 shadow-sm p-4 h-100 border-0" style="position: sticky; top: 100px;">
-                    <div class="mb-4">
-                        <h4 class="fw-bold text-danger mb-1"><i class="bi bi-shield-lock me-2"></i>Admin Panel</h4>
-                        <p class="text-muted small fw-semibold mb-0">Quản trị hệ thống</p>
-                    </div>
-                    
-                    <nav class="nav flex-column gap-2 admin-sidebar-nav-nested">
-                        <a href="/admin/dashboard" class="nav-link rounded-pill fw-bold @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active bg-danger text-white" : "text-dark hover-bg-light")">
-                            <i class="bi bi-bar-chart-fill me-2"></i> Thống kê
-                        </a>
-                        <a href="/admin" class="nav-link rounded-pill fw-bold @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active bg-danger text-white" : "text-dark hover-bg-light")">
-                            <i class="bi bi-people-fill me-2"></i> Người dùng
-                        </a>
-                        <a href="/Admin/Courses" class="nav-link rounded-pill fw-bold @(ViewContext.RouteData.Values["controller"]?.ToString() == "Courses" ? "active bg-danger text-white" : "text-dark hover-bg-light")">
-                            <i class="bi bi-book-half me-2"></i> Khóa học
-                        </a>
-                        <a href="/Admin/Exams" class="nav-link rounded-pill fw-bold @(ViewContext.RouteData.Values["controller"]?.ToString() == "Exams" ? "active bg-danger text-white" : "text-dark hover-bg-light")">
-                            <i class="bi bi-file-earmark-text-fill me-2"></i> Bài thi
-                        </a>
-                        <a href="/Admin/Transactions" class="nav-link rounded-pill fw-bold @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transactions" ? "active bg-danger text-white" : "text-dark hover-bg-light")">
-                            <i class="bi bi-credit-card-fill me-2"></i> Giao dịch
-                        </a>
-                        <a href="/Admin/Vouchers" class="nav-link rounded-pill fw-bold @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vouchers" ? "active bg-danger text-white" : "text-dark hover-bg-light")">
-                            <i class="bi bi-ticket-perforated-fill me-2"></i> Vouchers
-                        </a>
-                    </nav>
-                </div>
+<div class="admin-dashboard-layout jp-bg-pattern">
+    <!-- Sidebar -->
+    <div class="admin-sidebar shadow-sm">
+        <div class="p-4">
+            <div class="mb-4">
+                <h5 class="fw-bold mb-1" style="color: var(--color-primary);"><i class="bi bi-shield-lock me-2"></i>Admin Panel</h5>
+                <p class="text-muted small fw-semibold mb-0" style="letter-spacing: 0.5px;">Quản trị hệ thống</p>
             </div>
-
-            <!-- Main Content -->
-            <div class="col-lg-9">
-                <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border-0">
-                    @RenderBody()
-                </div>
+            
+            <nav class="nav flex-column jp-sidebar-nav mt-3">
+                    <a href="/admin/dashboard" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                        <i class="bi bi-bar-chart-fill me-3"></i> Thống kê
+                    </a>
+                    <a href="/admin" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
+                        <i class="bi bi-people-fill me-3"></i> Người dùng
+                    </a>
+                    <a href="/Admin/Courses" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Courses" ? "active" : "")">
+                        <i class="bi bi-book-half me-3"></i> Khóa học
+                    </a>
+                    <a href="/Admin/Transactions" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transactions" ? "active" : "")">
+                        <i class="bi bi-credit-card-fill me-3"></i> Giao dịch
+                    </a>
+                    <a href="/Admin/Vouchers" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vouchers" ? "active" : "")">
+                        <i class="bi bi-ticket-perforated-fill me-3"></i> Vouchers
+                    </a>
+                    <a href="/admin/tickets" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
+                        <i class="bi bi-headset me-3"></i> Ticket Support
+                    </a>
+                </nav>
             </div>
         </div>
-    </div>
+
+        <!-- Main Content -->
+        <div class="admin-main-content">
+            @RenderBody()
+        </div>
 </div>
 
 @section Scripts {

@@ -1,0 +1,111 @@
+@model IEnumerable<CoreLibrary.Data.Entities.CourseReview>
+@{
+    Layout = "~/Areas/Teacher/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold">Đánh giá từ Học viên</h3>
+        <p class="text-muted small mb-0">Xem ý kiến đóng góp và trả lời phản hồi các đánh giá khóa học từ học viên.</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="d-flex flex-column gap-4">
+    @foreach (var review in Model)
+    {
+        <div class="card border-0 jp-omni-card rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                        @review.Student.FullName.Substring(0, 1).ToUpper()
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">@review.Student.FullName</h6>
+                        <span class="text-muted small">Khóa học: <span class="text-dark fw-semibold">@review.Course.Title</span></span>
+                    </div>
+                </div>
+                <span class="text-muted small">@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+
+            <!-- Stars and Rating -->
+            <div class="mb-3">
+                <div class="text-warning">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= review.Rating)
+                        {
+                            <i class="bi bi-star-fill me-1"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star me-1"></i>
+                        }
+                    }
+                    <span class="text-dark fw-bold small ms-2">(@review.Rating / 5 sao)</span>
+                </div>
+            </div>
+
+            <p class="text-dark mb-4 p-3 bg-light rounded-3 italic">
+                "@review.Comment"
+            </p>
+
+            <!-- Review Responses -->
+            <div class="ps-4 border-start border-2 border-danger-subtle d-flex flex-column gap-3">
+                @foreach (var resp in review.ReviewResponses)
+                {
+                    <div class="bg-danger bg-opacity-5 p-3 rounded-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold text-danger"><i class="bi bi-reply-fill me-1"></i>Bạn đã trả lời:</span>
+                            <span class="text-muted small">@resp.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <p class="mb-0 text-dark">@resp.Response</p>
+                    </div>
+                }
+
+                <!-- Response form -->
+                <button class="btn btn-sm btn-jp-outline align-self-start mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#respondForm-@review.ReviewId" aria-expanded="false">
+                    <i class="bi bi-chat-dots-fill me-1"></i> @(review.ReviewResponses.Any() ? "Cập nhật phản hồi" : "Trả lời phản hồi")
+                </button>
+
+                <div class="collapse mt-2" id="respondForm-@review.ReviewId">
+                    <form asp-action="Respond" method="post" class="card card-body border-light p-3 bg-light bg-opacity-50 rounded-3">
+                        <input type="hidden" name="reviewId" value="@review.ReviewId" />
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Nội dung câu trả lời</label>
+                            <textarea name="replyText" class="form-control rounded-3" rows="3" placeholder="Nhập câu trả lời lịch sự để gửi học viên..." required>@(review.ReviewResponses.FirstOrDefault()?.Response)</textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-sm btn-light rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#respondForm-@review.ReviewId">Hủy</button>
+                            <button type="submit" class="btn btn-sm btn-jp-primary rounded-3 px-4">Gửi phản hồi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 jp-omni-card rounded-4 p-5 text-center text-muted">
+            <i class="bi bi-chat-square-quote fs-1 mb-3"></i>
+            <h5>Chưa có đánh giá nào cho các khóa học của bạn</h5>
+            <p class="small mb-0">Ý kiến đóng góp từ học viên sẽ xuất hiện ở đây sau khi họ gửi đánh giá khóa học.</p>
+        </div>
+    }
+</div>

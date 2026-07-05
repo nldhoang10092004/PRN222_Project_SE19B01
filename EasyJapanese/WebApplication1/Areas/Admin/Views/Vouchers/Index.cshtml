@@ -1,0 +1,268 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Voucher>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var plans = ViewBag.Plans as List<CoreLibrary.Data.Entities.SubscriptionPlan> ?? new List<CoreLibrary.Data.Entities.SubscriptionPlan>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold">Quản lý Voucher giảm giá</h3>
+        <p class="text-muted small mb-0">Thiết lập các mã khuyến mại cho các gói hội viên VIP của hệ thống.</p>
+    </div>
+    <button class="btn btn-jp-primary" data-bs-toggle="modal" data-bs-target="#createVoucherModal">
+        <i class="bi bi-plus-lg me-1"></i> Tạo Voucher mới
+    </button>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    @foreach (var voucher in Model)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 jp-omni-card h-100 rounded-4">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge @(voucher.IsActive ? "bg-success bg-opacity-10 text-success" : "bg-secondary bg-opacity-10 text-secondary") rounded-pill px-3 py-2 fw-semibold">
+                            @(voucher.IsActive ? "Đang áp dụng" : "Đã tạm ẩn")
+                        </span>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical fs-5"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                <li>
+                                    <button class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#editVoucherModal-@voucher.VoucherId">
+                                        <i class="bi bi-pencil me-2 text-muted"></i> Chỉnh sửa
+                                    </button>
+                                </li>
+                                <li>
+                                    <form asp-action="ToggleStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="voucherId" value="@voucher.VoucherId" />
+                                        <button type="submit" class="dropdown-item py-2">
+                                            <i class="bi @(voucher.IsActive ? "bi-eye-slash" : "bi-eye") me-2 text-muted"></i> @(voucher.IsActive ? "Tạm ẩn" : "Kích hoạt")
+                                        </button>
+                                    </form>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-action="Delete" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa mã giảm giá này?');">
+                                        <input type="hidden" name="voucherId" value="@voucher.VoucherId" />
+                                        <button type="submit" class="dropdown-item py-2 text-danger">
+                                            <i class="bi bi-trash3 me-2"></i> Xóa mã
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-muted small d-block">Mã giảm giá</span>
+                        <h4 class="fw-extrabold text-danger m-0 font-monospace">@voucher.Code</h4>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <p class="text-dark fw-semibold mb-1">
+                            Giảm: @(voucher.DiscountType == "Percentage" ? $"{voucher.DiscountValue:0}%" : $"{voucher.DiscountValue:N0}đ")
+                        </p>
+                        <p class="text-muted small mb-2">@voucher.Description</p>
+                        
+                        <div class="bg-light p-3 rounded-3 small">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Đơn tối thiểu:</span>
+                                <span class="fw-bold">@voucher.MinOrderValue.ToString("N0")đ</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Giới hạn dùng:</span>
+                                <span class="fw-bold">@(voucher.MaxUsesTotal?.ToString() ?? "Không giới hạn")</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Đã sử dụng:</span>
+                                <span class="fw-bold">@voucher.UsedCount lượt</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-top border-light pt-3 mt-3 text-muted small d-flex justify-content-between">
+                        <span>Hạn dùng:</span>
+                        <span class="fw-semibold @(voucher.ExpiresAt < DateTime.UtcNow ? "text-danger" : "text-dark")">
+                            @(voucher.ExpiresAt?.ToString("dd/MM/yyyy") ?? "Vô thời hạn")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editVoucherModal-@voucher.VoucherId" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Chỉnh sửa Voucher</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="VoucherId" value="@voucher.VoucherId" />
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Mã Code (In hoa)</label>
+                                <input type="text" name="Code" class="form-control rounded-3" value="@voucher.Code" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Mô tả</label>
+                                <textarea name="Description" class="form-control rounded-3" rows="2" required>@voucher.Description</textarea>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Loại giảm giá</label>
+                                    <select name="DiscountType" class="form-select rounded-3">
+                                        <option value="Percentage" selected="@(voucher.DiscountType == "Percentage")">Phần trăm (%)</option>
+                                        <option value="FixedAmount" selected="@(voucher.DiscountType == "FixedAmount")">Số tiền mặt (đ)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Giá trị giảm</label>
+                                    <input type="number" name="DiscountValue" class="form-control rounded-3" value="@voucher.DiscountValue" min="1" required />
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Đơn tối thiểu</label>
+                                    <input type="number" name="MinOrderValue" class="form-control rounded-3" value="@voucher.MinOrderValue" min="0" required />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Giới hạn tối đa</label>
+                                    <input type="number" name="MaxDiscountCap" class="form-control rounded-3" value="@voucher.MaxDiscountCap" min="0" />
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Tổng lượt sử dụng</label>
+                                    <input type="number" name="MaxUsesTotal" class="form-control rounded-3" value="@voucher.MaxUsesTotal" min="1" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Gói áp dụng</label>
+                                    <select name="ApplicablePlanId" class="form-select rounded-3">
+                                        <option value="">Tất cả gói</option>
+                                        @foreach (var plan in plans)
+                                        {
+                                            <option value="@plan.PlanId" selected="@(voucher.ApplicablePlanId == plan.PlanId)">@plan.PlanName</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Ngày bắt đầu</label>
+                                    <input type="date" name="StartsAt" class="form-control rounded-3" value="@(voucher.StartsAt?.ToString("yyyy-MM-dd"))" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted">Ngày hết hạn</label>
+                                    <input type="date" name="ExpiresAt" class="form-control rounded-3" value="@(voucher.ExpiresAt?.ToString("yyyy-MM-dd"))" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-jp-primary rounded-3">Lưu thay đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-ticket-perforated fs-1 mb-3"></i>
+            <h5>Chưa có Voucher nào</h5>
+            <p class="small">Hãy tạo mã giảm giá đầu tiên bằng cách nhấn nút "Tạo Voucher mới" phía trên.</p>
+        </div>
+    }
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createVoucherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Tạo Voucher giảm giá mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Mã Code (In hoa)</label>
+                        <input type="text" name="Code" class="form-control rounded-3" placeholder="Ví dụ: HIJAPAN50" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Mô tả</label>
+                        <textarea name="Description" class="form-control rounded-3" placeholder="Nhập ghi chú hoặc mô tả về mã..." rows="2" required></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Loại giảm giá</label>
+                            <select name="DiscountType" class="form-select rounded-3">
+                                <option value="Percentage" selected>Phần trăm (%)</option>
+                                <option value="FixedAmount">Số tiền mặt (đ)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Giá trị giảm</label>
+                            <input type="number" name="DiscountValue" class="form-control rounded-3" value="10" min="1" required />
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Đơn tối thiểu</label>
+                            <input type="number" name="MinOrderValue" class="form-control rounded-3" value="0" min="0" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Giới hạn tối đa</label>
+                            <input type="number" name="MaxDiscountCap" class="form-control rounded-3" placeholder="Không giới hạn" min="0" />
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Tổng lượt sử dụng</label>
+                            <input type="number" name="MaxUsesTotal" class="form-control rounded-3" placeholder="Không giới hạn" min="1" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Gói áp dụng</label>
+                            <select name="ApplicablePlanId" class="form-select rounded-3">
+                                <option value="">Tất cả gói</option>
+                                @foreach (var plan in plans)
+                                {
+                                    <option value="@plan.PlanId">@plan.PlanName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Ngày bắt đầu</label>
+                            <input type="date" name="StartsAt" class="form-control rounded-3" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Ngày hết hạn</label>
+                            <input type="date" name="ExpiresAt" class="form-control rounded-3" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-jp-primary rounded-3">Tạo mã</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
