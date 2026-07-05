@@ -131,12 +131,28 @@
     </style>
 }
 
-<div class="hj-content container py-5" style="max-width: 1100px;">
-    <!-- Header -->
-    <div class="text-center mb-5">
-        <h1 class="course-list-title mb-2">Danh Sách Khóa Học</h1>
-        <p class="course-list-subtitle">Lựa chọn khóa học phù hợp với mục tiêu của bạn. Không giới hạn cấp độ.</p>
+<!-- ═══ HERO — full width ═══ -->
+<div class="hj-hero">
+    <div class="hj-hero-kanji">学</div>
+    <div class="container">
+        <p class="hj-hero-eyebrow">講座 — Khóa học</p>
+        <h1 class="hj-hero-title">Danh sách khóa học</h1>
+        <p class="hj-hero-sub">
+            @if (!hasMembership)
+            {
+                <text>Đăng ký membership để mở khoá toàn bộ nội dung N5 → N1.</text>
+            }
+            else if (recommendedLevelName != null)
+            {
+                <text>Trình độ gợi ý của bạn: <strong>@recommendedLevelName</strong> — nhưng bạn có thể học bất kỳ cấp độ nào.</text>
+            }
+            else
+            {
+                <text>Lựa chọn khoá học phù hợp với mục tiêu — học từ N5 đến N1.</text>
+            }
+        </p>
     </div>
+</div>
 
     <!-- Filter / Sort / Search -->
     <form method="get" action="/learn/Course" class="hj-filter-bar">
@@ -206,7 +222,7 @@
     <div class="row g-4 justify-content-center">
         @if (Model != null && Model.Any())
         {
-            foreach (var course in Model)
+            @foreach (var group in groups)
             {
                 var levelClass = course.Level?.LevelName?.ToLower() ?? "n5";
                 var levelText = course.Level?.LevelName ?? "Beginner";
@@ -229,11 +245,81 @@
                                     <div class="teacher-name">@(course.Mentor?.FullName ?? "Đang cập nhật")</div>
                                     <div class="teacher-exp">@(course.Mentor?.Expertise ?? "Giảng viên EasyJapanese")</div>
                                 </div>
-                            </div>
 
-                            <a href="/learn/Course/Detail/@course.CourseId" class="btn-vao-hoc mt-4">Vào học ngay</a>
-                        </div>
+                                <div class="hj-course-body">
+                                    <h3 class="hj-course-title">@course.Title</h3>
+                                    <p class="hj-course-desc">
+                                        @(string.IsNullOrEmpty(course.Description)
+                                                                        ? "Khóa học đang cập nhật mô tả."
+                                                                        : course.Description)
+                            </p>
+
+                                        <hr class="hj-divider">
+
+                                        <!-- Mentor -->
+                                        <div class="hj-mentor-row">
+                                @if (!string.IsNullOrEmpty(course.Mentor?.AvatarUrl))
+                                            {
+                                                <img src="@course.Mentor.AvatarUrl"
+                                                     class="hj-mentor-avt"
+                                                     alt="@course.Mentor.FullName">
+                                            }
+                                            else
+                                            {
+                                                <div class="hj-mentor-avt-fallback">
+                                                    @((course.Mentor?.FullName ?? "G").Substring(0, 1).ToUpper())
+                                                </div>
+                                            }
+                                            <div>
+                                                <div class="hj-mentor-name">
+                                                    @(course.Mentor?.FullName ?? "Đang cập nhật")
+                                                </div>
+                                                <div class="hj-mentor-exp">
+                                                    @(course.Mentor?.Expertise ?? "Giảng viên Hi Japan!")
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- CTA -->
+                                        @if (isAccessible)
+                                        {
+                                            <a href="/learn/Course/Detail/@course.CourseId"
+                                               class="btn-hj-course mt-auto @(isEnrolled ? "enrolled" : "")">
+                                                @(isEnrolled ? "Tiếp tục học" : "Vào học ngay")
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-area="Learner" asp-controller="Membership" asp-action="Plans"
+                                               class="btn-hj-course mt-auto"
+                                               style="border-color:var(--color-navy);color:var(--color-navy);">
+                                                <i class="bi bi-lock me-1"></i>Mở khoá membership
+                                            </a>
+                                        }
+                                    </div>
+
+                                </div>
+                            </div>
+                            if (di < 6) di++;
+                        }
                     </div>
+
+                </div>
+            }
+
+            <!-- Nếu không có membership, hiện CTA upgrade ở cuối -->
+            @if (!hasMembership)
+            {
+                <div class="text-center pt-2 pb-4 fade-in">
+                    <p class="text-muted mb-3" style="font-size:14px;">
+                        Đăng ký membership để mở khoá tất cả khoá học N5 → N1.
+                    </p>
+                    <a asp-area="Learner" asp-controller="Membership" asp-action="Plans"
+                       class="btn-hj-course d-inline-block"
+                       style="width:auto;padding:11px 32px;
+                                      background:var(--color-primary);color:#fff;border-color:var(--color-primary);">
+                        Xem gói học →
+                    </a>
                 </div>
             }
         }

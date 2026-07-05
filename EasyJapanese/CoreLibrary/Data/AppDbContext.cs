@@ -192,11 +192,17 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.CourseId, "IX_Exercises_Course");
 
+            entity.HasIndex(e => e.LessonId, "IX_Exercises_LessonId");
+
             entity.Property(e => e.AudioUrl).HasMaxLength(500);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.ExerciseType).HasMaxLength(20);
             entity.Property(e => e.StrokeOrderUrl).HasMaxLength(500);
             entity.Property(e => e.Title).HasMaxLength(200);
+
+            entity.HasOne(d => d.Lesson).WithMany(p => p.Exercises)
+                .HasForeignKey(d => d.LessonId)
+                .HasConstraintName("FK_Exercises_Lessons");
 
             entity.HasOne(d => d.Course).WithMany(p => p.Exercises)
                 .HasForeignKey(d => d.CourseId)
