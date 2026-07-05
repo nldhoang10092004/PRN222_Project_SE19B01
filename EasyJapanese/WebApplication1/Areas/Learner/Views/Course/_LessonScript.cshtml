@@ -182,18 +182,188 @@
         });
 
         // ==========================================================
-        // Nút Practice của từng Exercise
+        // Nút Practice của từng Exercise (mở ngay trong trang)
         // ==========================================================
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         document.querySelectorAll('.btn-practice').forEach(function (button) {
             button.addEventListener('click', function () {
                 const exerciseId = this.getAttribute('data-exercise-id');
+                const exerciseTitle = this.getAttribute('data-exercise-title') || '';
 
                 if (!exerciseId) return;
 
-                window.location.href =
-                    '/learn/Exercise/Practice?exerciseId=' + exerciseId;
+                const area = document.getElementById('practice-' + exerciseId);
+                if (!area) return;
+
+                // Đang mở -> đóng lại
+                if (area.classList.contains('opened')) {
+                    area.classList.remove('opened');
+                    return;
+                }
+
+                area.classList.add('opened');
+                area.setAttribute('data-exercise-title', exerciseTitle);
+
+                // Đã load rồi thì không gọi lại API nữa
+                if (area.getAttribute('data-loaded') === '1') return;
+
+                loadPractice(exerciseId, exerciseTitle, area);
             });
         });
+
+        function loadPractice(exerciseId, exerciseTitle, area) {
+            area.innerHTML =
+                '<div class="practice-loading"><i class="bi bi-hourglass-split"></i> Đang tải bài luyện tập...</div>';
+
+            fetch('/learn/Course/ExercisePractice?exerciseId=' + encodeURIComponent(exerciseId))
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    const questions = (data && data.questions) || [];
+
+                    if (!questions.length) {
+                        area.innerHTML =
+                            '<div class="practice-empty"><i class="bi bi-info-circle"></i> Bài luyện tập đang được cập nhật.</div>';
+                        return;
+                    }
+
+                    renderPractice(exerciseId, exerciseTitle, questions, area);
+                    area.setAttribute('data-loaded', '1');
+                })
+                .catch(function () {
+                    area.innerHTML =
+                        '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Không tải được bài luyện tập. Vui lòng thử lại.</div>';
+                });
+        }
+
+        function renderPractice(exerciseId, exerciseTitle, questions, area) {
+            let html = '<div class="practice-box">';
+            html += '<div class="practice-heading"><i class="bi bi-pencil-square"></i> ' + escapeHtml(exerciseTitle) + '</div>';
+
+            questions.forEach(function (q, index) {
+                html += '<div class="practice-question" id="pq-' + q.questionId + '">';
+                html += '<div class="practice-question-text">' + (index + 1) + '. ' + escapeHtml(q.questionText) + '</div>';
+
+                (q.options || []).forEach(function (opt) {
+                    html += '<label class="practice-option">' +
+                        '<input type="radio" name="q_' + q.questionId + '" value="' + opt.optionId + '"> ' +
+                        '<span>' + escapeHtml(opt.answerText) + '</span>' +
+                        '</label>';
+                });
+
+                html += '<div class="question-feedback" id="feedback-' + q.questionId + '"></div>';
+                html += '</div>';
+            });
+
+            html += '<button type="button" class="btn-submit-practice" data-exercise-id="' + exerciseId + '">Nộp bài</button>';
+            html += '<div class="practice-result" id="result-' + exerciseId + '"></div>';
+            html += '</div>';
+
+            area.innerHTML = html;
+
+            const submitBtn = area.querySelector('.btn-submit-practice');
+            submitBtn.addEventListener('click', function () {
+                submitPractice(exerciseId, questions, area, submitBtn);
+            });
+        }
+
+        function submitPractice(exerciseId, questions, area, submitBtn) {
+            const answers = [];
+            let unanswered = 0;
+
+            questions.forEach(function (q) {
+                const checked = area.querySelector('input[name="q_' + q.questionId + '"]:checked');
+
+                if (checked) {
+                    answers.push({ questionId: q.questionId, optionId: parseInt(checked.value, 10) });
+                } else {
+                    unanswered++;
+                }
+            });
+
+            const resultEl = document.getElementById('result-' + exerciseId);
+
+            if (unanswered > 0) {
+                if (resultEl) {
+                    resultEl.innerHTML =
+                        '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Bạn còn ' + unanswered + ' câu chưa trả lời.</div>';
+                }
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang chấm...';
+
+            fetch('/learn/Course/CheckExercise', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ exerciseId: parseInt(exerciseId, 10), answers: answers })
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    const results = (data && data.answers) || [];
+                    let correctCount = 0;
+
+                    results.forEach(function (r) {
+                        const qEl = document.getElementById('pq-' + r.questionId);
+                        const feedbackEl = document.getElementById('feedback-' + r.questionId);
+                        if (!qEl) return;
+
+                        const selectedInput = qEl.querySelector('input[type="radio"]:checked');
+
+                        qEl.querySelectorAll('.practice-option').forEach(function (optLabel) {
+                            const input = optLabel.querySelector('input');
+                            const optId = parseInt(input.value, 10);
+
+                            if (optId === r.correctOptionId) {
+                                optLabel.classList.add('option-correct');
+                            } else if (selectedInput && parseInt(selectedInput.value, 10) === optId) {
+                                optLabel.classList.add('option-wrong');
+                            }
+
+                            input.disabled = true;
+                        });
+
+                        if (r.isCorrect) {
+                            correctCount++;
+                            qEl.classList.add('question-correct');
+                            if (feedbackEl) feedbackEl.innerHTML = '<span class="feedback-correct"><i class="bi bi-check-circle"></i> Chính xác</span>';
+                        } else {
+                            qEl.classList.add('question-wrong');
+                            if (feedbackEl) feedbackEl.innerHTML = '<span class="feedback-wrong"><i class="bi bi-x-circle"></i> Chưa đúng</span>';
+                        }
+                    });
+
+                    if (resultEl) {
+                        resultEl.innerHTML =
+                            '<div class="practice-score"><i class="bi bi-award"></i> Bạn đúng ' + correctCount + '/' + results.length + ' câu.' +
+                            '<button type="button" class="btn-retry-practice" data-exercise-id="' + exerciseId + '">Làm lại</button></div>';
+
+                        resultEl.querySelector('.btn-retry-practice').addEventListener('click', function () {
+                            area.setAttribute('data-loaded', '0');
+                            loadPractice(exerciseId, area.getAttribute('data-exercise-title') || '', area);
+                        });
+                    }
+
+                    submitBtn.style.display = 'none';
+                })
+                .catch(function () {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Nộp bài';
+                    if (resultEl) {
+                        resultEl.innerHTML =
+                            '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Có lỗi khi chấm bài. Vui lòng thử lại.</div>';
+                    }
+                });
+        }
 
     })();
 </script>

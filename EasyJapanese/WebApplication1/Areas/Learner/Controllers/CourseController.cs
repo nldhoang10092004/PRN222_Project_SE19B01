@@ -32,11 +32,6 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .AnyAsync(m => m.StudentId == studentId.Value
                             && m.IsActive
                             && m.EndDate > DateTime.UtcNow);
-
-            // ── Logic hiển thị ──
-            // Không có membership  → chỉ lấy IsFree = true
-            // Có membership + đã làm placement test → hiện TẤT CẢ, ViewBag.RecommendedLevelId để highlight
-            // Có membership + chưa làm test          → hiện TẤT CẢ
             var query = _db.Courses
                 .Where(c => c.IsPublished)
                 .Include(c => c.Level)
