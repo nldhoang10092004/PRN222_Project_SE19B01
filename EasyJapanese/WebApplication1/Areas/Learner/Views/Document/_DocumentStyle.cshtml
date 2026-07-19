@@ -1,0 +1,305 @@
+<style>
+    /* ── DOC TABS (theo Level) ── */
+    .hj-doc-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .hj-doc-tab {
+        padding: 8px 18px;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border);
+        background: #fff;
+        color: var(--color-text);
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all .15s;
+    }
+
+        .hj-doc-tab:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .hj-doc-tab.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+    /* ── TOOLBAR ── */
+    .hj-doc-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .hj-doc-result-meta {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .hj-doc-sort {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13.5px;
+    }
+
+    .hj-sort-link {
+        color: #6c757d;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .hj-sort-link:hover,
+        .hj-sort-link.active {
+            color: var(--color-primary);
+        }
+
+    .hj-sort-sep {
+        color: var(--color-border);
+    }
+
+    /* ── KANJI GRID ── */
+    .hj-kanji-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+        margin-bottom: 32px;
+    }
+
+    .hj-kanji-doc-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 22px 18px;
+        box-shadow: var(--shadow-sm);
+        transition: transform .18s, box-shadow .18s;
+    }
+
+        .hj-kanji-doc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .hj-kanji-doc-char {
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--color-navy);
+        text-align: center;
+        margin-bottom: 8px;
+    }
+
+    .hj-kanji-doc-meaning {
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 8px;
+    }
+
+    .hj-kanji-doc-readings {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 12.5px;
+        color: #6b7280;
+        margin-bottom: 12px;
+    }
+
+        .hj-kanji-doc-readings strong {
+            color: var(--color-primary);
+        }
+
+    .hj-kanji-doc-stroke {
+        display: block;
+        margin: 0 auto 12px;
+        max-width: 90px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+    }
+
+    .hj-kanji-doc-examples {
+        border-top: 1px dashed var(--color-border);
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .hj-kanji-doc-examples-title {
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #9ca3af;
+        margin-bottom: 6px;
+    }
+
+    .hj-kanji-doc-example-item {
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--color-text);
+    }
+
+    .hj-kanji-doc-example-word {
+        font-weight: 700;
+        color: var(--color-navy);
+    }
+
+    .hj-kanji-doc-example-reading {
+        color: #6b7280;
+        margin-left: 4px;
+    }
+
+    .hj-kanji-doc-example-meaning {
+        color: #6b7280;
+        margin-left: 4px;
+    }
+
+    .hj-kanji-doc-level-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: var(--color-navy-light);
+        color: var(--color-navy);
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+    }
+
+    /* ── PAGINATION ── */
+    .hj-doc-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 40px;
+    }
+
+    .hj-doc-page-link {
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 600;
+        padding: 0 10px;
+    }
+
+        .hj-doc-page-link:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .hj-doc-page-link.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+        .hj-doc-page-link.disabled {
+            opacity: .4;
+            pointer-events: none;
+        }
+
+    /* ── STROKE ORDER (bấm để xem to) ── */
+    .hj-kanji-doc-stroke {
+        cursor: zoom-in;
+        transition: transform .15s;
+    }
+
+        .hj-kanji-doc-stroke:hover {
+            transform: scale(1.05);
+            border-color: var(--color-primary) !important;
+        }
+
+    /* ── STROKE MODAL ── */
+    .hj-stroke-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .hj-stroke-modal.open {
+            display: flex;
+        }
+
+    .hj-stroke-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(26, 39, 68, .72);
+    }
+
+    .hj-stroke-modal-content {
+        position: relative;
+        background: #fff;
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 90vw;
+        max-height: 90vh;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        overflow-y: auto;
+    }
+
+        .hj-stroke-modal-content img {
+            max-width: min(360px, 80vw);
+            max-height: 60vh;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+        }
+
+    .hj-stroke-modal-char {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--color-navy);
+        margin-top: 16px;
+    }
+
+    .hj-stroke-modal-meaning {
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .hj-stroke-modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%;
+        background: var(--color-navy-light);
+        color: var(--color-navy);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .15s;
+    }
+
+        .hj-stroke-modal-close:hover {
+            background: var(--color-primary);
+            color: #fff;
+        }
+</style>

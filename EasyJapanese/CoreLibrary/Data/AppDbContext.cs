@@ -34,6 +34,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<JlptLevel> JlptLevels { get; set; }
 
+    public virtual DbSet<KanjiEntry> KanjiEntries { get; set; }
+
+    public virtual DbSet<KanjiExample> KanjiExamples { get; set; }
+
     public virtual DbSet<Lesson> Lessons { get; set; }
 
     public virtual DbSet<LessonMaterial> LessonMaterials { get; set; }
@@ -243,6 +247,35 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.LevelName).HasMaxLength(10);
+        });
+
+        modelBuilder.Entity<KanjiEntry>(entity =>
+        {
+            entity.HasKey(e => e.KanjiId);
+            entity.HasIndex(e => e.LevelId, "IX_KanjiEntries_LevelId");
+            entity.Property(e => e.Character).HasMaxLength(10);
+            entity.Property(e => e.Meaning).HasMaxLength(300);
+            entity.Property(e => e.OnYomi).HasMaxLength(200);
+            entity.Property(e => e.KunYomi).HasMaxLength(200);
+            entity.Property(e => e.StrokeOrderUrl).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Level).WithMany()
+                .HasForeignKey(d => d.LevelId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<KanjiExample>(entity =>
+        {
+            entity.HasKey(e => e.ExampleId);
+            entity.HasIndex(e => e.KanjiId, "IX_KanjiExamples_KanjiId");
+            entity.Property(e => e.Word).HasMaxLength(50);
+            entity.Property(e => e.Reading).HasMaxLength(100);
+            entity.Property(e => e.Meaning).HasMaxLength(300);
+
+            entity.HasOne(d => d.Kanji).WithMany(p => p.Examples)
+                .HasForeignKey(d => d.KanjiId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Lesson>(entity =>
