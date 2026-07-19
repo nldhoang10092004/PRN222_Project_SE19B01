@@ -258,12 +258,12 @@
 
                             @if (!string.IsNullOrEmpty(item.StrokeOrderUrl))
                             {
-                                <a href="@item.StrokeOrderUrl"
-                                   target="_blank"
-                                   class="kanji-stroke-link">
-                                    Xem nét bút
-                                    <i class="bi bi-box-arrow-up-right"></i>
-                                </a>
+                                <div class="kanji-stroke-section">
+                                    <div class="kanji-stroke-label">Thứ tự nét viết:</div>
+                                    <img src="@item.StrokeOrderUrl"
+                                         alt="Stroke order - @item.Title"
+                                         class="kanji-stroke-gif" />
+                                </div>
                             }
 
                             <button type="button"
