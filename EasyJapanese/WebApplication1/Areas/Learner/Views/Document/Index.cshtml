@@ -1,0 +1,189 @@
+@model List<CoreLibrary.Data.Entities.KanjiEntry>
+@using CoreLibrary.Data.Entities
+@using WebApplication1.Areas.Learner.Helpers
+@{
+    ViewData["Title"] = "Thư Viện Tra Cứu";
+    var levels = (ViewBag.Levels as List<JlptLevel>) ?? new List<JlptLevel>();
+    var currentLevel = ViewBag.CurrentLevel as string ?? "";
+    var currentSort = ViewBag.CurrentSort as string ?? "newest";
+    int page = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+
+    string BuildUrl(string? lvl = null, string? sort = null, int? pg = null)
+    {
+        var l = lvl ?? currentLevel;
+        var s = sort ?? currentSort;
+        var p = pg ?? page;
+        var qs = new List<string>();
+        if (!string.IsNullOrEmpty(l)) qs.Add("level=" + Uri.EscapeDataString(l));
+        if (!string.IsNullOrEmpty(s) && s != "newest") qs.Add("sort=" + Uri.EscapeDataString(s));
+        if (p > 1) qs.Add("page=" + p);
+        return "/learn/Document" + (qs.Count > 0 ? "?" + string.Join("&", qs) : "");
+    }
+}
+
+@section Styles {
+    @await Html.PartialAsync("_DocumentStyle")
+}
+
+<!-- ═══ HERO ═══ -->
+<div class="hj-hero">
+    <div class="container">
+        <p class="hj-hero-eyebrow">辞書 — Thư viện tra cứu</p>
+        <h1 class="hj-hero-title">Thư viện Tra Cứu</h1>
+        <p class="hj-hero-sub">Tìm kiếm Kanji mọi cấp độ JLPT, kèm cách đọc, nghĩa và ví dụ ghép từ.</p>
+    </div>
+</div>
+
+<div class="container py-4" style="max-width: 1100px;">
+
+    <!-- Category tabs theo Level -->
+    <div class="hj-doc-tabs">
+        <a class="hj-doc-tab @(string.IsNullOrEmpty(currentLevel) ? "active" : "")"
+           href="@BuildUrl(lvl: "", pg: 1)">Tất cả</a>
+        @foreach (var lv in levels)
+        {
+            var active = string.Equals(currentLevel, lv.LevelName, StringComparison.OrdinalIgnoreCase);
+            <a class="hj-doc-tab @(active ? "active" : "")"
+               href="@BuildUrl(lvl: lv.LevelName, pg: 1)">Kanji @lv.LevelName</a>
+        }
+    </div>
+
+    <!-- Sort + result meta -->
+    <div class="hj-doc-toolbar">
+        <p class="hj-doc-result-meta">Tìm thấy <strong>@totalCount</strong> Kanji</p>
+        <div class="hj-doc-sort">
+            <a class="hj-sort-link @(currentSort == "newest" ? "active" : "")" href="@BuildUrl(sort: "newest", pg: 1)">Mới nhất</a>
+            <span class="hj-sort-sep">|</span>
+            <a class="hj-sort-link @(currentSort == "az" ? "active" : "")" href="@BuildUrl(sort: "az", pg: 1)">A → Z</a>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="hj-kanji-grid">
+            @foreach (var kanji in Model)
+            {
+                <div class="hj-kanji-doc-card">
+                    <div class="hj-kanji-doc-char">@kanji.Character</div>
+                    <div class="hj-kanji-doc-meaning">@kanji.Meaning</div>
+                    <div class="hj-kanji-doc-readings">
+                        @if (!string.IsNullOrEmpty(kanji.OnYomi))
+                        {
+                            <span><strong>On:</strong> @kanji.OnYomi</span>
+                        }
+                        @if (!string.IsNullOrEmpty(kanji.KunYomi))
+                        {
+                            <span><strong>Kun:</strong> @kanji.KunYomi</span>
+                        }
+                    </div>
+
+                    <img src="@KanjiHelper.GetStrokeOrderUrl(kanji)"
+                         alt="Thứ tự nét viết @kanji.Character"
+                         class="hj-kanji-doc-stroke hj-stroke-trigger"
+                         data-character="@kanji.Character"
+                         data-meaning="@kanji.Meaning"
+                         title="Bấm để xem rõ hơn" />
+
+                    @if (kanji.Examples.Any())
+                    {
+                        <div class="hj-kanji-doc-examples">
+                            <div class="hj-kanji-doc-examples-title">Ví dụ:</div>
+                            @foreach (var ex in kanji.Examples.OrderBy(e => e.SortOrder))
+                            {
+                                <div class="hj-kanji-doc-example-item">
+                                    <span class="hj-kanji-doc-example-word">@ex.Word</span>
+                                    @if (!string.IsNullOrEmpty(ex.Reading))
+                                    {
+                                        <span class="hj-kanji-doc-example-reading">(@ex.Reading)</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ex.Meaning))
+                                    {
+                                        <span class="hj-kanji-doc-example-meaning">— @ex.Meaning</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <span class="hj-kanji-doc-level-badge">@kanji.Level?.LevelName</span>
+                </div>
+            }
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <nav class="hj-doc-pagination">
+                <a class="hj-doc-page-link @(page <= 1 ? "disabled" : "")"
+                   href="@(page > 1 ? BuildUrl(pg: page - 1) : "#")">Trước</a>
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <a class="hj-doc-page-link @(i == page ? "active" : "")" href="@BuildUrl(pg: i)">@i</a>
+                }
+
+                <a class="hj-doc-page-link @(page >= totalPages ? "disabled" : "")"
+                   href="@(page < totalPages ? BuildUrl(pg: page + 1) : "#")">Sau</a>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="hj-doc-empty text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 2.5rem; color: #9ca3af;"></i>
+            <p class="text-muted mt-3">Chưa có Kanji nào trong danh mục này.</p>
+        </div>
+    }
+</div>
+
+<!-- Modal xem cách viết Kanji -->
+<div class="hj-stroke-modal" id="strokeModal">
+    <div class="hj-stroke-modal-backdrop"></div>
+    <div class="hj-stroke-modal-content">
+        <button type="button" class="hj-stroke-modal-close" id="strokeModalClose" aria-label="Đóng">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <img id="strokeModalImg" src="" alt="Thứ tự nét viết" />
+        <div class="hj-stroke-modal-char" id="strokeModalChar"></div>
+        <div class="hj-stroke-modal-meaning" id="strokeModalMeaning"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const modal = document.getElementById('strokeModal');
+            const modalImg = document.getElementById('strokeModalImg');
+            const modalChar = document.getElementById('strokeModalChar');
+            const modalMeaning = document.getElementById('strokeModalMeaning');
+            const closeBtn = document.getElementById('strokeModalClose');
+            const backdrop = modal.querySelector('.hj-stroke-modal-backdrop');
+
+            function openModal(src, character, meaning) {
+                modalImg.src = src;
+                modalChar.textContent = character || '';
+                modalMeaning.textContent = meaning || '';
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            document.querySelectorAll('.hj-stroke-trigger').forEach(function (img) {
+                img.addEventListener('click', function () {
+                    openModal(img.src, img.getAttribute('data-character'), img.getAttribute('data-meaning'));
+                });
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            backdrop.addEventListener('click', closeModal);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        })();
+    </script>
+}
