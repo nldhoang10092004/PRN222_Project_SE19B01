@@ -36,6 +36,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Lesson> Lessons { get; set; }
 
+    public virtual DbSet<LessonMaterial> LessonMaterials { get; set; }
+
     public virtual DbSet<LessonProgress> LessonProgresses { get; set; }
 
     public virtual DbSet<Mentor> Mentors { get; set; }
@@ -259,6 +261,18 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Course).WithMany(p => p.Lessons)
                 .HasForeignKey(d => d.CourseId)
                 .HasConstraintName("FK__Lessons__CourseI__0F624AF8");
+        });
+
+        modelBuilder.Entity<LessonMaterial>(entity =>
+        {
+            entity.HasKey(e => e.MaterialId);
+            entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.Url).HasMaxLength(500);
+            entity.Property(e => e.FileType).HasMaxLength(20);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.HasOne(d => d.Lesson).WithMany(p => p.Materials)
+                .HasForeignKey(d => d.LessonId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<LessonProgress>(entity =>

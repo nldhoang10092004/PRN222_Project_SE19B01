@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Làm Quiz - Hi Japan!";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/placement-test.css" asp-append-version="true" />
+}
+
+<div class="hj-test-page">
+    <div class="hj-test-container">
+
+        <div class="card-premium" id="quiz-card">
+            <!-- ACTIVE -->
+            <div id="quiz-active" class="text-start p-4 p-md-5">
+                <div class="hj-test-progress mb-4">
+                    <div class="hj-test-progress-track">
+                        <div id="progress-fill" class="hj-test-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="hj-test-progress-label">
+                        <span id="current-num">1</span> / <span id="total-num">0</span>
+                    </div>
+                </div>
+
+                <h4 id="question-text" class="hj-question-text mb-4">Đang tải câu hỏi...</h4>
+
+                <div id="options-container" class="hj-options d-grid gap-2"></div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button id="btn-prev" class="btn btn-outline-primary d-none">
+                        <i class="bi bi-arrow-left me-1"></i>Câu trước
+                    </button>
+                    <button id="btn-next" class="btn btn-primary ms-auto">
+                        Câu tiếp<i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESULT -->
+            <div id="quiz-result" class="d-none p-5 text-center">
+                <i id="result-icon" class="bi bi-trophy text-warning mb-4 d-inline-block" style="font-size: 4rem;"></i>
+                <h2 class="mb-3">Hoàn thành!</h2>
+                <p class="text-muted mb-2">Kết quả bài làm của bạn:</p>
+
+                <h1 id="result-score" class="display-4 text-primary fw-bold mb-3">0/0</h1>
+                <p id="result-status" class="mb-4"></p>
+
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a id="retry-link" href="#" class="btn btn-outline-primary btn-lg">Làm lại</a>
+                    <a id="course-link" href="#" class="btn btn-primary btn-lg">Quay lại khóa học</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const questions = @Html.Raw(ViewBag.QuestionsJson);
+            const quizId = @ViewBag.QuizId;
+
+            let currentIndex = 0;
+            const answers = {};
+
+            document.getElementById('total-num').innerText = questions.length;
+
+            function showQuestion() {
+                const q = questions[currentIndex];
+                document.getElementById('question-text').innerText = q.text;
+                document.getElementById('current-num').innerText = currentIndex + 1;
+                document.getElementById('progress-fill').style.width =
+                    `${((currentIndex + 1) / questions.length) * 100}%`;
+
+                const container = document.getElementById('options-container');
+                container.innerHTML = '';
+
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'hj-option text-start';
+                    btn.innerHTML =
+                        `<input type="radio" name="opt-${q.questionId}" value="${opt.optionId}"
+                         ${answers[q.questionId] === opt.optionId ? 'checked' : ''} />
+                     <span class="hj-option-label">${escapeHtml(opt.text)}</span>`;
+                    btn.addEventListener('click', () => {
+                        answers[q.questionId] = opt.optionId;
+                        container.querySelectorAll('.hj-option').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        btn.querySelector('input').checked = true;
+                    });
+                    container.appendChild(btn);
+                });
+
+                document.getElementById('btn-prev').classList.toggle('d-none', currentIndex === 0);
+                document.getElementById('btn-next').innerText =
+                    currentIndex === questions.length - 1 ? 'Nộp bài' : 'Câu tiếp';
+            }
+
+            document.getElementById('btn-next').addEventListener('click', () => {
+                if (answers[questions[currentIndex].questionId] == null) {
+                    alert('Vui lòng chọn 1 đáp án trước khi tiếp tục.');
+                    return;
+                }
+                if (currentIndex < questions.length - 1) {
+                    currentIndex++;
+                    showQuestion();
+                } else {
+                    submitQuiz();
+                }
+            });
+
+            document.getElementById('btn-prev').addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    showQuestion();
+                }
+            });
+
+            function submitQuiz() {
+                const payload = {
+                    quizId: quizId,
+                    answers: Object.keys(answers).map(qid => ({
+                        questionId: parseInt(qid),
+                        selectedOptionId: answers[qid]
+                    }))
+                };
+
+                fetch('@Url.Action("Submit", "Quiz", new { area = "Learner" })', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(r => r.ok ? r.json() : Promise.reject(r))
+                    .then(data => {
+                        showResult(data);
+                    })
+                    .catch(() => {
+                        alert('Có lỗi khi nộp bài. Vui lòng thử lại.');
+                    });
+            }
+
+            function showResult(data) {
+                document.getElementById('quiz-active').classList.add('d-none');
+                document.getElementById('quiz-result').classList.remove('d-none');
+
+                const icon = document.getElementById('result-icon');
+                const statusText = document.getElementById('result-status');
+                const scoreText = document.getElementById('result-score');
+
+                scoreText.innerText = `${data.score} / ${data.totalPoints}`;
+
+                if (data.isPassed) {
+                    icon.className = 'bi bi-trophy text-warning mb-4 d-inline-block';
+                    statusText.innerHTML = `<span class="text-success fw-bold">✓ Đạt</span> (Yêu cầu: ${data.passScore}%)`;
+                } else {
+                    icon.className = 'bi bi-x-circle text-danger mb-4 d-inline-block';
+                    statusText.innerHTML = `<span class="text-danger fw-bold">Chưa đạt</span> (Yêu cầu: ${data.passScore}%)`;
+                }
+
+                document.getElementById('retry-link').href = `/learn/Quiz/Start?courseId=${data.courseId}`;
+                document.getElementById('course-link').href = `/learn/Course/Detail/${data.courseId}`;
+            }
+
+            function escapeHtml(s) {
+                return String(s).replace(/[&<>"']/g, c => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                }[c]));
+            }
+
+            showQuestion();
+        })();
+    </script>
+}

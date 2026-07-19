@@ -1,11 +1,17 @@
-﻿<script>
+<script>
     (function () {
         const sidebar = document.getElementById('lessonSidebar');
         const toggleEl = document.getElementById('sidebarToggle');
         const icon = document.getElementById('toggleIcon');
 
-        const navItems = document.querySelectorAll('.sidebar-nav-item');
-        const panels = document.querySelectorAll('.lesson-panel');
+        const tabItems = document.querySelectorAll('.lesson-tab-item');
+        const tabPanels = document.querySelectorAll('.lesson-tab-panel');
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
 
         // ==========================================================
         // Toggle sidebar
@@ -21,42 +27,36 @@
         }
 
         // ==========================================================
-        // Chuyển tab nội dung
+        // Chuyển tab ngang
         // ==========================================================
-        navItems.forEach(function (item) {
+        function activateTab(item) {
+            const targetId = item.getAttribute('data-panel');
+
+            tabItems.forEach(function (tab) {
+                tab.classList.remove('active');
+            });
+            item.classList.add('active');
+
+            tabPanels.forEach(function (panel) {
+                panel.classList.remove('active');
+            });
+
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        }
+
+        tabItems.forEach(function (item) {
             item.addEventListener('click', function () {
-                const targetId = this.getAttribute('data-panel');
-
-                // Nếu sidebar đang thu nhỏ thì mở lại
-                if (sidebar && sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed');
-
-                    if (icon) {
-                        icon.className = 'bi bi-layout-sidebar-reverse';
-                    }
-                }
-
-                // Bỏ active ở menu cũ
-                navItems.forEach(function (nav) {
-                    nav.classList.remove('active');
-                });
-
-                // Active menu vừa click
-                this.classList.add('active');
-
-                // Ẩn toàn bộ panel
-                panels.forEach(function (panel) {
-                    panel.classList.remove('active');
-                });
-
-                // Hiện panel tương ứng
-                const targetPanel = document.getElementById(targetId);
-
-                if (targetPanel) {
-                    targetPanel.classList.add('active');
-                }
+                activateTab(this);
             });
         });
+
+        // Tab đầu tiên hiển thị theo mặc định
+        if (tabItems.length > 0) {
+            activateTab(tabItems[0]);
+        }
 
         // ==========================================================
         // Audio player
@@ -182,18 +182,168 @@
         });
 
         // ==========================================================
-        // Nút Practice của từng Exercise
+        // Nút Practice của từng Exercise (ngữ pháp / đọc / nghe)
         // ==========================================================
-        document.querySelectorAll('.btn-practice').forEach(function (button) {
+        document.querySelectorAll('.btn-practice:not(.kanji-practice)').forEach(function (button) {
             button.addEventListener('click', function () {
                 const exerciseId = this.getAttribute('data-exercise-id');
+                const exerciseTitle = this.getAttribute('data-exercise-title') || 'Luyện tập';
 
                 if (!exerciseId) return;
 
-                window.location.href =
-                    '/learn/Exercise/Practice?exerciseId=' + exerciseId;
+                const area = document.getElementById('practice-' + exerciseId);
+                if (!area) return;
+
+                // Toggle: nếu đang mở và đã load rồi thì đóng lại
+                if (area.classList.contains('opened')) {
+                    area.classList.remove('opened');
+                    return;
+                }
+
+                area.classList.add('opened');
+
+                // Nếu đã load câu hỏi trước đó thì không load lại
+                if (area.dataset.loaded === '1') return;
+
+                area.innerHTML = '<div class="practice-loading"><i class="bi bi-arrow-repeat"></i> Đang tải câu hỏi...</div>';
+
+                fetch('/learn/Course/ExercisePractice?exerciseId=' + exerciseId)
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        renderPractice(area, exerciseId, exerciseTitle, data.questions || []);
+                        area.dataset.loaded = '1';
+                    })
+                    .catch(function () {
+                        area.innerHTML = '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Không thể tải bài luyện tập. Vui lòng thử lại.</div>';
+                    });
             });
         });
+
+        // ==========================================================
+        // Nút Practice của Kanji — dùng chung 1 vùng .kanji-practice-area
+        // nằm ngoài .kanji-grid (không lồng trong từng card)
+        // ==========================================================
+        const kanjiPracticeArea = document.getElementById('kanji-practice-shared');
+
+        document.querySelectorAll('.kanji-practice').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const exerciseId = this.getAttribute('data-exercise-id');
+                const exerciseTitle = this.getAttribute('data-exercise-title') || 'Luyện tập';
+
+                if (!exerciseId || !kanjiPracticeArea) return;
+
+                // Nếu đang mở đúng bài này thì đóng lại
+                if (kanjiPracticeArea.dataset.currentExercise === exerciseId
+                    && kanjiPracticeArea.classList.contains('opened')) {
+                    kanjiPracticeArea.classList.remove('opened');
+                    kanjiPracticeArea.innerHTML = '';
+                    kanjiPracticeArea.dataset.currentExercise = '';
+                    return;
+                }
+
+                kanjiPracticeArea.classList.add('opened');
+                kanjiPracticeArea.dataset.currentExercise = exerciseId;
+                kanjiPracticeArea.innerHTML = '<div class="practice-loading"><i class="bi bi-arrow-repeat"></i> Đang tải câu hỏi...</div>';
+
+                kanjiPracticeArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                fetch('/learn/Course/ExercisePractice?exerciseId=' + exerciseId)
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        renderPractice(kanjiPracticeArea, exerciseId, exerciseTitle, data.questions || []);
+                    })
+                    .catch(function () {
+                        kanjiPracticeArea.innerHTML = '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Không thể tải bài luyện tập. Vui lòng thử lại.</div>';
+                    });
+            });
+        });
+
+        function renderPractice(area, exerciseId, exerciseTitle, questions) {
+            if (!questions.length) {
+                area.innerHTML = '<div class="practice-empty"><i class="bi bi-inbox"></i> Bài luyện tập đang được cập nhật.</div>';
+                return;
+            }
+
+            let html = '<div class="practice-box">';
+            html += '<div class="practice-heading"><i class="bi bi-pencil-square"></i>' + escapeHtml(exerciseTitle) + '</div>';
+
+            questions.forEach(function (q, qIndex) {
+                html += '<div class="practice-question" data-question-id="' + q.questionId + '">';
+                html += '<div class="practice-question-text">' + (qIndex + 1) + '. ' + escapeHtml(q.questionText) + '</div>';
+                (q.options || []).forEach(function (opt) {
+                    html += '<label class="practice-option">' +
+                        '<input type="radio" name="practice-q-' + q.questionId + '" value="' + opt.optionId + '" />' +
+                        '<span>' + escapeHtml(opt.answerText) + '</span>' +
+                        '</label>';
+                });
+                html += '</div>';
+            });
+
+            html += '<button type="button" class="btn-submit-practice" data-exercise-id="' + exerciseId + '">Nộp bài</button>';
+            html += '<div class="practice-result"></div>';
+            html += '</div>';
+
+            area.innerHTML = html;
+
+            area.querySelector('.btn-submit-practice').addEventListener('click', function () {
+                submitPractice(area, exerciseId, questions);
+            });
+        }
+
+        function submitPractice(area, exerciseId, questions) {
+            const answers = [];
+            let unanswered = false;
+
+            questions.forEach(function (q) {
+                const checked = area.querySelector('input[name="practice-q-' + q.questionId + '"]:checked');
+                if (!checked) {
+                    unanswered = true;
+                    return;
+                }
+                answers.push({ questionId: q.questionId, optionId: parseInt(checked.value, 10) });
+            });
+
+            if (unanswered) {
+                alert('Vui lòng trả lời tất cả câu hỏi trước khi nộp bài.');
+                return;
+            }
+
+            fetch('/learn/Course/CheckExercise', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ exerciseId: parseInt(exerciseId, 10), answers: answers })
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    let correctCount = 0;
+                    (data.answers || []).forEach(function (result) {
+                        const questionBlock = area.querySelector('.practice-question[data-question-id="' + result.questionId + '"]');
+                        if (!questionBlock) return;
+
+                        if (result.isCorrect) correctCount++;
+
+                        questionBlock.querySelectorAll('.practice-option').forEach(function (label) {
+                            const input = label.querySelector('input');
+                            label.classList.remove('correct', 'incorrect');
+                            if (parseInt(input.value, 10) === result.correctOptionId) {
+                                label.classList.add('correct');
+                            } else if (input.checked && !result.isCorrect) {
+                                label.classList.add('incorrect');
+                            }
+                            input.disabled = true;
+                        });
+                    });
+
+                    const resultBox = area.querySelector('.practice-result');
+                    resultBox.innerHTML = '<div class="practice-score"><i class="bi bi-check-circle"></i>Kết quả: ' +
+                        correctCount + ' / ' + questions.length + ' câu đúng</div>';
+
+                    area.querySelector('.btn-submit-practice').disabled = true;
+                })
+                .catch(function () {
+                    alert('Có lỗi khi nộp bài luyện tập. Vui lòng thử lại.');
+                });
+        }
 
         // ==========================================================
         // Đánh dấu hoàn thành bài học
@@ -221,6 +371,13 @@
                         const label = completeBtn.querySelector('.btn-complete-label');
                         if (icon) icon.className = 'bi bi-check-circle-fill';
                         if (label) label.textContent = 'Đã hoàn thành';
+
+                        const currentLessonItem = document.querySelector('.lesson-list-item.active');
+                        if (currentLessonItem) {
+                            currentLessonItem.classList.add('completed');
+                            const statusIcon = currentLessonItem.querySelector('.lesson-status-icon i');
+                            if (statusIcon) statusIcon.className = 'bi bi-check-circle-fill';
+                        }
                     })
                     .catch(function () {
                         completeBtn.disabled = false;
