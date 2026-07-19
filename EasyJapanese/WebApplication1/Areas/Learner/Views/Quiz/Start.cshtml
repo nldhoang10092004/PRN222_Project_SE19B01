@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Quiz Cuối Khóa - Hi Japan!";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/placement-test.css" asp-append-version="true" />
+}
+
+<div class="hj-test-page">
+    <div class="hj-test-container">
+
+        <div class="mb-4 fade-in">
+            <a asp-area="Learner" asp-controller="Course" asp-action="Detail"
+               asp-route-id="@Context.Request.Query["courseId"]"
+               class="text-muted text-decoration-none">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại khóa học
+            </a>
+        </div>
+
+        <div class="card-premium text-center fade-in-up" style="animation-delay: 0.1s;">
+            <div class="text-center mb-5 border-bottom pb-4">
+                <i class="bi bi-patch-question text-primary mb-3 d-inline-block" style="font-size: 4rem;"></i>
+                <h2 class="fw-bold mb-2">@ViewBag.QuizTitle</h2>
+                <p class="text-muted mb-3">@ViewBag.CourseName</p>
+
+                <div class="d-flex justify-content-center gap-4 flex-wrap text-muted small">
+                    <span><i class="bi bi-clock me-1"></i>Thời gian: @ViewBag.Duration phút</span>
+                    <span><i class="bi bi-card-list me-1"></i>Số câu: @ViewBag.QuestionCount</span>
+                </div>
+
+                <div class="badge bg-warning text-dark mt-3 p-2 px-3">
+                    Điểm đạt: @ViewBag.PassScore%
+                </div>
+            </div>
+
+            <div class="px-md-5">
+                <div class="alert alert-info mb-4 text-start">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Bài kiểm tra bao gồm các phần: Từ vựng, Ngữ pháp và Đọc hiểu.
+                    Hãy chắc chắn bạn đã ôn tập kỹ trước khi bắt đầu.
+                </div>
+
+                <a asp-action="Take" asp-route-quizId="@ViewBag.QuizId"
+                   class="btn btn-primary btn-lg px-5 py-3">
+                    Bắt Đầu Làm Bài
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -17,12 +17,34 @@ namespace CoreWeb.Areas.Learner.Models
 
         public bool IsCompleted { get; set; }
 
+        // Danh sách bài học trong khóa (cho sidebar)
+        public List<SidebarLessonItem> AllLessons { get; set; } = new();
+
+        // Tài liệu đính kèm bài học
+        public List<LessonMaterialViewModel> MaterialItems { get; set; } = new();
+
         // Các exercise được tách theo ExerciseType
-        public List<LessonExerciseItemViewModel> VocabularyItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> KanjiItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> GrammarItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> ReadingItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> ListeningItems { get; set; } = new();
+    }
+
+    public class SidebarLessonItem
+    {
+        public int LessonId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public bool IsCompleted { get; set; }
+        public bool IsCurrent { get; set; }
+        public int SortOrder { get; set; }
+    }
+
+    public class LessonMaterialViewModel
+    {
+        public int MaterialId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public string FileType { get; set; } = "link";
     }
 
     public class LessonExerciseItemViewModel

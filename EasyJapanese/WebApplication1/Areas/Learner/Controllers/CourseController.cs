@@ -178,6 +178,13 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             if (lesson == null) return NotFound();
 
+            // Danh sách bài học trong khóa để hiển thị sidebar
+            var courseLessons = await _db.Lessons
+                .Where(l => l.CourseId == lesson.CourseId)
+                .OrderBy(l => l.SortOrder)
+                .Select(l => new { l.LessonId, l.Title, l.SortOrder })
+                .ToListAsync();
+
             if (lesson.Course != null && !lesson.Course.IsFree && !await HasAccessAsync())
             {
                 TempData["LockedMessage"] = "Bạn cần đăng ký Membership để truy cập bài học này.";
@@ -187,18 +194,33 @@ namespace WebApplication1.Areas.Learner.Controllers
             // Mở bài học = ghi danh khóa + đánh dấu đã truy cập bài
             bool isCompleted = false;
             var studentId = await GetCurrentStudentIdAsync();
+            var completedLessonIds = new HashSet<int>();
             if (studentId.HasValue)
             {
                 EnsureEnrolled(studentId.Value, lesson.CourseId);
                 var progress = await TrackLessonAccessAsync(studentId.Value, lesson.LessonId);
                 await _db.SaveChangesAsync();
                 isCompleted = progress.IsCompleted;
+
+                var courseLessonIds = courseLessons.Select(l => l.LessonId).ToList();
+                var completedIds = await _db.LessonProgresses
+                    .Where(lp => lp.StudentId == studentId.Value
+                              && lp.IsCompleted
+                              && courseLessonIds.Contains(lp.LessonId))
+                    .Select(lp => lp.LessonId)
+                    .ToListAsync();
+                completedLessonIds = new HashSet<int>(completedIds);
             }
 
             // Chỉ lấy bài tập thuộc đúng lesson đang mở
             var exercises = await _db.Exercises
                 .Where(e => e.LessonId == lesson.LessonId)
                 .OrderBy(e => e.SortOrder)
+                .ToListAsync();
+
+            var materials = await _db.LessonMaterials
+                .Where(m => m.LessonId == lesson.LessonId)
+                .OrderBy(m => m.SortOrder)
                 .ToListAsync();
 
             var vm = new LessonViewModel
@@ -212,7 +234,23 @@ namespace WebApplication1.Areas.Learner.Controllers
                 VideoUrl = lesson.VideoUrl,
                 IsCompleted = isCompleted,
 
-                VocabularyItems = MapExercises(exercises, "Vocabulary"),
+                AllLessons = courseLessons.Select(l => new SidebarLessonItem
+                {
+                    LessonId = l.LessonId,
+                    Title = l.Title,
+                    SortOrder = l.SortOrder,
+                    IsCurrent = l.LessonId == lesson.LessonId,
+                    IsCompleted = completedLessonIds.Contains(l.LessonId)
+                }).ToList(),
+
+                MaterialItems = materials.Select(m => new LessonMaterialViewModel
+                {
+                    MaterialId = m.MaterialId,
+                    Title = m.Title,
+                    Url = m.Url,
+                    FileType = m.FileType ?? "link"
+                }).ToList(),
+
                 KanjiItems = MapExercises(exercises, "Kanji"),
                 GrammarItems = MapExercises(exercises, "Grammar"),
                 ReadingItems = MapExercises(exercises, "Reading"),
