@@ -251,10 +251,10 @@ namespace WebApplication1.Areas.Learner.Controllers
                     FileType = m.FileType ?? "link"
                 }).ToList(),
 
-                KanjiItems = MapExercises(exercises, "Kanji"),
-                GrammarItems = MapExercises(exercises, "Grammar"),
-                ReadingItems = MapExercises(exercises, "Reading"),
-                ListeningItems = MapExercises(exercises, "Listening")
+                KanjiItems = MapExercises(exercises, ExerciseTypeConst.KANJI),
+                GrammarItems = MapExercises(exercises, ExerciseTypeConst.GRAMMAR),
+                ReadingItems = MapExercises(exercises, ExerciseTypeConst.READING),
+                ListeningItems = MapExercises(exercises, ExerciseTypeConst.LISTENING)
             };
 
             return View(vm);

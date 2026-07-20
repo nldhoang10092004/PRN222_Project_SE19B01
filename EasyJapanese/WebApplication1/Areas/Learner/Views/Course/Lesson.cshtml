@@ -133,40 +133,29 @@
         @if (Model.KanjiItems.Any())
         {
             <div id="panel-kanji" class="lesson-tab-panel">
-                <div class="kanji-grid">
-                    @foreach (var item in Model.KanjiItems)
-                    {
-                        <div class="kanji-card">
-                            <div class="kanji-char">@item.Title</div>
+                @foreach (var item in Model.KanjiItems)
+                {
+                    <div class="reading-item">
+                        <div class="reading-title">@item.Title</div>
 
-                            @if (!string.IsNullOrEmpty(item.Content))
-                            {
-                                <div class="kanji-meta">@item.Content</div>
-                            }
+                        @if (!string.IsNullOrEmpty(item.Content))
+                        {
+                            <div class="reading-passage">
+                                @Html.Raw(item.Content.Replace("\n", "<br/>"))
+                            </div>
+                        }
 
-                            @if (!string.IsNullOrEmpty(item.StrokeOrderUrl))
-                            {
-                                <div class="kanji-stroke-section">
-                                    <div class="kanji-stroke-label">Thứ tự nét viết:</div>
-                                    <img src="@item.StrokeOrderUrl"
-                                         alt="Stroke order - @item.Title"
-                                         class="kanji-stroke-gif" />
-                                </div>
-                            }
+                        <button type="button"
+                                class="btn-practice"
+                                data-exercise-id="@item.ExerciseId"
+                                data-exercise-title="@item.Title">
+                            <i class="bi bi-pencil-square"></i>
+                            Làm bài kanji
+                        </button>
 
-                            <button type="button"
-                                    class="btn-practice kanji-practice"
-                                    data-exercise-id="@item.ExerciseId"
-                                    data-exercise-title="@item.Title">
-                                <i class="bi bi-pencil-square"></i>
-                                Luyện tập
-                            </button>
-                        </div>
-                    }
-                </div>
-
-                <!-- Vùng luyện tập kanji dùng chung, nằm ngoài grid -->
-                <div id="kanji-practice-shared" class="kanji-practice-area"></div>
+                        <div id="practice-@item.ExerciseId" class="practice-area"></div>
+                    </div>
+                }
             </div>
         }
 

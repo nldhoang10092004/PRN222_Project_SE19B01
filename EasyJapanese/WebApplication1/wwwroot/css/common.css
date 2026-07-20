@@ -8,6 +8,10 @@
   --color-primary-light: #FEE2E2;
   --color-primary-soft: #FEF2F2;
 
+  /* Navy (dùng cho tiêu đề phụ, stat) */
+  --color-navy: #1E3A8A;
+  --color-navy-light: #DBEAFE;
+
   /* Neutrals */
   --color-bg: #FFFFFF;
   --color-bg-soft: #FAFAFA;

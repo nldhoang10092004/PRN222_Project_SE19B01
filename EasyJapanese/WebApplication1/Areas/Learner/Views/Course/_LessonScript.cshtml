@@ -182,9 +182,9 @@
         });
 
         // ==========================================================
-        // Nút Practice của từng Exercise (ngữ pháp / đọc / nghe)
+        // Nút Practice của từng Exercise (ngữ pháp / đọc / nghe / kanji)
         // ==========================================================
-        document.querySelectorAll('.btn-practice:not(.kanji-practice)').forEach(function (button) {
+        document.querySelectorAll('.btn-practice').forEach(function (button) {
             button.addEventListener('click', function () {
                 const exerciseId = this.getAttribute('data-exercise-id');
                 const exerciseTitle = this.getAttribute('data-exercise-title') || 'Luyện tập';
@@ -215,45 +215,6 @@
                     })
                     .catch(function () {
                         area.innerHTML = '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Không thể tải bài luyện tập. Vui lòng thử lại.</div>';
-                    });
-            });
-        });
-
-        // ==========================================================
-        // Nút Practice của Kanji — dùng chung 1 vùng .kanji-practice-area
-        // nằm ngoài .kanji-grid (không lồng trong từng card)
-        // ==========================================================
-        const kanjiPracticeArea = document.getElementById('kanji-practice-shared');
-
-        document.querySelectorAll('.kanji-practice').forEach(function (button) {
-            button.addEventListener('click', function () {
-                const exerciseId = this.getAttribute('data-exercise-id');
-                const exerciseTitle = this.getAttribute('data-exercise-title') || 'Luyện tập';
-
-                if (!exerciseId || !kanjiPracticeArea) return;
-
-                // Nếu đang mở đúng bài này thì đóng lại
-                if (kanjiPracticeArea.dataset.currentExercise === exerciseId
-                    && kanjiPracticeArea.classList.contains('opened')) {
-                    kanjiPracticeArea.classList.remove('opened');
-                    kanjiPracticeArea.innerHTML = '';
-                    kanjiPracticeArea.dataset.currentExercise = '';
-                    return;
-                }
-
-                kanjiPracticeArea.classList.add('opened');
-                kanjiPracticeArea.dataset.currentExercise = exerciseId;
-                kanjiPracticeArea.innerHTML = '<div class="practice-loading"><i class="bi bi-arrow-repeat"></i> Đang tải câu hỏi...</div>';
-
-                kanjiPracticeArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                fetch('/learn/Course/ExercisePractice?exerciseId=' + exerciseId)
-                    .then(function (res) { return res.json(); })
-                    .then(function (data) {
-                        renderPractice(kanjiPracticeArea, exerciseId, exerciseTitle, data.questions || []);
-                    })
-                    .catch(function () {
-                        kanjiPracticeArea.innerHTML = '<div class="practice-warning"><i class="bi bi-exclamation-triangle"></i> Không thể tải bài luyện tập. Vui lòng thử lại.</div>';
                     });
             });
         });
