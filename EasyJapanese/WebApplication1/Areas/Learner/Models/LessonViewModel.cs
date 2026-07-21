@@ -28,6 +28,19 @@ namespace CoreWeb.Areas.Learner.Models
         public List<LessonExerciseItemViewModel> GrammarItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> ReadingItems { get; set; } = new();
         public List<LessonExerciseItemViewModel> ListeningItems { get; set; } = new();
+
+        public List<LessonQuizItemViewModel> QuizItems { get; set; } = new();
+    }
+
+    public class LessonQuizItemViewModel
+    {
+        public int QuizId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public int? Duration { get; set; }
+        public int PassScore { get; set; }
+        public int QuestionCount { get; set; }
+        public int? BestScore { get; set; }
+        public bool HasPassed { get; set; }
     }
 
     public class SidebarLessonItem

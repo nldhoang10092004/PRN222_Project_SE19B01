@@ -422,4 +422,63 @@
     .delay-4 {
         animation-delay: .4s;
     }
+
+    /* ── PRACTICE PAGE ── */
+    .practice-card {
+        display: block;
+        height: 100%;
+        padding: 28px 24px;
+        background: #fff;
+        border: 1px solid #eef0f3;
+        border-radius: 18px;
+        color: inherit;
+        transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .practice-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .08);
+        border-color: var(--color-primary, #c8102e);
+        color: inherit;
+    }
+
+    .practice-card-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        font-size: 30px;
+        color: #111827;
+    }
+
+    .practice-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        font-family: 'Outfit', sans-serif;
+        color: var(--color-navy, #0f172a);
+    }
+
+    .practice-card-desc {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 18px;
+        line-height: 1.55;
+    }
+
+    .practice-card-link {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-primary, #c8102e);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .practice-card-link--soon {
+        color: #b45309;
+    }
 </style>

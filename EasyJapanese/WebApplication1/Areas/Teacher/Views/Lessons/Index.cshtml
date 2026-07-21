@@ -69,6 +69,7 @@
                                 }
                             </td>
                             <td class="text-end pe-4">
+                                <a href="/teacher/lessons/manage?courseId=@courseId&lessonId=@item.LessonId" class="btn btn-sm btn-outline-primary">Bài tập</a>
                                 <a href="/teacher/lessons/edit/@item.LessonId" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-square"></i> Sửa</a>
                                 <form asp-action="Delete" asp-route-id="@item.LessonId" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa bài học này?');" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>

@@ -145,10 +145,92 @@ namespace WebApplication1.Areas.Teacher.Controllers
             return RedirectToAction(nameof(Index), new { courseId });
         }
 
+        // GET: /teacher/lessons/manage?courseId=1&lessonId=2
+        [HttpGet("manage")]
+        public async Task<IActionResult> Manage(int? courseId, int? lessonId)
+        {
+            var mentorId = GetCurrentMentorId();
+            var courses = await _context.Courses
+                .Where(c => c.CreatedBy == mentorId)
+                .OrderBy(c => c.Title)
+                .ToListAsync();
+
+            ViewBag.Courses = courses;
+
+            if (!courseId.HasValue || !courses.Any(c => c.CourseId == courseId.Value))
+            {
+                return View((ManageLessonViewModel)null!);
+            }
+
+            var lessons = await _context.Lessons
+                .Where(l => l.CourseId == courseId.Value)
+                .OrderBy(l => l.SortOrder)
+                .ToListAsync();
+
+            ViewBag.Lessons = lessons;
+            ViewBag.SelectedCourseId = courseId.Value;
+
+            if (!lessonId.HasValue || !lessons.Any(l => l.LessonId == lessonId.Value))
+            {
+                return View((ManageLessonViewModel)null!);
+            }
+
+            var lesson = lessons.First(l => l.LessonId == lessonId.Value);
+            var lessonCourse = courses.First(c => c.CourseId == courseId.Value);
+
+            var quizzes = await _context.Quizzes
+                .Where(q => q.LessonId == lessonId.Value)
+                .Include(q => q.Questions)
+                .OrderBy(q => q.SortOrder).ThenBy(q => q.CreatedAt)
+                .ToListAsync();
+
+            // LessonsByCourse for JS filter
+            var lessonsByCourse = lessons
+                .GroupBy(l => l.CourseId)
+                .ToDictionary(g => g.Key, g => g.Select(l => new { l.LessonId, l.Title }).ToList());
+
+            var vm = new ManageLessonViewModel
+            {
+                CourseId = courseId.Value,
+                CourseTitle = lessonCourse.Title,
+                LessonId = lessonId.Value,
+                LessonTitle = lesson.Title,
+                Quizzes = quizzes.Select(q => new ManageQuizItemViewModel
+                {
+                    QuizId = q.QuizId,
+                    Title = q.Title,
+                    Duration = q.Duration,
+                    PassScore = q.PassScore,
+                    QuestionCount = q.Questions?.Count ?? 0
+                }).ToList()
+            };
+
+            ViewBag.LessonsByCourse = lessonsByCourse;
+            return View(vm);
+        }
+
         private int GetCurrentMentorId()
         {
             var user = HttpContext.Session.GetObject<CoreLibrary.Authentication.CurrentUser>(CoreLibrary.Authentication.IAuthenticationService.SessionKeyCurrentUser);
             return user?.AccountId ?? 0;
         }
+    }
+
+    public class ManageLessonViewModel
+    {
+        public int CourseId { get; set; }
+        public string CourseTitle { get; set; } = string.Empty;
+        public int LessonId { get; set; }
+        public string LessonTitle { get; set; } = string.Empty;
+        public List<ManageQuizItemViewModel> Quizzes { get; set; } = new();
+    }
+
+    public class ManageQuizItemViewModel
+    {
+        public int QuizId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public int? Duration { get; set; }
+        public int PassScore { get; set; }
+        public int QuestionCount { get; set; }
     }
 }

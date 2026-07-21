@@ -1,0 +1,176 @@
+@model WebApplication1.Areas.Teacher.Controllers.ManageLessonViewModel
+@{
+    Layout = "~/Areas/Teacher/Views/Shared/_TeacherLayout.cshtml";
+    ViewData["Title"] = "Quản lý Bài tập theo Bài học";
+    var courses = ViewBag.Courses as List<CoreLibrary.Data.Entities.Course> ?? new List<CoreLibrary.Data.Entities.Course>();
+    var lessons = ViewBag.Lessons as List<CoreLibrary.Data.Entities.Lesson> ?? new List<CoreLibrary.Data.Entities.Lesson>();
+    int selectedCourseId = ViewBag.SelectedCourseId ?? 0;
+    int selectedLessonId = Model?.LessonId ?? 0;
+    var lessonsByCourse = ViewBag.LessonsByCourse as Dictionary<int, List<dynamic>> ?? new Dictionary<int, List<dynamic>>();
+
+    var allLessonsJson = System.Text.Json.JsonSerializer.Serialize(
+        lessonsByCourse.ToDictionary(
+            kv => kv.Key,
+            kv => kv.Value.Select(l => new { lessonId = (int)l.LessonId, title = (string)l.Title }).ToList<object>()
+        )
+    );
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div>
+        <a href="/teacher/courses" class="text-decoration-none text-muted mb-2 d-inline-block">
+            Khóa học của tôi
+        </a>
+        <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">
+            Quản lý Bài tập &amp; Quiz
+        </h3>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted">Khóa học</label>
+                <select id="courseSelect" name="courseId" class="form-select rounded-3" required>
+                    <option value="">-- Chọn khóa học --</option>
+                    @foreach (var c in courses)
+                    {
+                        <option value="@c.CourseId" selected="@(selectedCourseId == c.CourseId)">@c.Title</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted">Bài học</label>
+                <select id="lessonSelect" name="lessonId" class="form-select rounded-3" @(selectedCourseId == 0 ? "disabled" : "")>
+                    <option value="">-- Chọn bài học --</option>
+                    @if (selectedCourseId > 0)
+                    {
+                        @foreach (var l in lessons)
+                        {
+                            <option value="@l.LessonId" selected="@(selectedLessonId == l.LessonId)">@l.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100 rounded-3">Xem</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model == null)
+{
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5 text-muted">
+            <h5 class="mb-1">Chọn khóa học &amp; bài học để bắt đầu</h5>
+            <p class="small mb-0">Trang này giúp bạn quản lý Exercise và Quiz gắn với từng bài học.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div class="small text-muted">Đang quản lý bài tập cho bài học:</div>
+            <h5 class="fw-bold mb-0" style="color: var(--color-navy);">@Model.LessonTitle</h5>
+            <div class="small text-muted">@Model.CourseTitle</div>
+        </div>
+        <a href="/teacher/quizzes/create?courseId=@Model.CourseId&lessonId=@Model.LessonId"
+           class="btn btn-primary rounded-3">
+            Tạo Quiz mới
+        </a>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" id="manageTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="tab-quiz" data-bs-toggle="tab" data-bs-target="#pane-quiz" type="button" role="tab">
+                Quiz (@Model.Quizzes.Count)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="pane-quiz" role="tabpanel">
+            @if (Model.Quizzes.Any())
+            {
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Tiêu đề Quiz</th>
+                                        <th>Thời gian</th>
+                                        <th>Điểm đạt</th>
+                                        <th>Số câu hỏi</th>
+                                        <th class="text-end pe-4">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var q in Model.Quizzes)
+                                    {
+                                        <tr>
+                                            <td class="ps-4 fw-bold text-dark">@q.Title</td>
+                                            <td>@(q.Duration.HasValue ? $"{q.Duration} phút" : "Không giới hạn")</td>
+                                            <td>@q.PassScore%</td>
+                                            <td>@q.QuestionCount</td>
+                                            <td class="text-end pe-4">
+                                                <a href="/teacher/quizzes/questions/@q.QuizId" class="btn btn-sm btn-outline-secondary">Soạn câu hỏi</a>
+                                                <a href="/teacher/quizzes/edit/@q.QuizId?returnManage=1" class="btn btn-sm btn-outline-secondary">Sửa</a>
+                                                <form asp-controller="Quizzes" asp-action="Delete" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Bạn chắc chắn muốn xóa Quiz này?');">
+                                                    <input type="hidden" name="quizId" value="@q.QuizId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center py-5 text-muted">
+                        <h6 class="mb-1">Bài học này chưa có Quiz nào</h6>
+                        <p class="small mb-3">Tạo Quiz để học viên luyện tập sau khi học xong bài.</p>
+                        <a href="/teacher/quizzes/create?courseId=@Model.CourseId&lessonId=@Model.LessonId" class="btn btn-primary rounded-3">Tạo Quiz đầu tiên</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    const allLessons = @Html.Raw(allLessonsJson);
+
+    document.getElementById('courseSelect').addEventListener('change', function () {
+        const courseId = this.value;
+        const lessonSelect = document.getElementById('lessonSelect');
+        const lessons = allLessons[courseId] || [];
+        lessonSelect.innerHTML = '<option value="">-- Chọn bài học --</option>';
+        lessons.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.lessonId;
+            opt.textContent = l.title;
+            lessonSelect.appendChild(opt);
+        });
+        lessonSelect.disabled = !courseId;
+    });
+</script>
+}

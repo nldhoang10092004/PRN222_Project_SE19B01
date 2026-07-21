@@ -4,6 +4,7 @@
 @{
     var currentUser = HttpContextAccessor.HttpContext?.Session.GetObject<CurrentUser>(IAuthenticationService.SessionKeyCurrentUser);
     var initial = !string.IsNullOrEmpty(currentUser?.FullName) ? currentUser.FullName.Substring(0, 1).ToUpper() : "?";
+    var currentController = (ViewContext.RouteData.Values["controller"] as string) ?? "";
 }
 <header>
     <nav class="hj-nav">
@@ -14,10 +15,11 @@
             </a>
 
             <ul class="d-none d-md-flex list-unstyled mb-0 gap-4">
-                <li><a asp-area="Learner" asp-controller="Dashboard" asp-action="Index" class="hj-nav-link active">Tổng quan</a></li>
-                <li><a asp-area="Learner" asp-controller="Course" asp-action="Index" class="hj-nav-link">Khoá học</a></li>
+                <li><a asp-area="Learner" asp-controller="Dashboard" asp-action="Index" class="hj-nav-link @(currentController == "Dashboard" ? "active" : "")">Tổng quan</a></li>
+                <li><a asp-area="Learner" asp-controller="Course" asp-action="Index" class="hj-nav-link @(currentController == "Course" ? "active" : "")">Khoá học</a></li>
+                <li><a asp-area="Learner" asp-controller="Practice" asp-action="Index" class="hj-nav-link @(currentController == "Practice" ? "active" : "")">Luyện tập</a></li>
                 <li><a href="#" class="hj-nav-link">Tài liệu</a></li>
-                <li><a asp-area="Learner" asp-controller="Blog" asp-action="Index" class="hj-nav-link">Cộng đồng</a></li>
+                <li><a asp-area="Learner" asp-controller="Blog" asp-action="Index" class="hj-nav-link @(currentController == "Blog" ? "active" : "")">Cộng đồng</a></li>
             </ul>
 
             <div class="d-flex align-items-center gap-3">

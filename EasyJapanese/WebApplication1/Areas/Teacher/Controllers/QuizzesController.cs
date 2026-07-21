@@ -43,12 +43,24 @@ namespace WebApplication1.Areas.Teacher.Controllers
                 .Where(c => c.CreatedBy == mentorId)
                 .ToListAsync();
 
+            // Load lessons grouped by course for LessonId dropdown
+            var courseIds = courses.Select(c => c.CourseId).ToList();
+            var lessonsByCourse = await _context.Lessons
+                .Where(l => courseIds.Contains(l.CourseId))
+                .OrderBy(l => l.CourseId).ThenBy(l => l.SortOrder)
+                .Select(l => new { l.LessonId, l.CourseId, l.Title })
+                .ToListAsync();
+            ViewBag.LessonsByCourse = lessonsByCourse
+                .GroupBy(l => l.CourseId)
+                .ToDictionary(g => g.Key, g => g.Select(l => new { l.LessonId, l.Title }).ToList());
+
             ViewBag.Courses = courses;
             ViewBag.SelectedCourseId = courseId;
 
             // Query quizzes
             var query = _context.Quizzes
                 .Include(q => q.Course)
+                .Include(q => q.Lesson)
                 .Include(q => q.Questions)
                 .Where(q => q.Course.CreatedBy == mentorId);
 
@@ -65,13 +77,20 @@ namespace WebApplication1.Areas.Teacher.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(Quiz model)
+        public async Task<IActionResult> Create(Quiz model, int? lessonId)
         {
             var user = HttpContext.Session.GetObject<CoreLibrary.Authentication.CurrentUser>(CoreLibrary.Authentication.IAuthenticationService.SessionKeyCurrentUser);
             var mentorId = user?.AccountId ?? 0;
 
             var courseExists = await _context.Courses.AnyAsync(c => c.CourseId == model.CourseId && c.CreatedBy == mentorId);
             if (!courseExists) return Forbid();
+
+            if (lessonId.HasValue)
+            {
+                var lessonValid = await _context.Lessons.AnyAsync(l => l.LessonId == lessonId.Value && l.CourseId == model.CourseId);
+                if (!lessonValid) return BadRequest("Bài học không thuộc khóa học đã chọn.");
+                model.LessonId = lessonId;
+            }
 
             model.CreatedAt = DateTime.UtcNow;
             model.SortOrder = 0;
@@ -84,7 +103,7 @@ namespace WebApplication1.Areas.Teacher.Controllers
         }
 
         [HttpPost("edit")]
-        public async Task<IActionResult> Edit(Quiz model)
+        public async Task<IActionResult> Edit(Quiz model, int? lessonId)
         {
             var user = HttpContext.Session.GetObject<CoreLibrary.Authentication.CurrentUser>(CoreLibrary.Authentication.IAuthenticationService.SessionKeyCurrentUser);
             var mentorId = user?.AccountId ?? 0;
@@ -95,10 +114,17 @@ namespace WebApplication1.Areas.Teacher.Controllers
 
             if (quiz == null) return NotFound();
 
+            if (lessonId.HasValue)
+            {
+                var lessonValid = await _context.Lessons.AnyAsync(l => l.LessonId == lessonId.Value && l.CourseId == model.CourseId);
+                if (!lessonValid) return BadRequest("Bài học không thuộc khóa học đã chọn.");
+            }
+
             quiz.Title = model.Title;
             quiz.Duration = model.Duration;
             quiz.PassScore = model.PassScore;
             quiz.CourseId = model.CourseId;
+            quiz.LessonId = lessonId;
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Cập nhật Quiz thành công.";

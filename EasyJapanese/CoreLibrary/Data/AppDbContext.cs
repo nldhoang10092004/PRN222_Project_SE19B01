@@ -32,6 +32,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Flashcard> Flashcards { get; set; }
 
+    public virtual DbSet<FlashcardSet> FlashcardSets { get; set; }
+
     public virtual DbSet<JlptLevel> JlptLevels { get; set; }
 
     public virtual DbSet<KanjiEntry> KanjiEntries { get; set; }
@@ -228,15 +230,39 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("decimal(4, 2)")
                 .HasColumnName("EFactor");
             entity.Property(e => e.FrontText).HasMaxLength(300);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
 
             entity.HasOne(d => d.Course).WithMany(p => p.Flashcards)
                 .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("FK__Flashcard__Cours__3493CFA7");
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.FlashcardSet).WithMany(p => p.Flashcards)
+                .HasForeignKey(d => d.FlashcardSetId)
+                .HasConstraintName("FK_Flashcards_FlashcardSet");
 
             entity.HasOne(d => d.Student).WithMany(p => p.Flashcards)
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Flashcard__Stude__339FAB6E");
+        });
+
+        modelBuilder.Entity<FlashcardSet>(entity =>
+        {
+            entity.HasKey(e => e.FlashcardSetId).HasName("PK_FlashcardSets");
+
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Course).WithMany()
+                .HasForeignKey(d => d.CourseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FlashcardSets_Course");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK_FlashcardSets_Creator");
         });
 
         modelBuilder.Entity<JlptLevel>(entity =>
@@ -397,6 +423,8 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.QuizId).HasName("PK__Quizzes__8B42AE8E5A0B999C");
 
+            entity.HasIndex(e => e.LessonId, "IX_Quizzes_LessonId");
+
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.PassScore).HasDefaultValue(60);
             entity.Property(e => e.Title).HasMaxLength(200);
@@ -405,6 +433,11 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.CourseId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Quizzes__CourseI__25518C17");
+
+            entity.HasOne(d => d.Lesson).WithMany(p => p.Quizzes)
+                .HasForeignKey(d => d.LessonId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Quizzes_Lessons");
         });
 
         modelBuilder.Entity<QuizAttempt>(entity =>

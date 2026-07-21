@@ -1,6 +1,7 @@
 ﻿using CoreLibrary.Authentication;
 using CoreLibrary.Const;
 using CoreLibrary.Data;
+using CoreLibrary.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoreWeb.Areas.Learner.Models;
@@ -223,6 +224,24 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .OrderBy(m => m.SortOrder)
                 .ToListAsync();
 
+            // Quiz gắn với lesson này (nếu có) + attempt tốt nhất của student hiện tại
+            var lessonQuizzes = await _db.Quizzes
+                .Where(q => q.LessonId == lesson.LessonId)
+                .Include(q => q.Questions)
+                .OrderBy(q => q.SortOrder).ThenBy(q => q.CreatedAt)
+                .ToListAsync();
+
+            Dictionary<int, QuizAttempt> bestAttempts = new();
+            if (studentId.HasValue && lessonQuizzes.Any())
+            {
+                var quizIds = lessonQuizzes.Select(q => q.QuizId).ToList();
+                bestAttempts = await _db.QuizAttempts
+                    .Where(a => a.StudentId == studentId.Value && quizIds.Contains(a.QuizId))
+                    .GroupBy(a => a.QuizId)
+                    .Select(g => g.OrderByDescending(a => a.Score).First())
+                    .ToDictionaryAsync(a => a.QuizId);
+            }
+
             var vm = new LessonViewModel
             {
                 LessonId = lesson.LessonId,
@@ -254,7 +273,18 @@ namespace WebApplication1.Areas.Learner.Controllers
                 KanjiItems = MapExercises(exercises, ExerciseTypeConst.KANJI),
                 GrammarItems = MapExercises(exercises, ExerciseTypeConst.GRAMMAR),
                 ReadingItems = MapExercises(exercises, ExerciseTypeConst.READING),
-                ListeningItems = MapExercises(exercises, ExerciseTypeConst.LISTENING)
+                ListeningItems = MapExercises(exercises, ExerciseTypeConst.LISTENING),
+
+                QuizItems = lessonQuizzes.Select(q => new LessonQuizItemViewModel
+                {
+                    QuizId = q.QuizId,
+                    Title = q.Title,
+                    Duration = q.Duration,
+                    PassScore = q.PassScore,
+                    QuestionCount = q.Questions?.Count ?? 0,
+                    BestScore = bestAttempts.TryGetValue(q.QuizId, out var a) ? a.Score : (int?)null,
+                    HasPassed = bestAttempts.TryGetValue(q.QuizId, out var p) && p.IsPassed
+                }).ToList()
             };
 
             return View(vm);

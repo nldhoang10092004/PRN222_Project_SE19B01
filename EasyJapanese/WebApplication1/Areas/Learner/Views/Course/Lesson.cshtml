@@ -126,6 +126,10 @@
             {
                 <div class="lesson-tab-item" data-panel="panel-listening">Nghe</div>
             }
+            @if (Model.QuizItems.Any())
+            {
+                <div class="lesson-tab-item" data-panel="panel-quiz">Bài tập</div>
+            }
             <div class="lesson-tab-item" data-panel="panel-materials">Tài liệu</div>
         </div>
 
@@ -265,6 +269,41 @@
 
                             <div id="practice-@item.ExerciseId" class="practice-area"></div>
                         </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- ═══ PANEL: BÀI TẬP (QUIZ) ═══ -->
+        @if (Model.QuizItems.Any())
+        {
+            <div id="panel-quiz" class="lesson-tab-panel">
+                @foreach (var quiz in Model.QuizItems)
+                {
+                    <div class="quiz-card @(quiz.HasPassed ? "passed" : "")">
+                        <div class="quiz-card-info">
+                            <div class="quiz-card-title">@quiz.Title</div>
+                            <div class="quiz-card-meta">
+                                <span>@(quiz.Duration.HasValue ? $"{quiz.Duration} phút" : "Không giới hạn")</span>
+                                <span>•</span>
+                                <span>@quiz.QuestionCount câu hỏi</span>
+                                <span>•</span>
+                                <span>Đạt từ @quiz.PassScore%</span>
+                            </div>
+                            @if (quiz.BestScore.HasValue)
+                            {
+                                <div class="quiz-card-result @(quiz.HasPassed ? "is-pass" : "is-fail")">
+                                    Lần tốt nhất: @quiz.BestScore%
+                                    @if (quiz.HasPassed)
+                                    {
+                                        <span class="quiz-card-badge">Đã đạt</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <a class="btn-quiz-card" href="/learn/Quiz/Take?quizId=@quiz.QuizId">
+                            @(quiz.BestScore.HasValue ? "Làm lại" : "Bắt đầu làm")
+                        </a>
                     </div>
                 }
             </div>

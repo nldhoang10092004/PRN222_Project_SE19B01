@@ -3,6 +3,13 @@
     Layout = "~/Areas/Teacher/Views/Shared/_TeacherLayout.cshtml";
     var courses = ViewBag.Courses as List<CoreLibrary.Data.Entities.Course> ?? new List<CoreLibrary.Data.Entities.Course>();
     int? selectedCourseId = ViewBag.SelectedCourseId;
+    var lessonsByCourse = ViewBag.LessonsByCourse as Dictionary<int, List<dynamic>> ?? new Dictionary<int, List<dynamic>>();
+    var lessonsJson = System.Text.Json.JsonSerializer.Serialize(
+        lessonsByCourse.ToDictionary(
+            kv => kv.Key,
+            kv => kv.Value.Select(l => new { lessonId = (int)l.LessonId, title = (string)l.Title }).ToList<object>()
+        )
+    );
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -59,6 +66,12 @@
                         <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 fw-bold small">
                             @quiz.Course?.Title
                         </span>
+                        @if (quiz.Lesson != null)
+                        {
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold small ms-1">
+                                @quiz.Lesson.Title
+                            </span>
+                        }
                         
                         <div class="dropdown">
                             <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" aria-expanded="false">
@@ -123,11 +136,17 @@
                         <div class="modal-body p-4">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">Khóa học liên kết</label>
-                                <select name="CourseId" class="form-select rounded-3" required>
+                                <select name="CourseId" class="form-select rounded-3 quiz-course-select" required>
                                     @foreach (var c in courses)
                                     {
                                         <option value="@c.CourseId" selected="@(quiz.CourseId == c.CourseId)">@c.Title</option>
                                     }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Bài học (tùy chọn)</label>
+                                <select name="lessonId" class="form-select rounded-3 quiz-lesson-select" data-selected="@quiz.LessonId">
+                                    <option value="">-- Không gắn với bài học cụ thể --</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -218,11 +237,17 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">Khóa học liên kết</label>
-                        <select name="CourseId" class="form-select rounded-3" required>
+                        <select name="CourseId" class="form-select rounded-3 quiz-course-select" required>
                             @foreach (var c in courses)
                             {
                                 <option value="@c.CourseId" selected="@(selectedCourseId == c.CourseId)">@c.Title</option>
                             }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Bài học (tùy chọn)</label>
+                        <select name="lessonId" class="form-select rounded-3 quiz-lesson-select">
+                            <option value="">-- Không gắn với bài học cụ thể --</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -308,3 +333,29 @@
         </div>
     </div>
 </div>
+
+<script>
+    const lessonsByCourse = @Html.Raw(lessonsJson);
+
+    function populateLessonSelect(courseSelect, lessonSelect) {
+        const courseId = courseSelect.value;
+        const lessons = lessonsByCourse[courseId] || [];
+        const selected = lessonSelect.getAttribute('data-selected') || '';
+        lessonSelect.innerHTML = '<option value="">-- Không gắn với bài học cụ thể --</option>';
+        lessons.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.lessonId;
+            opt.textContent = l.title;
+            if (String(l.lessonId) === selected) opt.selected = true;
+            lessonSelect.appendChild(opt);
+        });
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        const cs = modal.querySelector('.quiz-course-select');
+        const ls = modal.querySelector('.quiz-lesson-select');
+        if (!cs || !ls) return;
+        populateLessonSelect(cs, ls);
+        cs.addEventListener('change', () => populateLessonSelect(cs, ls));
+    });
+</script>

@@ -1,0 +1,64 @@
+@model WebApplication1.Areas.Learner.Controllers.PracticeIndexViewModel
+@{
+    ViewData["Title"] = "Luyện tập - Hi Japan!";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+<main class="hj-content">
+    <div class="container py-5">
+
+        <div class="mb-5">
+            <span class="hj-eyebrow">Luyện tập</span>
+            <h2 class="fw-bold mb-2" style="font-family:'Outfit',sans-serif;color:var(--color-navy);">
+                Chọn kỹ năng bạn muốn luyện hôm nay
+            </h2>
+            <p class="text-muted mb-0">Mỗi ngày một chút — đều đặn là chìa khóa để tiến bộ.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <a href="/learn/Practice/Listening" class="hj-practice-card text-decoration-none">
+                    <span class="hj-practice-card-mark hj-practice-card-mark--red">聞</span>
+                    <h5 class="hj-practice-card-title">Luyện Nghe</h5>
+                    <p class="hj-practice-card-desc">Bài nghe đa dạng từ N5 → N1 kèm transcript và câu hỏi.</p>
+                    <span class="hj-practice-card-link">Bắt đầu →</span>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <a href="/learn/Practice/Speaking" class="hj-practice-card hj-practice-card--soon text-decoration-none">
+                    <span class="hj-practice-card-mark">話</span>
+                    <h5 class="hj-practice-card-title">Luyện Nói</h5>
+                    <p class="hj-practice-card-desc">Phát âm chuẩn và hội thoại với AI — tính năng đang phát triển.</p>
+                    <span class="hj-practice-card-link">Sắp ra mắt</span>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <a href="/learn/Practice/Reading" class="hj-practice-card text-decoration-none">
+                    <span class="hj-practice-card-mark">読</span>
+                    <h5 class="hj-practice-card-title">Luyện Đọc</h5>
+                    <p class="hj-practice-card-desc">Đọc hiểu đa chủ đề, từ vựng Hán tự và ngữ pháp đi kèm.</p>
+                    <span class="hj-practice-card-link">Bắt đầu →</span>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <a asp-area="Learner" asp-controller="Flashcard" asp-action="Review"
+                   class="hj-practice-card text-decoration-none">
+                    <span class="hj-practice-card-mark">語</span>
+                    <h5 class="hj-practice-card-title">Flashcard</h5>
+                    <p class="hj-practice-card-desc">
+                        @(Model.FlashcardDueCount > 0
+                            ? $"Có <strong>{Model.FlashcardDueCount}</strong> thẻ cần ôn hôm nay"
+                            : (Model.FlashcardTotal > 0 ? "Ôn tập từ vựng SRS của bạn" : "Tạo bộ flashcard đầu tiên"))
+                    </p>
+                    <span class="hj-practice-card-link">
+                        @(Model.FlashcardDueCount > 0 ? "Ôn ngay →" : "Mở Flashcard →")
+                    </span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>

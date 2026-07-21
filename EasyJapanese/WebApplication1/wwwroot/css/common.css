@@ -675,3 +675,79 @@ a:hover {
   border-color: var(--color-surface-muted);
   color: var(--color-primary-hover);
 }
+
+/* =========================================
+   Practice page - skill cards
+   ========================================= */
+.hj-practice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%;
+  padding: 1.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  color: var(--color-text);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hj-practice-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+  color: var(--color-text);
+}
+
+.hj-practice-card-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--color-navy);
+  background-color: var(--color-navy-light);
+  margin-bottom: 1.25rem;
+}
+
+.hj-practice-card-mark--red {
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.hj-practice-card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.hj-practice-card-desc {
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+  flex: 1;
+}
+
+.hj-practice-card-link {
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+}
+
+.hj-practice-card-link--soon {
+  color: var(--color-warning);
+}
+
+.hj-practice-card--soon {
+  background-color: var(--color-bg-soft);
+}
+
+.hj-practice-card--soon .hj-practice-card-link {
+  color: var(--color-text-subtle);
+}
