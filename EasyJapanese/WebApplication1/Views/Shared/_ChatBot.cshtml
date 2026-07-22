@@ -1,0 +1,96 @@
+﻿<div id="hjChatbot" class="hj-chatbot">
+    <button type="button"
+            id="hjChatbotToggle"
+            class="hj-chatbot-toggle"
+            aria-label="Mở trợ lý Hi Japan">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+
+    <div id="hjChatbotPanel" class="hj-chatbot-panel">
+        <div class="hj-chatbot-header">
+            <div class="hj-chatbot-header-title">
+                <i class="bi bi-robot"></i>
+                Trợ lý Hi Japan!
+            </div>
+
+            <button type="button"
+                    id="hjChatbotClose"
+                    class="hj-chatbot-close"
+                    aria-label="Đóng chatbot">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Hai tab -->
+        <div class="hj-chatbot-tabs">
+            <button type="button"
+                    class="hj-chatbot-tab active"
+                    data-tab="chat">
+                <i class="bi bi-chat-left-text"></i>
+                Trò chuyện
+            </button>
+
+            <button type="button"
+                    class="hj-chatbot-tab"
+                    data-tab="dictionary">
+                <i class="bi bi-book"></i>
+                Từ điển
+            </button>
+        </div>
+
+        <!-- TAB CHAT -->
+        <div id="hjChatTab"
+             class="hj-chatbot-tab-content active">
+
+            <div id="hjChatMessages"
+                 class="hj-chatbot-messages">
+
+                <div class="hj-chatbot-msg bot">Xin chào! Bạn có thể hỏi mình về tiếng Nhật, lộ trình học hoặc nội dung bài học.</div>
+            </div>
+
+            <form id="hjChatForm"
+                  class="hj-chatbot-input-bar">
+
+                <input type="text"
+                       id="hjChatInput"
+                       placeholder="Nhập câu hỏi..."
+                       autocomplete="off" />
+
+                <button type="submit"
+                        aria-label="Gửi câu hỏi">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- TAB TỪ ĐIỂN -->
+        <div id="hjDictionaryTab"
+             class="hj-chatbot-tab-content">
+
+            <div id="hjDictionaryMessages"
+                 class="hj-chatbot-messages">
+
+                <div class="hj-chatbot-msg bot">Nhập một từ tiếng Nhật để tra nghĩa. 
+Ví dụ: <strong>"飲む nghĩa là gì"</strong><strong>, "ありがとう"</strong>.
+                </div>
+            </div>
+
+            <form id="hjDictionaryForm"
+                  class="hj-chatbot-input-bar">
+
+                <input type="text"
+                       id="hjDictionaryInput"
+                       placeholder="Nhập từ tiếng Nhật cần tra..."
+                       autocomplete="off" />
+
+                <button type="submit"
+                        aria-label="Tra từ">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("/Views/Shared/_ChatbotStyle.cshtml")
+@await Html.PartialAsync("/Views/Shared/_ChatbotScript.cshtml")

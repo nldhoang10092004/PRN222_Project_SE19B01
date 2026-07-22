@@ -1,0 +1,271 @@
+﻿<style>
+    .hj-chatbot {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1050;
+    }
+
+    .hj-chatbot-toggle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--color-primary, #c8102e);
+        color: #fff;
+        border: none;
+        font-size: 22px;
+        box-shadow: 0 6px 18px rgba(200,16,46,.35);
+        cursor: pointer;
+        transition: transform .15s;
+    }
+
+        .hj-chatbot-toggle:hover {
+            transform: scale(1.06);
+        }
+
+    .hj-chatbot-panel {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+        width: 360px;
+        height: 520px;
+        max-height: calc(100vh - 120px);
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,.18);
+        border: 1px solid var(--color-border, #e4e0db);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+        .hj-chatbot-panel.open {
+            display: flex;
+        }
+
+    .hj-chatbot-header {
+        flex-shrink: 0;
+        background: var(--color-primary, #c8102e);
+        color: #fff;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .hj-chatbot-header-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .hj-chatbot-close {
+        width: 30px;
+        height: 30px;
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        color: #fff;
+        opacity: .85;
+        cursor: pointer;
+    }
+
+        .hj-chatbot-close:hover {
+            background: rgba(255,255,255,.15);
+            opacity: 1;
+        }
+
+    /* Hai tab Chat và Từ điển */
+    .hj-chatbot-tabs {
+        flex-shrink: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: #fff;
+        border-bottom: 1px solid var(--color-border, #e4e0db);
+    }
+
+    .hj-chatbot-tab {
+        position: relative;
+        padding: 12px 8px;
+        border: none;
+        background: #fff;
+        color: #6b7280;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+    }
+
+        .hj-chatbot-tab i {
+            margin-right: 5px;
+        }
+
+        .hj-chatbot-tab:hover {
+            color: var(--color-primary, #c8102e);
+            background: #fff7f8;
+        }
+
+        .hj-chatbot-tab.active {
+            color: var(--color-primary, #c8102e);
+        }
+
+            .hj-chatbot-tab.active::after {
+                content: "";
+                position: absolute;
+                left: 20%;
+                right: 20%;
+                bottom: 0;
+                height: 3px;
+                border-radius: 999px 999px 0 0;
+                background: var(--color-primary, #c8102e);
+            }
+
+    /* Nội dung từng tab */
+    .hj-chatbot-tab-content {
+        display: none;
+        flex: 1;
+        min-height: 0;
+        flex-direction: column;
+    }
+
+        .hj-chatbot-tab-content.active {
+            display: flex;
+        }
+
+    .hj-chatbot-messages {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: #f7f5f2;
+    }
+
+    .hj-chatbot-msg {
+        max-width: 85%;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 13.5px;
+        line-height: 1.55;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+
+        .hj-chatbot-msg.user {
+            align-self: flex-end;
+            background: var(--color-primary, #c8102e);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .hj-chatbot-msg.bot {
+            align-self: flex-start;
+            background: #fff;
+            border: 1px solid var(--color-border, #e4e0db);
+            color: #1a1a1a;
+            border-bottom-left-radius: 4px;
+        }
+
+    .hj-chatbot-dict-card {
+        align-self: flex-start;
+        width: 100%;
+        max-width: 100%;
+        background: #fff8f8;
+        border: 1px solid rgba(200,16,46,.25);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .hj-chatbot-dict-word {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--color-navy, #1a2744);
+    }
+
+    .hj-chatbot-dict-reading {
+        font-size: 12.5px;
+        color: #9ca3af;
+        margin-bottom: 6px;
+    }
+
+    .hj-chatbot-dict-meaning {
+        color: #4b5563;
+        line-height: 1.6;
+    }
+
+    .hj-chatbot-typing {
+        align-self: flex-start;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid var(--color-border, #e4e0db);
+        font-size: 12.5px;
+        color: #9ca3af;
+    }
+
+    .hj-chatbot-input-bar {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        border-top: 1px solid var(--color-border, #e4e0db);
+        background: #fff;
+    }
+
+        .hj-chatbot-input-bar input {
+            min-width: 0;
+            flex: 1;
+            border: 1px solid var(--color-border, #e4e0db);
+            border-radius: 999px;
+            padding: 9px 16px;
+            font-size: 13.5px;
+            outline: none;
+        }
+
+            .hj-chatbot-input-bar input:focus {
+                border-color: var(--color-primary, #c8102e);
+                box-shadow: 0 0 0 3px rgba(200,16,46,.08);
+            }
+
+            .hj-chatbot-input-bar input:disabled {
+                background: #f3f4f6;
+            }
+
+        .hj-chatbot-input-bar button {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--color-primary, #c8102e);
+            color: #fff;
+            border: none;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+            .hj-chatbot-input-bar button:hover {
+                opacity: .9;
+            }
+
+    @@media (max-width: 480px) {
+        .hj-chatbot {
+            right: 16px;
+            bottom: 16px;
+        }
+
+        .hj-chatbot-panel {
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            bottom: 86px;
+            width: auto;
+            height: min(520px, calc(100vh - 110px));
+        }
+    }
+</style>
