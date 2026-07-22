@@ -1,0 +1,306 @@
+﻿<script>
+    (function () {
+        const toggleBtn = document.getElementById('hjChatbotToggle');
+        const closeBtn = document.getElementById('hjChatbotClose');
+        const panel = document.getElementById('hjChatbotPanel');
+
+        const tabButtons = document.querySelectorAll('.hj-chatbot-tab');
+        const chatTab = document.getElementById('hjChatTab');
+        const dictionaryTab = document.getElementById('hjDictionaryTab');
+
+        const chatForm = document.getElementById('hjChatForm');
+        const chatInput = document.getElementById('hjChatInput');
+        const chatMessages = document.getElementById('hjChatMessages');
+
+        const dictionaryForm = document.getElementById('hjDictionaryForm');
+        const dictionaryInput = document.getElementById('hjDictionaryInput');
+        const dictionaryMessages = document.getElementById('hjDictionaryMessages');
+
+        if (!toggleBtn || !closeBtn || !panel ||
+            !chatForm || !chatInput || !chatMessages ||
+            !dictionaryForm || !dictionaryInput || !dictionaryMessages) {
+            console.error('Không tìm thấy thành phần chatbot.');
+            return;
+        }
+
+        let activeTab = 'chat';
+        let history = [];
+
+        toggleBtn.addEventListener('click', function () {
+            panel.classList.toggle('open');
+
+            if (panel.classList.contains('open')) {
+                focusCurrentInput();
+            }
+        });
+
+        closeBtn.addEventListener('click', function () {
+            panel.classList.remove('open');
+        });
+
+        tabButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                activeTab = button.dataset.tab;
+
+                tabButtons.forEach(function (item) {
+                    item.classList.toggle(
+                        'active',
+                        item.dataset.tab === activeTab
+                    );
+                });
+
+                chatTab.classList.toggle(
+                    'active',
+                    activeTab === 'chat'
+                );
+
+                dictionaryTab.classList.toggle(
+                    'active',
+                    activeTab === 'dictionary'
+                );
+
+                focusCurrentInput();
+            });
+        });
+
+        function focusCurrentInput() {
+            setTimeout(function () {
+                if (activeTab === 'dictionary') {
+                    dictionaryInput.focus();
+                } else {
+                    chatInput.focus();
+                }
+            }, 50);
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(
+                /[&<>"']/g,
+                function (c) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    }[c];
+                }
+            );
+        }
+
+        function appendMessage(container, text, type) {
+            const div = document.createElement('div');
+
+            div.className = 'hj-chatbot-msg ' + type;
+            div.textContent = text;
+
+            container.appendChild(div);
+            scrollToBottom(container);
+        }
+
+        function appendDictionaryCard(container, card) {
+            if (!card) {
+                return false;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'hj-chatbot-dict-card';
+
+            div.innerHTML =
+                '<div class="hj-chatbot-dict-word">' +
+                    escapeHtml(card.word || '') +
+                '</div>' +
+
+                (
+                    card.reading
+                        ? '<div class="hj-chatbot-dict-reading">' +
+                            escapeHtml(card.reading) +
+                          '</div>'
+                        : ''
+                ) +
+
+                '<div class="hj-chatbot-dict-meaning">' +
+                    escapeHtml(
+                        (card.meanings || []).join('; ')
+                    ) +
+                '</div>';
+
+            container.appendChild(div);
+            scrollToBottom(container);
+
+            return true;
+        }
+
+        function showTyping(container, id, text) {
+            hideTyping(id);
+
+            const div = document.createElement('div');
+            div.className = 'hj-chatbot-typing';
+            div.id = id;
+
+            div.innerHTML =
+                '<i class="bi bi-three-dots"></i> ' +
+                escapeHtml(text);
+
+            container.appendChild(div);
+            scrollToBottom(container);
+        }
+
+        function hideTyping(id) {
+            const el = document.getElementById(id);
+
+            if (el) {
+                el.remove();
+            }
+        }
+
+        function scrollToBottom(container) {
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendRequest(payload) {
+            const response = await fetch('/Chat/SendMessage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error ||
+                    data.reply ||
+                    'Có lỗi xảy ra.'
+                );
+            }
+
+            return data;
+        }
+
+        // TAB CHAT
+        chatForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const text = chatInput.value.trim();
+
+            if (!text) {
+                return;
+            }
+
+            appendMessage(chatMessages, text, 'user');
+
+            chatInput.value = '';
+            chatInput.disabled = true;
+
+            showTyping(
+                chatMessages,
+                'hjChatTyping',
+                'Đang trả lời...'
+            );
+
+            try {
+                const data = await sendRequest({
+                    message: text,
+                    mode: 'chat',
+                    history: history
+                });
+
+                hideTyping('hjChatTyping');
+
+                appendMessage(
+                    chatMessages,
+                    data.reply ||
+                    'Mình chưa có câu trả lời phù hợp.',
+                    'bot'
+                );
+
+                history.push({
+                    role: 'user',
+                    content: text
+                });
+
+                history.push({
+                    role: 'model',
+                    content: data.reply || ''
+                });
+            } catch (error) {
+                hideTyping('hjChatTyping');
+
+                appendMessage(
+                    chatMessages,
+                    error.message ||
+                    'Xin lỗi, có lỗi xảy ra.',
+                    'bot'
+                );
+            } finally {
+                chatInput.disabled = false;
+                chatInput.focus();
+            }
+        });
+
+        // TAB TỪ ĐIỂN
+        dictionaryForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const word = dictionaryInput.value.trim();
+
+            if (!word) {
+                return;
+            }
+
+            appendMessage(
+                dictionaryMessages,
+                word,
+                'user'
+            );
+
+            dictionaryInput.value = '';
+            dictionaryInput.disabled = true;
+
+            showTyping(
+                dictionaryMessages,
+                'hjDictionaryTyping',
+                'Đang tra từ...'
+            );
+
+            try {
+                const data = await sendRequest({
+                    message: word,
+                    mode: 'dictionary',
+                    history: []
+                });
+
+                hideTyping('hjDictionaryTyping');
+
+                const hasCard = appendDictionaryCard(
+                    dictionaryMessages,
+                    data.dictionaryCard
+                );
+
+                if (!hasCard) {
+                    appendMessage(
+                        dictionaryMessages,
+                        data.reply ||
+                        'Không tìm thấy từ này.',
+                        'bot'
+                    );
+                }
+            } catch (error) {
+                hideTyping('hjDictionaryTyping');
+
+                appendMessage(
+                    dictionaryMessages,
+                    error.message ||
+                    'Không thể tra từ lúc này.',
+                    'bot'
+                );
+            } finally {
+                dictionaryInput.disabled = false;
+                dictionaryInput.focus();
+            }
+        });
+    })();
+</script>

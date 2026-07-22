@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -14,6 +14,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    @await Html.PartialAsync("_ChatBot")
     @await Html.PartialAsync("_Header")
 
     <main role="main">
