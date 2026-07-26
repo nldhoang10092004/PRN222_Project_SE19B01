@@ -50,14 +50,18 @@
                         </div>
                     </div>
 
-                    <h5 class="fw-bold mb-3">@q.QuestionText</h5>
+                    <h5 class="fw-bold mb-3 text-dark">@q.QuestionText</h5>
 
                     <div class="d-flex flex-column gap-2 mt-2">
                         @foreach (var opt in q.AnswerOptions)
                         {
-                            <div class="d-flex align-items-center p-3 rounded-3 border @(opt.IsCorrect ? "bg-success bg-opacity-5 border-success text-success fw-bold" : "bg-light border-light text-dark")">
-                                <i class="bi @(opt.IsCorrect ? "bi-check-circle-fill" : "bi-circle") me-3"></i>
-                                <span>@opt.AnswerText</span>
+                            <div class="d-flex align-items-center p-3 rounded-3 border @(opt.IsCorrect ? "bg-success bg-opacity-10 border-success fw-bold" : "bg-light border-light text-dark")">
+                                <i class="bi @(opt.IsCorrect ? "bi-check-circle-fill text-success" : "bi-circle text-muted") me-3 fs-5"></i>
+                                <span class="fs-6" style="color: @(opt.IsCorrect ? "#146c43" : "#212529") !important;">@opt.AnswerText</span>
+                                @if (opt.IsCorrect)
+                                {
+                                    <span class="badge bg-success ms-auto px-2 py-1 small">Đáp án đúng</span>
+                                }
                             </div>
                         }
                     </div>
@@ -65,7 +69,7 @@
 
                 <!-- Modal Sửa câu hỏi -->
                 <div class="modal fade" id="editModal_@q.QuestionId" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
                         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                             <div class="modal-header bg-primary text-white py-3">
                                 <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Sửa câu hỏi #@index</h5>
@@ -76,24 +80,28 @@
                                 <div class="modal-body p-4">
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold text-muted">Nội dung câu hỏi</label>
-                                        <textarea name="questionText" class="form-control rounded-3" rows="3" required>@q.QuestionText</textarea>
+                                        <textarea name="questionText" class="form-control rounded-3 text-dark bg-white" rows="3" required style="color: #212529 !important; background-color: #ffffff !important;">@q.QuestionText</textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold text-muted">Số điểm</label>
-                                        <input type="number" name="points" class="form-control rounded-3" value="@q.Points" min="1" required />
+                                        <input type="number" name="points" class="form-control rounded-3 text-dark bg-white" value="@q.Points" min="1" required style="color: #212529 !important; background-color: #ffffff !important;" />
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted d-block">Các lựa chọn & Đáp án đúng</label>
-                                        <div class="d-flex flex-column gap-3 mt-2">
+                                        <label class="form-label small fw-bold text-muted d-block mb-2">Các lựa chọn & Chọn 1 đáp án đúng</label>
+                                        <div class="d-flex flex-column gap-3">
                                             @for (int i = 0; i < 4; i++)
                                             {
                                                 var val = i < optsList.Count ? optsList[i].AnswerText : "";
+                                                bool isCorrectOpt = (i == correctIdx);
                                                 <div class="input-group">
-                                                    <div class="input-group-text bg-light border-end-0">
-                                                        <input type="radio" name="correctIndex" value="@i" @(i == correctIdx ? "checked" : "") class="form-check-input" />
+                                                    <div class="input-group-text border-end-0 @(isCorrectOpt ? "bg-success bg-opacity-10 border-success" : "bg-light")">
+                                                        <input type="radio" name="correctIndex" value="@i" @(isCorrectOpt ? "checked" : "") class="form-check-input me-2" id="edit_opt_@(q.QuestionId)_@i" />
+                                                        <label class="form-check-label small fw-bold @(isCorrectOpt ? "text-success" : "text-muted")" for="edit_opt_@(q.QuestionId)_@i">
+                                                            @(isCorrectOpt ? "Đúng" : $"Đáp án {i+1}")
+                                                        </label>
                                                     </div>
-                                                    <input type="text" name="options" class="form-control" value="@val" placeholder="Đáp án @(i+1)" required />
+                                                    <input type="text" name="options" class="form-control text-dark bg-white fw-semibold" value="@val" placeholder="Nhập đáp án @(i+1)..." required style="color: #212529 !important; background-color: #ffffff !important; border-color: @(isCorrectOpt ? "#198754" : "#dee2e6") !important;" />
                                                 </div>
                                             }
                                         </div>
@@ -129,30 +137,32 @@
             <form asp-action="CreateQuestion" asp-route-testId="@Model.TestId" method="post">
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Nội dung câu hỏi</label>
-                    <textarea name="questionText" class="form-control rounded-3" rows="3" placeholder="Nhập câu hỏi..." required></textarea>
+                    <textarea name="questionText" class="form-control rounded-3 text-dark bg-white" rows="3" placeholder="Nhập câu hỏi..." required style="color: #212529 !important; background-color: #ffffff !important;"></textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Số điểm</label>
-                    <input type="number" name="points" class="form-control rounded-3" value="10" min="1" required />
+                    <input type="number" name="points" class="form-control rounded-3 text-dark bg-white" value="10" min="1" required style="color: #212529 !important; background-color: #ffffff !important;" />
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label small fw-bold text-muted d-block">Các lựa chọn & Đáp án đúng</label>
-                    <div class="d-flex flex-column gap-3 mt-2">
+                    <label class="form-label small fw-bold text-muted d-block mb-2">Các lựa chọn & Chọn 1 đáp án đúng</label>
+                    <div class="d-flex flex-column gap-3">
                         @for (int i = 0; i < 4; i++)
                         {
                             <div class="input-group">
-                                <div class="input-group-text bg-light border-end-0">
-                                    <input type="radio" name="correctIndex" value="@i" @(i == 0 ? "checked" : "") class="form-check-input" />
+                                <div class="input-group-text bg-light border-end-0 text-muted">
+                                    <input type="radio" name="correctIndex" value="@i" @(i == 0 ? "checked" : "") class="form-check-input me-2" id="create_opt_@i" />
+                                    <label class="form-check-label small fw-bold" for="create_opt_@i">
+                                        @(i == 0 ? "Đúng" : $"Đáp án {i+1}")
+                                    </label>
                                 </div>
-                                <input type="text" name="options" class="form-control" placeholder="Đáp án @(i+1)" required />
+                                <input type="text" name="options" class="form-control text-dark bg-white" placeholder="Nhập đáp án @(i+1)..." required style="color: #212529 !important; background-color: #ffffff !important;" />
                             </div>
                         }
                     </div>
-                    <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Tích chọn nút tròn bên trái đáp án để chọn làm đáp án đúng.</small>
                 </div>
 
-                <button type="submit" class="btn btn-danger w-100 rounded-3 py-2 fw-bold">
+                <button type="submit" class="btn btn-jp-primary w-100 py-2.5 rounded-3 fw-bold">
                     <i class="bi bi-check-lg me-1"></i> Lưu câu hỏi
                 </button>
             </form>
