@@ -27,6 +27,7 @@ namespace CoreLibrary.Storage
                 ContentType = contentType,
                 // R2 không hỗ trợ STREAMING-AWS4-HMAC-SHA256-PAYLOAD (chunked signing) của AWS SDK
                 DisablePayloadSigning = true,
+                UseChunkEncoding = false,
                 // Cache ảnh 1 năm, video 30 ngày
                 Headers = { CacheControl = contentType.StartsWith("video/") ? "public, max-age=2592000" : "public, max-age=31536000" }
             };

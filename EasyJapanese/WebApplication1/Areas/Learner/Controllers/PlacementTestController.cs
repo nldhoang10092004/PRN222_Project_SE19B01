@@ -186,30 +186,15 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .LevelId;
         }
 
-        private async Task SaveResultIfLoggedIn(
-            int testId,
-            int score,
-            int totalPoints,
-            int recommendedLevelId)
+        private async Task<bool> SaveResultIfLoggedIn(
+            int testId, int score, int totalPoints, int recommendedLevelId)
         {
-            var currentUser = HttpContext.Session.GetObject<CurrentUser>(
-                IAuthenticationService.SessionKeyCurrentUser
-            );
-
-            if (currentUser == null)
-            {
-                return;
-            }
+            var currentUser = await _auth.GetCurrentUserAsync(HttpContext);
+            if (currentUser == null) return false;
 
             var student = await _db.Students
-                .FirstOrDefaultAsync(s =>
-                    s.StudentNavigation.AccountId == currentUser.AccountId
-                );
-
-            if (student == null)
-            {
-                return;
-            }
+                .FirstOrDefaultAsync(s => s.StudentNavigation.AccountId == currentUser.AccountId);
+            if (student == null) return false;
 
             _db.StudentPlacementResults.Add(new StudentPlacementResult
             {
@@ -223,20 +208,21 @@ namespace WebApplication1.Areas.Learner.Controllers
             });
 
             await _db.SaveChangesAsync();
+            return true;
         }
-    }
 
-    public class PlacementSubmitRequest
-    {
-        public int TestId { get; set; }
+        public class PlacementSubmitRequest
+        {
+            public int TestId { get; set; }
 
-        public List<PlacementAnswerDto> Answers { get; set; } = new();
-    }
+            public List<PlacementAnswerDto> Answers { get; set; } = new();
+        }
 
-    public class PlacementAnswerDto
-    {
-        public int QuestionId { get; set; }
+        public class PlacementAnswerDto
+        {
+            public int QuestionId { get; set; }
 
-        public int SelectedOptionId { get; set; }
+            public int SelectedOptionId { get; set; }
+        }
     }
 }
