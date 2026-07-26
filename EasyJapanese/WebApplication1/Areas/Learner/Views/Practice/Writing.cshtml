@@ -1,0 +1,409 @@
+﻿@model WebApplication1.Areas.Learner.Models.WritingIndexViewModel
+@{
+    ViewData["Title"] = "Luyện Viết - Hi Japan!";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .hj-writing-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 4px;
+        }
+
+        .hj-back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--color-border, #e5e0d8);
+            background: #fff;
+            color: var(--color-navy, #1c1c2e);
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+            .hj-back-btn:hover {
+                border-color: var(--color-primary, #c8102e);
+                color: var(--color-primary, #c8102e);
+                background: #fdf2f3;
+            }
+
+        .hj-writing-tabs {
+            border: none;
+            gap: 6px;
+            margin-bottom: 1.75rem;
+        }
+
+            .hj-writing-tabs .nav-link {
+                border: 1px solid var(--color-border, #e5e0d8);
+                border-radius: 999px;
+                padding: 0.5rem 1.25rem;
+                font-weight: 600;
+                font-size: 0.9rem;
+                color: #6c757d;
+                background: #fff;
+            }
+
+                .hj-writing-tabs .nav-link.active {
+                    background: var(--color-primary, #c8102e);
+                    border-color: var(--color-primary, #c8102e);
+                    color: #fff;
+                }
+
+        .hj-writing-card {
+            background: #fff;
+            border: 1px solid var(--color-border, #e5e0d8);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .hj-prompt-box {
+            background: #faf8f5;
+            border: 1px dashed var(--color-border, #e5e0d8);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hj-prompt-empty {
+            color: #9a9186;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        .hj-prompt-level {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.2rem 0.7rem;
+            border-radius: 999px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hj-prompt-level--essay {
+            background: rgba(200,16,46,.1);
+            color: var(--color-primary, #c8102e);
+        }
+
+        .hj-prompt-level--translate {
+            background: rgba(13,110,253,.1);
+            color: #0d6efd;
+        }
+
+        .hj-writing-textarea {
+            border: 1px solid var(--color-border, #e5e0d8);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+
+            .hj-writing-textarea:focus {
+                outline: none;
+                border-color: var(--color-primary, #c8102e);
+                box-shadow: 0 0 0 3px rgba(200,16,46,.08);
+            }
+
+            .hj-writing-textarea:disabled {
+                background: #f5f3ef;
+                color: #b0a89c;
+            }
+
+        .hj-btn-generate {
+            background: #fff;
+            border: 1px solid var(--color-border, #e5e0d8);
+            border-radius: 999px;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-navy, #1c1c2e);
+        }
+
+            .hj-btn-generate:hover {
+                border-color: var(--color-primary, #c8102e);
+                color: var(--color-primary, #c8102e);
+            }
+
+        .hj-btn-submit {
+            background: var(--color-primary, #c8102e);
+            border: none;
+            border-radius: 12px;
+            padding: 0.65rem 1.75rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+            .hj-btn-submit:disabled {
+                opacity: 0.5;
+            }
+
+        .hj-result-box {
+            background: #faf8f5;
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+            .hj-result-box h6 {
+                font-weight: 700;
+                margin-top: 1rem;
+            }
+
+                .hj-result-box h6:first-child {
+                    margin-top: 0;
+                }
+
+        .hj-correction-item {
+            background: #fff;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+}
+
+<main class="hj-content">
+    <div class="container py-5" style="max-width: 900px;">
+
+        <div class="hj-writing-header">
+            <a href="/learn/Practice" class="hj-back-btn" aria-label="Quay về Luyện tập">&#8592;</a>
+            <div>
+                <span class="hj-eyebrow">Luyện tập</span>
+                <h2 class="fw-bold mb-0" style="font-family:'Outfit',sans-serif;">Luyện Viết cùng AI</h2>
+            </div>
+        </div>
+        <p class="text-muted mb-4">Chọn một hình thức, tạo đề rồi bắt đầu viết — AI sẽ chấm điểm và sửa lỗi cho bạn.</p>
+
+        <ul class="nav hj-writing-tabs" id="writingTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-essay" type="button">
+                    Viết theo chủ đề
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-translate" type="button">
+                    Dịch câu
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            @* ===== TAB 1: ESSAY ===== *@
+            <div class="tab-pane fade show active" id="tab-essay">
+                <div class="hj-writing-card">
+                    <div class="hj-prompt-box">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="hj-prompt-level hj-prompt-level--essay" id="essay-level">@Model.EssayLevel</span>
+                                <div id="essay-topic-wrap">
+                                    <p class="hj-prompt-empty mb-0" id="essay-topic-empty">Bấm "Tạo đề bài" để bắt đầu.</p>
+                                    <h5 class="fw-bold mb-0 d-none" id="essay-topic"></h5>
+                                </div>
+                            </div>
+                            <button class="hj-btn-generate" id="btn-essay-next">Tạo đề bài</button>
+                        </div>
+                    </div>
+
+                    <textarea id="essay-text" class="form-control hj-writing-textarea mb-3" rows="8"
+                              placeholder="Viết bài của bạn ở đây..." disabled></textarea>
+                    <button class="hj-btn-submit" id="btn-essay-submit" disabled>Chấm bài</button>
+
+                    <div id="essay-result" class="hj-result-box d-none"></div>
+                </div>
+            </div>
+
+            @* ===== TAB 2: TRANSLATION ===== *@
+            <div class="tab-pane fade" id="tab-translate">
+                <div class="hj-writing-card">
+                    <div class="hj-prompt-box">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="hj-prompt-level hj-prompt-level--translate" id="tr-level">@Model.TranslationLevel</span>
+                                <div id="tr-sentence-wrap">
+                                    <p class="hj-prompt-empty mb-0" id="tr-sentence-empty">Bấm "Tạo câu dịch" để bắt đầu.</p>
+                                    <h5 class="fw-bold mb-0 d-none" id="tr-sentence"></h5>
+                                </div>
+                            </div>
+                            <button class="hj-btn-generate" id="btn-tr-next">Tạo câu dịch</button>
+                        </div>
+                    </div>
+
+                    <textarea id="tr-text" class="form-control hj-writing-textarea mb-3" rows="3"
+                              placeholder="Dịch sang tiếng Nhật..." disabled></textarea>
+                    <button class="hj-btn-submit" id="btn-tr-submit" disabled>Chấm câu dịch</button>
+
+                    <div id="tr-result" class="hj-result-box d-none"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    (function () {
+      const csrfToken = () => document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+      function setLoading(btn, loading, loadingText, originalText) {
+        btn.disabled = loading;
+        btn.innerText = loading ? loadingText : originalText;
+      }
+
+      // ── ESSAY: tạo đề ──
+      document.getElementById('btn-essay-next').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-essay-next');
+        setLoading(btn, true, 'Đang tạo...', 'Tạo đề bài');
+        try {
+          const r = await fetch('/learn/Writing/NextEssayTopic');
+          if (!r.ok) throw new Error();
+          const data = await r.json();
+
+          document.getElementById('essay-level').innerText = data.level;
+          document.getElementById('essay-topic-empty').classList.add('d-none');
+          const topicEl = document.getElementById('essay-topic');
+          topicEl.innerText = data.topic;
+          topicEl.classList.remove('d-none');
+
+          const textarea = document.getElementById('essay-text');
+          textarea.disabled = false;
+          textarea.value = '';
+          document.getElementById('btn-essay-submit').disabled = false;
+          document.getElementById('essay-result').classList.add('d-none');
+        } catch {
+          alert('Không thể tạo đề bài lúc này. Vui lòng thử lại.');
+        } finally {
+          setLoading(btn, false, 'Đang tạo...', 'Đề bài khác');
+        }
+      });
+
+      document.getElementById('btn-essay-submit').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-essay-submit');
+        const text = document.getElementById('essay-text').value.trim();
+        if (!text) { alert('Vui lòng nhập bài viết.'); return; }
+
+        setLoading(btn, true, 'Đang chấm...', 'Chấm bài');
+        try {
+          const res = await fetch('/learn/Writing/GradeEssay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken() },
+            body: JSON.stringify({
+              topic: document.getElementById('essay-topic').innerText,
+              level: document.getElementById('essay-level').innerText,
+              studentText: text
+            })
+          });
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+
+          let html = `<h6>Điểm: ${data.score}/100</h6><p class="mb-0">${escapeHtml(data.overallComment)}</p>`;
+
+          if (data.corrections?.length) {
+            html += `<h6>Cần sửa</h6>`;
+            data.corrections.forEach(c => {
+              html += `<div class="hj-correction-item">
+                <span class="text-danger text-decoration-line-through">${escapeHtml(c.original)}</span> →
+                <span class="text-success fw-bold">${escapeHtml(c.corrected)}</span>
+                <div class="text-muted small mt-1">${escapeHtml(c.explanation)}</div></div>`;
+            });
+          }
+          if (data.strengths?.length) {
+            html += `<h6>Điểm mạnh</h6><ul class="mb-0">` +
+              data.strengths.map(s => `<li>${escapeHtml(s)}</li>`).join('') + `</ul>`;
+          }
+          if (data.improvements?.length) {
+            html += `<h6>Cần cải thiện</h6><ul class="mb-0">` +
+              data.improvements.map(s => `<li>${escapeHtml(s)}</li>`).join('') + `</ul>`;
+          }
+
+          const box = document.getElementById('essay-result');
+          box.innerHTML = html;
+          box.classList.remove('d-none');
+        } catch {
+          alert('Có lỗi khi chấm bài. Vui lòng thử lại.');
+        } finally {
+          setLoading(btn, false, 'Đang chấm...', 'Chấm bài');
+        }
+      });
+
+      // ── TRANSLATION: tạo câu ──
+      document.getElementById('btn-tr-next').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-tr-next');
+        setLoading(btn, true, 'Đang tạo...', 'Tạo câu dịch');
+        try {
+          const r = await fetch('/learn/Writing/NextTranslationPrompt');
+          if (!r.ok) throw new Error();
+          const data = await r.json();
+
+          document.getElementById('tr-level').innerText = data.level;
+          document.getElementById('tr-sentence-empty').classList.add('d-none');
+          const sentenceEl = document.getElementById('tr-sentence');
+          sentenceEl.innerText = data.sentence;
+          sentenceEl.classList.remove('d-none');
+
+          const textarea = document.getElementById('tr-text');
+          textarea.disabled = false;
+          textarea.value = '';
+          document.getElementById('btn-tr-submit').disabled = false;
+          document.getElementById('tr-result').classList.add('d-none');
+        } catch {
+          alert('Không thể tạo câu dịch lúc này. Vui lòng thử lại.');
+        } finally {
+          setLoading(btn, false, 'Đang tạo...', 'Câu khác');
+        }
+      });
+
+      document.getElementById('btn-tr-submit').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-tr-submit');
+        const text = document.getElementById('tr-text').value.trim();
+        if (!text) { alert('Vui lòng nhập câu dịch.'); return; }
+
+        setLoading(btn, true, 'Đang chấm...', 'Chấm câu dịch');
+        try {
+          const res = await fetch('/learn/Writing/GradeTranslation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken() },
+            body: JSON.stringify({
+              vietnameseSentence: document.getElementById('tr-sentence').innerText,
+              level: document.getElementById('tr-level').innerText,
+              studentText: text
+            })
+          });
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+
+          const statusText = data.isCorrect ? 'Đúng' : 'Cần chỉnh';
+          let html = `<h6>${statusText} — Điểm: ${data.score}/100</h6>
+            <p>${escapeHtml(data.explanation)}</p>
+            <div><strong>Gợi ý dịch:</strong> ${escapeHtml(data.suggestedTranslation)}</div>`;
+
+          if (data.notes?.length) {
+            html += `<ul class="mb-0 mt-2">` + data.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('') + `</ul>`;
+          }
+
+          const box = document.getElementById('tr-result');
+          box.innerHTML = html;
+          box.classList.remove('d-none');
+        } catch {
+          alert('Có lỗi khi chấm câu dịch. Vui lòng thử lại.');
+        } finally {
+          setLoading(btn, false, 'Đang chấm...', 'Chấm câu dịch');
+        }
+      });
+
+      function escapeHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+      }
+    })();
+</script>

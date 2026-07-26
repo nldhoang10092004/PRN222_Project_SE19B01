@@ -4,6 +4,7 @@ using CoreLibrary.Email;
 using CoreLibrary.Payment;
 using CoreLibrary.Storage;
 using CoreWeb.Models.ChatBot;
+using CoreWeb.Service.AI;
 using CoreWeb.Service.ChatBot;
 using WebApplication1.Areas.Admin;
 using WebApplication1.Areas.Learner;
@@ -36,7 +37,7 @@ namespace CoreWeb
             });
             builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection("Gemini"));
             builder.Services.Configure<JishoOptions>(builder.Configuration.GetSection("Jisho"));
-
+            builder.Services.AddHttpClient<IWritingAiService, WritingAIService>();
             builder.Services.AddHttpClient<IJishoDictionaryService, JishoDictionaryService>();
             builder.Services.AddHttpClient<IGeminiChatService, GeminiChatService>();
             builder.Services.AddScoped<IChatBotService, ChatBotService>();
