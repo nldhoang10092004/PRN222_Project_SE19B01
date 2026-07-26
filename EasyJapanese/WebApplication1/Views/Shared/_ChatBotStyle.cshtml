@@ -1,4 +1,4 @@
-﻿<style>
+<style>
     .hj-chatbot {
         position: fixed;
         bottom: 24px;
@@ -77,29 +77,30 @@
             opacity: 1;
         }
 
-    /* Hai tab Chat và Từ điển */
+    /* Ba tab Chat, Từ điển và Hỗ trợ */
     .hj-chatbot-tabs {
         flex-shrink: 0;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         background: #fff;
         border-bottom: 1px solid var(--color-border, #e4e0db);
     }
 
     .hj-chatbot-tab {
         position: relative;
-        padding: 12px 8px;
+        padding: 10px 4px;
         border: none;
         background: #fff;
         color: #6b7280;
-        font-size: 13.5px;
+        font-size: 12.5px;
         font-weight: 600;
         cursor: pointer;
         transition: background .15s, color .15s;
+        text-align: center;
     }
 
         .hj-chatbot-tab i {
-            margin-right: 5px;
+            margin-right: 3px;
         }
 
         .hj-chatbot-tab:hover {
@@ -114,8 +115,8 @@
             .hj-chatbot-tab.active::after {
                 content: "";
                 position: absolute;
-                left: 20%;
-                right: 20%;
+                left: 15%;
+                right: 15%;
                 bottom: 0;
                 height: 3px;
                 border-radius: 999px 999px 0 0;
@@ -168,6 +169,15 @@
             border: 1px solid var(--color-border, #e4e0db);
             color: #1a1a1a;
             border-bottom-left-radius: 4px;
+        }
+
+        .hj-chatbot-msg.admin {
+            align-self: flex-start;
+            background: #FFF5F5;
+            border: 1px solid var(--color-primary, #c8102e);
+            color: #8C1D2F;
+            border-bottom-left-radius: 4px;
+            font-weight: 500;
         }
 
     .hj-chatbot-dict-card {

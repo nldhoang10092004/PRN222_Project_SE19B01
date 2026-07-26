@@ -30,56 +30,65 @@ namespace WebApplication1.Areas.Admin.Controllers
             public List<ChatMessage> ChatHistory { get; set; } = new List<ChatMessage>();
         }
 
-        private static List<SupportTicket> _tickets = new List<SupportTicket>
+        public static List<SupportTicket> _tickets = new List<SupportTicket>();
+
+        public static SupportTicket GetTicketForUser(string userEmail)
         {
-            new SupportTicket
+            if (string.IsNullOrEmpty(userEmail)) return null;
+            lock (_tickets)
             {
-                TicketId = 1001,
-                UserFullName = "Nguyễn Văn An",
-                UserEmail = "an.nguyen@gmail.com",
-                Category = "Thanh toán",
-                Subject = "Không tự động nâng cấp VIP sau khi quét mã thanh toán",
-                Status = "Open",
-                CreatedAt = DateTime.UtcNow.AddHours(-2),
-                ChatHistory = new List<ChatMessage>
+                return _tickets.FirstOrDefault(t => t.UserEmail.Equals(userEmail, StringComparison.OrdinalIgnoreCase) && t.Status != "Resolved");
+            }
+        }
+
+        public static SupportTicket GetOrCreateTicketForUser(string userEmail, string userFullName)
+        {
+            if (string.IsNullOrEmpty(userEmail)) userEmail = "khachhang@hijapan.vn";
+            if (string.IsNullOrEmpty(userFullName)) userFullName = "Khách hàng";
+
+            lock (_tickets)
+            {
+                var ticket = _tickets.FirstOrDefault(t => t.UserEmail.Equals(userEmail, StringComparison.OrdinalIgnoreCase) && t.Status != "Resolved");
+                if (ticket == null)
                 {
-                    new ChatMessage { Sender = "User", MessageText = "Chào Ad, mình vừa thực hiện thanh toán chuyển khoản gói 3 tháng qua cổng VNPAY lúc 9h sáng nay.", SentAt = DateTime.UtcNow.AddHours(-2) },
-                    new ChatMessage { Sender = "User", MessageText = "Tiền trong tài khoản ngân hàng của mình đã bị trừ 199.000đ rồi, mã giao dịch là VP120349. Nhưng tài khoản trên web vẫn báo là Basic. Mong Ad kích hoạt hộ nhé.", SentAt = DateTime.UtcNow.AddHours(-1).AddMinutes(-50) }
+                    var nextId = _tickets.Any() ? _tickets.Max(t => t.TicketId) + 1 : 1001;
+                    ticket = new SupportTicket
+                    {
+                        TicketId = nextId,
+                        UserFullName = userFullName,
+                        UserEmail = userEmail,
+                        Category = "Hỗ trợ trực tuyến",
+                        Subject = "Yêu cầu hỗ trợ từ học viên",
+                        Status = "Open",
+                        CreatedAt = DateTime.UtcNow,
+                        ChatHistory = new List<ChatMessage>()
+                    };
+                    _tickets.Insert(0, ticket);
                 }
-            },
-            new SupportTicket
+                return ticket;
+            }
+        }
+
+        public static void AddUserMessage(int ticketId, string messageText)
+        {
+            lock (_tickets)
             {
-                TicketId = 1002,
-                UserFullName = "Trần Thị Bình",
-                UserEmail = "binh.tran@yahoo.com",
-                Category = "Tài khoản",
-                Subject = "Lỗi không đăng nhập được bằng Google",
-                Status = "InProgress",
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                ChatHistory = new List<ChatMessage>
+                var ticket = _tickets.FirstOrDefault(t => t.TicketId == ticketId);
+                if (ticket != null && !string.IsNullOrWhiteSpace(messageText))
                 {
-                    new ChatMessage { Sender = "User", MessageText = "Chào admin, em dùng tài khoản Google để đăng nhập nhưng cứ bị báo lỗi Auth Timeout hoài.", SentAt = DateTime.UtcNow.AddDays(-1) },
-                    new ChatMessage { Sender = "Admin", MessageText = "Chào em, em thử đăng nhập bằng trình duyệt ẩn danh hoặc xóa cookie xem có được không nhé.", SentAt = DateTime.UtcNow.AddHours(-5) },
-                    new ChatMessage { Sender = "User", MessageText = "Em đã xóa cookie và thử lại rồi nhưng vẫn báo lỗi như cũ ạ, hình như do server kết nối Google có vấn đề.", SentAt = DateTime.UtcNow.AddHours(-4) }
-                }
-            },
-            new SupportTicket
-            {
-                TicketId = 1003,
-                UserFullName = "Phạm Hồng Đăng",
-                UserEmail = "dangpham@outlook.com",
-                Category = "Nội dung bài học",
-                Subject = "Sai đáp án bài tập trắc nghiệm Kanji N3",
-                Status = "Resolved",
-                CreatedAt = DateTime.UtcNow.AddDays(-3),
-                ChatHistory = new List<ChatMessage>
-                {
-                    new ChatMessage { Sender = "User", MessageText = "Ở bài trắc nghiệm N3 phần Kanji ôn tập bài 4, đáp án câu 5 đang bị sai. Mong thầy cô xem lại.", SentAt = DateTime.UtcNow.AddDays(-3) },
-                    new ChatMessage { Sender = "Admin", MessageText = "Cảm ơn bạn đã đóng góp. Đội ngũ học thuật đã chỉnh sửa lại đáp án chính xác của câu hỏi này.", SentAt = DateTime.UtcNow.AddDays(-2) },
-                    new ChatMessage { Sender = "User", MessageText = "Dạ vâng em cảm ơn admin nhiều ạ, chúc web ngày càng phát triển.", SentAt = DateTime.UtcNow.AddDays(-2).AddMinutes(30) }
+                    ticket.ChatHistory.Add(new ChatMessage
+                    {
+                        Sender = "User",
+                        MessageText = messageText,
+                        SentAt = DateTime.UtcNow
+                    });
+                    if (ticket.Status == "Resolved")
+                    {
+                        ticket.Status = "InProgress";
+                    }
                 }
             }
-        };
+        }
 
         [HttpGet("")]
         public IActionResult Index(int? selectedTicketId, string statusFilter)
