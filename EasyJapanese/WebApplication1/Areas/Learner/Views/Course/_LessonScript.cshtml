@@ -65,121 +65,115 @@
         let currentButton = null;
         let currentProgressFill = null;
 
-        document.querySelectorAll('.audio-play-btn[data-audio]').forEach(function (btn) {
-
-            const audioUrl = btn.getAttribute('data-audio');
-
-            if (!audioUrl) return;
-
+        document.querySelectorAll('.audio-play-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
-
                 const url = this.getAttribute('data-audio');
-
-                if (!url) return;
-
+                const text = this.getAttribute('data-text') || '';
                 const card = this.closest('.audio-card');
-                const progressFill = card
-                    ? card.querySelector('.audio-progress-fill')
-                    : null;
-
+                const progressFill = card ? card.querySelector('.audio-progress-fill') : null;
                 const iconEl = this.querySelector('i');
 
-                // Nếu click đúng bài đang phát thì pause
-                if (currentAudio && currentAudio._url === url) {
+                // Dừng audio/speech cũ nếu đang phát
+                if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                }
 
-                    if (!currentAudio.paused) {
-                        currentAudio.pause();
-
-                        if (iconEl) {
-                            iconEl.className = 'bi bi-play-fill';
-                        }
-
-                        return;
+                if (currentAudio) {
+                    currentAudio.pause();
+                    if (currentButton) {
+                        const oldIcon = currentButton.querySelector('i');
+                        if (oldIcon) oldIcon.className = 'bi bi-play-fill';
                     }
+                    if (currentProgressFill) currentProgressFill.style.width = '0%';
+                }
 
-                    currentAudio.play();
-
-                    if (iconEl) {
-                        iconEl.className = 'bi bi-pause-fill';
-                    }
-
+                // Nếu click lại nút đang phát -> tạm dừng
+                if (currentButton === this && currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    if (iconEl) iconEl.className = 'bi bi-play-fill';
                     return;
                 }
 
-                // Dừng audio cũ nếu đang phát
-                if (currentAudio) {
-                    currentAudio.pause();
+                // Trường hợp 1: Có URL file audio hợp lệ
+                if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/'))) {
+                    currentAudio = new Audio(url);
+                    currentAudio._url = url;
+                    currentButton = this;
+                    currentProgressFill = progressFill;
 
-                    if (currentButton) {
-                        const oldIcon = currentButton.querySelector('i');
+                    if (iconEl) iconEl.className = 'bi bi-pause-fill';
 
-                        if (oldIcon) {
-                            oldIcon.className = 'bi bi-play-fill';
+                    currentAudio.addEventListener('timeupdate', function () {
+                        if (this.duration && progressFill) {
+                            const percent = (this.currentTime / this.duration) * 100;
+                            progressFill.style.width = percent + '%';
                         }
-                    }
+                    });
 
-                    if (currentProgressFill) {
-                        currentProgressFill.style.width = '0%';
-                    }
+                    currentAudio.addEventListener('ended', function () {
+                        if (iconEl) iconEl.className = 'bi bi-play-fill';
+                        if (progressFill) progressFill.style.width = '0%';
+                        currentAudio = null;
+                        currentButton = null;
+                        currentProgressFill = null;
+                    });
+
+                    currentAudio.play().catch(function () {
+                        // Fallback sang Web Speech API phát đọc tiếng Nhật nếu phát file audio lỗi
+                        playSpeechFallback(text, iconEl, progressFill, btn);
+                    });
+                } else {
+                    // Trường hợp 2: Chưa có URL audio -> Phát giọng đọc tiếng Nhật chuẩn (Web Speech API)
+                    playSpeechFallback(text, iconEl, progressFill, this);
                 }
-
-                // Tạo audio mới
-                currentAudio = new Audio(url);
-                currentAudio._url = url;
-
-                currentButton = this;
-                currentProgressFill = progressFill;
-
-                if (iconEl) {
-                    iconEl.className = 'bi bi-pause-fill';
-                }
-
-                currentAudio.addEventListener('timeupdate', function () {
-                    if (this.duration && progressFill) {
-                        const percent = (this.currentTime / this.duration) * 100;
-                        progressFill.style.width = percent + '%';
-                    }
-                });
-
-                currentAudio.addEventListener('ended', function () {
-                    if (iconEl) {
-                        iconEl.className = 'bi bi-play-fill';
-                    }
-
-                    if (progressFill) {
-                        progressFill.style.width = '0%';
-                    }
-
-                    currentAudio = null;
-                    currentButton = null;
-                    currentProgressFill = null;
-                });
-
-                currentAudio.addEventListener('error', function () {
-                    if (iconEl) {
-                        iconEl.className = 'bi bi-play-fill';
-                    }
-
-                    if (progressFill) {
-                        progressFill.style.width = '0%';
-                    }
-
-                    alert('Không thể phát audio. Kiểm tra lại AudioUrl trong database.');
-
-                    currentAudio = null;
-                    currentButton = null;
-                    currentProgressFill = null;
-                });
-
-                currentAudio.play().catch(function () {
-                    if (iconEl) {
-                        iconEl.className = 'bi bi-play-fill';
-                    }
-
-                    alert('Không thể phát audio. Kiểm tra lại AudioUrl trong database.');
-                });
             });
         });
+
+        function playSpeechFallback(text, iconEl, progressFill, btn) {
+            if (!('speechSynthesis' in window) || !text) {
+                alert('Không thể phát audio. Vui lòng kiểm tra lại AudioUrl.');
+                return;
+            }
+
+            const cleanText = text.replace(/<[^>]*>?/gm, '').trim();
+            if (!cleanText) return;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.9;
+
+            if (iconEl) iconEl.className = 'bi bi-pause-fill';
+            currentButton = btn;
+
+            let progressInterval = null;
+            if (progressFill) {
+                let p = 0;
+                progressFill.style.width = '0%';
+                progressInterval = setInterval(function () {
+                    p = Math.min(p + 5, 95);
+                    progressFill.style.width = p + '%';
+                }, 200);
+            }
+
+            utterance.onend = function () {
+                if (iconEl) iconEl.className = 'bi bi-play-fill';
+                if (progressFill) progressFill.style.width = '100%';
+                if (progressInterval) clearInterval(progressInterval);
+                setTimeout(function () {
+                    if (progressFill) progressFill.style.width = '0%';
+                }, 500);
+                currentButton = null;
+            };
+
+            utterance.onerror = function () {
+                if (iconEl) iconEl.className = 'bi bi-play-fill';
+                if (progressFill) progressFill.style.width = '0%';
+                if (progressInterval) clearInterval(progressInterval);
+                currentButton = null;
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
 
     // ==========================================================
     // Nút Practice của từng Exercise (render inline trong trang)

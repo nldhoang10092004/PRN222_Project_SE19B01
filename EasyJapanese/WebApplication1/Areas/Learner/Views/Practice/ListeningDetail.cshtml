@@ -1,0 +1,427 @@
+@model WebApplication1.Areas.Learner.Controllers.ListeningDetailViewModel
+@{
+    ViewData["Title"] = $"{Model.Title} - Luyện Nghe Tiếng Nhật";
+}
+
+<div class="container py-4">
+    <!-- Navigation Back -->
+    <div class="mb-3">
+        <a href="/learn/Practice/Listening" class="text-decoration-none text-muted small fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại Trung tâm Luyện Nghe
+        </a>
+    </div>
+
+    <!-- Header Card -->
+    <div class="card border-0 rounded-4 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                <span class="badge bg-danger text-white rounded-pill px-3 py-1 fw-bold fs-7">
+                    JLPT @Model.LevelName
+                </span>
+                @if (Model.BestScore.HasValue)
+                {
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold">
+                        <i class="bi bi-trophy me-1"></i> Kết quả tốt nhất: @Model.BestScore%
+                    </span>
+                }
+            </div>
+            <h2 class="fw-bold text-dark mb-1">@Model.Title</h2>
+            @if (!string.IsNullOrEmpty(Model.CourseTitle))
+            {
+                <div class="text-muted small">
+                    <i class="bi bi-journal-text me-1 text-danger"></i> @Model.CourseTitle
+                    @if (!string.IsNullOrEmpty(Model.LessonTitle))
+                    {
+                        <span>• @Model.LessonTitle</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Panel: Audio Control Suite & Questions -->
+        <div class="col-lg-8">
+            <!-- Audio Suite Card -->
+            <div class="card border-0 rounded-4 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #18181b 0%, #27272a 100%);">
+                <div class="card-body p-4 text-white">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-disc text-danger fs-4 fs-pulse"></i>
+                            <span class="fw-bold small text-uppercase tracking-wider">AUDIO PLAYER</span>
+                        </div>
+                        <!-- Speed selector -->
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-white-50">Tốc độ:</span>
+                            <select id="playbackSpeed" class="form-select form-select-sm bg-dark text-white border-secondary rounded-pill" style="width: auto;">
+                                <option value="0.8">0.8x (Chậm)</option>
+                                <option value="1.0" selected>1.0x (Chuẩn)</option>
+                                <option value="1.2">1.2x (Nhanh)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="audio-progress-container mb-3" id="audioProgressContainer">
+                        <div class="audio-progress-bar" id="audioProgressBar"></div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="small text-white-50 font-monospace">
+                            <span id="currentTime">00:00</span> / <span id="totalDuration">00:00</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <button id="btnRewind" type="button" class="btn btn-outline-light btn-sm rounded-circle p-2" title="Lùi lại 5 giây">
+                                <i class="bi bi-arrow-counterclockwise fs-5"></i>
+                            </button>
+                            <button id="btnPlayPause" type="button" class="btn btn-danger rounded-circle p-3 shadow" style="width: 54px; height: 54px;" title="Phát / Tạm dừng">
+                                <i class="bi bi-play-fill fs-3" id="playIcon"></i>
+                            </button>
+                        </div>
+
+                        <div>
+                            @if (!string.IsNullOrEmpty(Model.Content))
+                            {
+                                <button id="btnToggleTranscript" type="button" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                                    <i class="bi bi-file-text me-1"></i> <span id="transcriptBtnText">Xem kịch bản</span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Transcript Box -->
+                    @if (!string.IsNullOrEmpty(Model.Content))
+                    {
+                        <div id="transcriptBox" class="mt-4 p-3 rounded-3 bg-dark text-white-50 border border-secondary d-none">
+                            <div class="fw-bold text-white mb-2 small"><i class="bi bi-chat-quote me-1 text-danger"></i> Kịch bản bài nghe (Transcript):</div>
+                            <div class="small lh-lg text-light">
+                                @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Questions Form Card -->
+            <div class="card border-0 rounded-4 shadow-sm">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-pencil-square text-danger me-2"></i> Câu Hỏi Luyện Nghe
+                    </h5>
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-1">
+                        @Model.Questions.Count câu
+                    </span>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (Model.Questions.Any())
+                    {
+                        <form id="listeningForm">
+                            @for (int i = 0; i < Model.Questions.Count; i++)
+                            {
+                                var q = Model.Questions[i];
+                                <div class="question-block mb-4 p-3.5 rounded-3 bg-light border border-light-subtle" data-question-id="@q.QuestionId">
+                                    <div class="fw-bold text-dark mb-3 d-flex align-items-start gap-2">
+                                        <span class="badge bg-danger text-white rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                            @(i + 1)
+                                        </span>
+                                        <span class="fs-6 text-dark mt-0.5">@q.QuestionText</span>
+                                    </div>
+
+                                    <div class="options-group d-flex flex-column gap-2 ms-4">
+                                        @foreach (var opt in q.Options)
+                                        {
+                                            <label class="option-item p-3 rounded-3 border bg-white cursor-pointer transition-all d-flex align-items-center gap-3">
+                                                <input type="radio" name="q_@q.QuestionId" value="@opt.OptionId" class="form-check-input mt-0" />
+                                                <span class="text-dark small fw-medium">@opt.AnswerText</span>
+                                            </label>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="d-grid mt-4">
+                                <button id="btnSubmitListening" type="button" class="btn btn-danger btn-lg rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-check2-circle me-1"></i> Nộp Bài Luyện Nghe
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                            Bài tập nghe này chưa có câu hỏi đính kèm.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Rules & Attempt Results -->
+        <div class="col-lg-4">
+            <div class="card border-0 rounded-4 shadow-sm sticky-top" style="top: 90px;">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightbulb text-warning me-2"></i> Hướng Dẫn Luyện Nghe</h6>
+                    <ul class="text-secondary small ps-3 mb-4 space-y-2">
+                        <li>Nghe thật kỹ đoạn hội thoại audio trước khi trả lời.</li>
+                        <li>Có thể tua lại 5s hoặc giảm tốc độ nghe xuống <strong>0.8x</strong> nếu quá nhanh.</li>
+                        <li>Nộp bài để xem điểm số thực tế và lưu lịch sử vào hệ thống.</li>
+                        <li>Sau khi nộp bài, bạn có thể bấm <strong>"Xem kịch bản"</strong> để kiểm tra lại từ vựng.</li>
+                    </ul>
+
+                    <div id="resultCard" class="d-none alert alert-success rounded-3 border-0 p-3 text-center">
+                        <i class="bi bi-trophy-fill text-warning display-5 d-block mb-2"></i>
+                        <h6 class="fw-bold mb-1">Kết Quả Bài Làm</h6>
+                        <div class="fs-4 fw-extrabold text-success mb-1" id="scoreText">0/0</div>
+                        <div class="small text-muted mb-3" id="percentText">Đạt 0%</div>
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-4" onclick="location.reload();">
+                            <i class="bi bi-arrow-repeat me-1"></i> Làm lại bài nghe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .audio-progress-container {
+        height: 8px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .audio-progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #dc2626;
+        border-radius: 4px;
+        transition: width 0.1s linear;
+    }
+    .option-item:hover {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+    }
+    .option-item.correct {
+        border-color: #16a34a !important;
+        background-color: #f0fdf4 !important;
+        color: #16a34a !important;
+        font-weight: bold;
+    }
+    .option-item.incorrect {
+        border-color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+        color: #dc2626 !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        (function() {
+            const audioUrl = "@Model.AudioUrl";
+            const textContent = "@Html.Raw(Model.Content ?? Model.Title)";
+            const exerciseId = @Model.ExerciseId;
+
+            const btnPlayPause = document.getElementById('btnPlayPause');
+            const playIcon = document.getElementById('playIcon');
+            const btnRewind = document.getElementById('btnRewind');
+            const playbackSpeed = document.getElementById('playbackSpeed');
+            const audioProgressContainer = document.getElementById('audioProgressContainer');
+            const audioProgressBar = document.getElementById('audioProgressBar');
+            const currentTimeEl = document.getElementById('currentTime');
+            const totalDurationEl = document.getElementById('totalDuration');
+            const btnToggleTranscript = document.getElementById('btnToggleTranscript');
+            const transcriptBox = document.getElementById('transcriptBox');
+            const btnSubmitListening = document.getElementById('btnSubmitListening');
+
+            let audio = null;
+            let isSpeech = false;
+            let speechUtterance = null;
+
+            function formatTime(sec) {
+                if (isNaN(sec) || !isFinite(sec)) return "00:00";
+                const m = Math.floor(sec / 60);
+                const s = Math.floor(sec % 60);
+                return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+            }
+
+            // Init Audio Player
+            if (audioUrl && (audioUrl.startsWith('http://') || audioUrl.startsWith('https://') || audioUrl.startsWith('/'))) {
+                audio = new Audio(audioUrl);
+                audio.addEventListener('loadedmetadata', function() {
+                    totalDurationEl.textContent = formatTime(audio.duration);
+                });
+
+                audio.addEventListener('timeupdate', function() {
+                    currentTimeEl.textContent = formatTime(audio.currentTime);
+                    if (audio.duration) {
+                        const percent = (audio.currentTime / audio.duration) * 100;
+                        audioProgressBar.style.width = percent + '%';
+                    }
+                });
+
+                audio.addEventListener('ended', function() {
+                    playIcon.className = 'bi bi-play-fill fs-3';
+                    audioProgressBar.style.width = '0%';
+                });
+
+                audio.addEventListener('error', function() {
+                    isSpeech = true;
+                });
+            } else {
+                isSpeech = true;
+            }
+
+            // Play / Pause Toggle
+            btnPlayPause.addEventListener('click', function() {
+                if (!isSpeech && audio) {
+                    if (audio.paused) {
+                        audio.playbackRate = parseFloat(playbackSpeed.value);
+                        audio.play().then(function() {
+                            playIcon.className = 'bi bi-pause-fill fs-3';
+                        }).catch(function() {
+                            playTTS();
+                        });
+                    } else {
+                        audio.pause();
+                        playIcon.className = 'bi bi-play-fill fs-3';
+                    }
+                } else {
+                    playTTS();
+                }
+            });
+
+            function playTTS() {
+                if (!('speechSynthesis' in window)) {
+                    alert('Trình duyệt của bạn không hỗ trợ đọc âm thanh.');
+                    return;
+                }
+
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                    playIcon.className = 'bi bi-play-fill fs-3';
+                    return;
+                }
+
+                const cleanText = textContent.replace(/<[^>]*>?/gm, '').trim();
+                if (!cleanText) return;
+
+                speechUtterance = new SpeechSynthesisUtterance(cleanText);
+                speechUtterance.lang = 'ja-JP';
+                speechUtterance.rate = parseFloat(playbackSpeed.value);
+
+                playIcon.className = 'bi bi-pause-fill fs-3';
+
+                speechUtterance.onend = function() {
+                    playIcon.className = 'bi bi-play-fill fs-3';
+                    audioProgressBar.style.width = '100%';
+                    setTimeout(function() { audioProgressBar.style.width = '0%'; }, 400);
+                };
+
+                speechUtterance.onerror = function() {
+                    playIcon.className = 'bi bi-play-fill fs-3';
+                };
+
+                window.speechSynthesis.speak(speechUtterance);
+            }
+
+            // Rewind -5s
+            if (btnRewind) {
+                btnRewind.addEventListener('click', function() {
+                    if (audio) {
+                        audio.currentTime = Math.max(0, audio.currentTime - 5);
+                    }
+                });
+            }
+
+            // Speed change
+            playbackSpeed.addEventListener('change', function() {
+                if (audio) audio.playbackRate = parseFloat(this.value);
+            });
+
+            // Seek click
+            if (audioProgressContainer) {
+                audioProgressContainer.addEventListener('click', function(e) {
+                    if (audio && audio.duration) {
+                        const rect = this.getBoundingClientRect();
+                        const pos = (e.clientX - rect.left) / rect.width;
+                        audio.currentTime = pos * audio.duration;
+                    }
+                });
+            }
+
+            // Toggle Transcript
+            if (btnToggleTranscript && transcriptBox) {
+                btnToggleTranscript.addEventListener('click', function() {
+                    const isHidden = transcriptBox.classList.contains('d-none');
+                    if (isHidden) {
+                        transcriptBox.classList.remove('d-none');
+                        document.getElementById('transcriptBtnText').textContent = 'Ẩn kịch bản';
+                    } else {
+                        transcriptBox.classList.add('d-none');
+                        document.getElementById('transcriptBtnText').textContent = 'Xem kịch bản';
+                    }
+                });
+            }
+
+            // Submit Listening Test
+            if (btnSubmitListening) {
+                btnSubmitListening.addEventListener('click', function() {
+                    const questions = document.querySelectorAll('.question-block');
+                    const answers = [];
+
+                    questions.forEach(function(qBlock) {
+                        const qId = parseInt(qBlock.getAttribute('data-question-id'), 10);
+                        const selectedInp = qBlock.querySelector('input[type="radio"]:checked');
+                        answers.push({
+                            questionId: qId,
+                            optionId: selectedInp ? parseInt(selectedInp.value, 10) : null
+                        });
+                    });
+
+                    btnSubmitListening.disabled = true;
+                    btnSubmitListening.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Đang chấm điểm...';
+
+                    fetch('/learn/Practice/SubmitListening', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ exerciseId: exerciseId, answers: answers })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        (data.answers || []).forEach(function(res) {
+                            const qBlock = document.querySelector(`.question-block[data-question-id="${res.questionId}"]`);
+                            if (!qBlock) return;
+
+                            const selectedInput = qBlock.querySelector('input:checked');
+                            if (selectedInput) {
+                                const selectedOption = selectedInput.closest('.option-item');
+                                selectedOption.classList.add(res.isCorrect ? 'correct' : 'incorrect');
+                            }
+
+                            qBlock.querySelectorAll('input').forEach(inp => inp.disabled = true);
+                        });
+
+                        document.getElementById('resultCard').classList.remove('d-none');
+                        document.getElementById('scoreText').textContent = `${data.correctCount}/${data.totalQuestions}`;
+                        document.getElementById('percentText').textContent = `Điểm số: ${data.scorePercent}%`;
+
+                        btnSubmitListening.style.display = 'none';
+
+                        // Show transcript automatically after test submission if available
+                        if (transcriptBox) transcriptBox.classList.remove('d-none');
+                    })
+                    .catch(() => {
+                        alert('Không thể chấm bài. Vui lòng thử lại.');
+                        btnSubmitListening.disabled = false;
+                        btnSubmitListening.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Nộp Bài Luyện Nghe';
+                    });
+                });
+            }
+        })();
+    </script>
+}

@@ -57,6 +57,21 @@ BEGIN
         CONSTRAINT [FK_CommunityLikes_CommunityPosts] FOREIGN KEY ([PostId]) REFERENCES [CommunityPosts]([PostId]) ON DELETE CASCADE
     );
 END
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'StudentExerciseResults')
+BEGIN
+    CREATE TABLE [StudentExerciseResults] (
+        [ResultId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [StudentId] INT NOT NULL,
+        [ExerciseId] INT NOT NULL,
+        [Score] INT NOT NULL DEFAULT 0,
+        [TotalQuestions] INT NOT NULL DEFAULT 0,
+        [CorrectAnswers] INT NOT NULL DEFAULT 0,
+        [SubmittedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        CONSTRAINT [FK_StudentExerciseResults_Students] FOREIGN KEY ([StudentId]) REFERENCES [Students]([StudentId]) ON DELETE CASCADE,
+        CONSTRAINT [FK_StudentExerciseResults_Exercises] FOREIGN KEY ([ExerciseId]) REFERENCES [Exercises]([ExerciseId]) ON DELETE CASCADE
+    );
+END
 ";
                 context.Database.ExecuteSqlRaw(createTablesSql);
 
