@@ -46,9 +46,6 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .Include(c => c.Mentor)
                 .AsQueryable();
 
-            if (!hasMembership)
-                query = query.Where(c => c.IsFree);
-
             int? recommendedLevelId = null;
             string? recommendedLevelName = null;
 
@@ -426,8 +423,8 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .Select(e => new LessonExerciseItemViewModel
                 {
                     ExerciseId = e.ExerciseId,
-                    Title = e.Title,
-                    Content = e.Content,
+                    Title = CoreLibrary.Utility.EncodingFixer.FixMojibake(e.Title),
+                    Content = CoreLibrary.Utility.EncodingFixer.FixMojibake(e.Content),
                     AudioUrl = e.AudioUrl,
                     StrokeOrderUrl = e.StrokeOrderUrl,
                     SortOrder = e.SortOrder,
@@ -437,7 +434,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                         .Select(q => new ExerciseQuestionViewModel
                         {
                             QuestionId = q.QuestionId,
-                            QuestionText = q.QuestionText,
+                            QuestionText = CoreLibrary.Utility.EncodingFixer.FixMojibake(q.QuestionText),
                             QuestionType = q.QuestionType,
                             SortOrder = q.SortOrder,
 
@@ -445,7 +442,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                                 .Select(a => new ExerciseAnswerOptionViewModel
                                 {
                                     OptionId = a.OptionId,
-                                    AnswerText = a.AnswerText,
+                                    AnswerText = CoreLibrary.Utility.EncodingFixer.FixMojibake(a.AnswerText),
                                     IsCorrect = a.IsCorrect
                                 })
                                 .ToList()

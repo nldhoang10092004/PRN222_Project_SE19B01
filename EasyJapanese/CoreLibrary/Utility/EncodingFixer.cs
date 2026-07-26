@@ -192,6 +192,67 @@ namespace CoreLibrary.Utility
                     }
                 }
                 if (testChanged) db.SaveChanges();
+
+                // 7. Fix Exercises
+                var exercises = db.Exercises.ToList();
+                bool exChanged = false;
+                foreach (var ex in exercises)
+                {
+                    var newTitle = FixMojibake(ex.Title);
+                    var newContent = FixMojibake(ex.Content);
+                    if (newTitle != ex.Title || newContent != ex.Content)
+                    {
+                        ex.Title = newTitle;
+                        ex.Content = newContent;
+                        exChanged = true;
+                    }
+                }
+                if (exChanged) db.SaveChanges();
+
+                // 8. Fix Quizzes
+                var quizzes = db.Quizzes.ToList();
+                bool quizChanged = false;
+                foreach (var qz in quizzes)
+                {
+                    var newTitle = FixMojibake(qz.Title);
+                    if (newTitle != qz.Title)
+                    {
+                        qz.Title = newTitle;
+                        quizChanged = true;
+                    }
+                }
+                if (quizChanged) db.SaveChanges();
+
+                // 9. Fix Flashcards & Sets
+                var sets = db.FlashcardSets.ToList();
+                bool setChanged = false;
+                foreach (var s in sets)
+                {
+                    var newTitle = FixMojibake(s.Title);
+                    var newDesc = FixMojibake(s.Description);
+                    if (newTitle != s.Title || newDesc != s.Description)
+                    {
+                        s.Title = newTitle;
+                        s.Description = newDesc;
+                        setChanged = true;
+                    }
+                }
+                if (setChanged) db.SaveChanges();
+
+                var flashcards = db.Flashcards.ToList();
+                bool fcChanged = false;
+                foreach (var fc in flashcards)
+                {
+                    var newFront = FixMojibake(fc.FrontText);
+                    var newBack = FixMojibake(fc.BackText);
+                    if (newFront != fc.FrontText || newBack != fc.BackText)
+                    {
+                        fc.FrontText = newFront;
+                        fc.BackText = newBack;
+                        fcChanged = true;
+                    }
+                }
+                if (fcChanged) db.SaveChanges();
             }
             catch (Exception ex)
             {
