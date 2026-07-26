@@ -1,0 +1,113 @@
+@model CoreLibrary.Data.Entities.KanjiEntry
+@{
+    ViewData["Title"] = "Chỉnh sửa Kanji";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Chỉnh sửa Kanji</h3>
+    <a href="/teacher/kanji" class="btn btn-light">Quay lại</a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <form method="post" action="/teacher/kanji/edit/@Model.KanjiId">
+            @Html.AntiForgeryToken()
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="character" class="form-label">Ký tự Kanji <span class="text-danger">*</span></label>
+                    <input type="text" name="character" id="character" class="form-control" value="@Model.Character" required style="font-size: 2rem; height: 60px;">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="levelId" class="form-label">Cấp độ JLPT <span class="text-danger">*</span></label>
+                    <select name="levelId" id="levelId" class="form-select" required>
+                        @foreach (var level in ViewBag.Levels)
+                        {
+                            @if (level.LevelId == Model.LevelId)
+                            {
+                                <option value="@level.LevelId" selected>@level.LevelName</option>
+                            }
+                            else
+                            {
+                                <option value="@level.LevelId">@level.LevelName</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="meaning" class="form-label">Nghĩa</label>
+                <input type="text" name="meaning" id="meaning" class="form-control" value="@Model.Meaning">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="onYomi" class="form-label">On-yomi (âm Hán)</label>
+                    <input type="text" name="onYomi" id="onYomi" class="form-control" value="@Model.OnYomi">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="kunYomi" class="form-label">Kun-yomi (âm Nhật)</label>
+                    <input type="text" name="kunYomi" id="kunYomi" class="form-control" value="@Model.KunYomi">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="strokeCount" class="form-label">Số nét viết</label>
+                    <input type="number" name="strokeCount" id="strokeCount" class="form-control" value="@Model.StrokeCount" min="1">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="strokeOrderUrl" class="form-label">URL ảnh thứ tự nét</label>
+                    <input type="url" name="strokeOrderUrl" id="strokeOrderUrl" class="form-control" value="@Model.StrokeOrderUrl">
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                <a href="/teacher/kanji" class="btn btn-light">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Examples.Any())
+{
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Ví dụ từ vựng (@Model.Examples.Count)</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Từ</th>
+                            <th>Cách đọc</th>
+                            <th>Nghĩa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var example in Model.Examples.OrderBy(e => e.SortOrder))
+                        {
+                            <tr>
+                                <td class="fw-bold">@example.Word</td>
+                                <td>@example.Reading</td>
+                                <td>@example.Meaning</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

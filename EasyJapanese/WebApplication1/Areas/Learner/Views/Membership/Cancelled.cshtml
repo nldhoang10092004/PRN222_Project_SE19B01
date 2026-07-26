@@ -1,0 +1,63 @@
+@model CoreLibrary.Data.Entities.Transaction
+@{
+    ViewData["Title"] = "Đã hủy thanh toán";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <span class="fs-1 text-secondary">✕</span>
+                        </div>
+                    </div>
+
+                    <h2 class="mb-3">Đã hủy thanh toán</h2>
+                    <p class="text-muted mb-4">
+                        Bạn đã hủy giao dịch thanh toán gói <strong>@Model.Plan.PlanName</strong>.
+                        Không có khoản tiền nào được trừ từ tài khoản của bạn.
+                    </p>
+
+                    <div class="bg-light rounded p-4 mb-4">
+                        <div class="row text-start">
+                            <div class="col-6 mb-2">
+                                <small class="text-muted">Gói đăng ký</small>
+                                <div class="fw-semibold">@Model.Plan.PlanName</div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <small class="text-muted">Số tiền</small>
+                                <div class="fw-semibold">@Model.FinalAmount.ToString("N0") ₫</div>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted">Mã giao dịch</small>
+                                <div class="fw-semibold font-monospace small">@Model.PaymentRef</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mb-4" role="alert">
+                        <small>
+                            Bạn có thể thử lại thanh toán bất cứ lúc nào.
+                            Nếu gặp vấn đề, vui lòng liên hệ hỗ trợ.
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Checkout", "Membership", new { planId = Model.PlanId })" class="btn btn-primary btn-lg">
+                            Thử lại thanh toán
+                        </a>
+                        <a href="@Url.Action("Plans", "Membership")" class="btn btn-outline-secondary">
+                            Xem các gói khác
+                        </a>
+                        <a href="@Url.Action("Index", "Dashboard")" class="btn btn-link text-muted">
+                            Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+@model CoreLibrary.Data.Entities.LessonMaterial
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 fw-bold">Chỉnh sửa Tài liệu</h3>
+    <a href="/admin/lesson-materials" class="btn btn-light">Quay lại</a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <form method="post" action="/admin/lesson-materials/edit/@Model.MaterialId">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label for="lessonId" class="form-label">Bài học <span class="text-danger">*</span></label>
+                <select name="lessonId" id="lessonId" class="form-select" required>
+                    @foreach (var lesson in ViewBag.Lessons)
+                    {
+                        @if (lesson.LessonId == Model.LessonId)
+                        {
+                            <option value="@lesson.LessonId" selected>@lesson.Title</option>
+                        }
+                        else
+                        {
+                            <option value="@lesson.LessonId">@lesson.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Tên Tài liệu <span class="text-danger">*</span></label>
+                <input type="text" name="title" id="title" class="form-control" value="@Model.Title" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="url" class="form-label">URL Tài liệu <span class="text-danger">*</span></label>
+                <input type="url" name="url" id="url" class="form-control" value="@Model.Url" required>
+                <div class="form-text">Đường dẫn hiện tại: <a href="@Model.Url" target="_blank">@Model.Url</a></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="fileType" class="form-label">Loại File</label>
+                <input type="text" name="fileType" id="fileType" class="form-control" value="@Model.FileType">
+            </div>
+
+            <div class="mb-3">
+                <label for="sortOrder" class="form-label">Thứ tự sắp xếp</label>
+                <input type="number" name="sortOrder" id="sortOrder" class="form-control" value="@Model.SortOrder">
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">Cập nhật</button>
+                <a href="/admin/lesson-materials" class="btn btn-light">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
