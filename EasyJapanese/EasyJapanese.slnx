@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="CoreLibrary/CoreLibrary.csproj" />
   <Project Path="WebApplication1/CoreWeb.csproj" />
+  <Project Path="BackupWorkerService/BackupWorkerService.csproj" />
 </Solution>
