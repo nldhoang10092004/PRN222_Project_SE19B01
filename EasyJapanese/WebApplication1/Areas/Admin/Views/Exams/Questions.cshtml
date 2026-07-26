@@ -55,14 +55,21 @@
                     <div class="d-flex flex-column gap-2 mt-2">
                         @foreach (var opt in q.AnswerOptions)
                         {
-                            <div class="d-flex align-items-center p-3 rounded-3" style="background-color: @(opt.IsCorrect ? "#e8f5e9" : "#f8f9fa") !important; border: 1px solid @(opt.IsCorrect ? "#2e7d32" : "#e0e0e0") !important; border-left: @(opt.IsCorrect ? "5px solid #2e7d32" : "1px solid #e0e0e0") !important;">
-                                <i class="bi @(opt.IsCorrect ? "bi-check-circle-fill" : "bi-circle") me-3 fs-5" style="color: @(opt.IsCorrect ? "#2e7d32" : "#6c757d") !important;"></i>
-                                <span class="fs-6 fw-semibold" style="color: @(opt.IsCorrect ? "#1b5e20" : "#212529") !important;">@opt.AnswerText</span>
-                                @if (opt.IsCorrect)
-                                {
-                                    <span class="badge ms-auto px-3 py-1 small fw-bold" style="background-color: #2e7d32 !important; color: #ffffff !important;">Đáp án đúng</span>
-                                }
-                            </div>
+                            if (opt.IsCorrect)
+                            {
+                                <div class="d-flex align-items-center p-3 rounded-3 shadow-sm" style="background-color: #198754 !important; color: #ffffff !important; border: 1px solid #146c43 !important;">
+                                    <i class="bi bi-check-circle-fill me-3 fs-5" style="color: #ffffff !important;"></i>
+                                    <span class="fs-6 fw-bold" style="color: #ffffff !important;">@opt.AnswerText</span>
+                                    <span class="badge ms-auto px-3 py-2 fw-bold" style="background-color: #ffffff !important; color: #198754 !important;">Đáp án đúng</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center p-3 rounded-3 border bg-light border-light text-dark">
+                                    <i class="bi bi-circle text-muted me-3 fs-5"></i>
+                                    <span class="fs-6 fw-normal" style="color: #212529 !important;">@opt.AnswerText</span>
+                                </div>
+                            }
                         }
                     </div>
                 </div>
@@ -95,13 +102,13 @@
                                                 var val = i < optsList.Count ? optsList[i].AnswerText : "";
                                                 bool isCorrectOpt = (i == correctIdx);
                                                 <div class="input-group">
-                                                    <div class="input-group-text border-end-0" style="background-color: @(isCorrectOpt ? "#e8f5e9" : "#f8f9fa") !important; border-color: @(isCorrectOpt ? "#2e7d32" : "#ced4da") !important;">
+                                                    <div class="input-group-text border-end-0" style="background-color: @(isCorrectOpt ? "#198754" : "#f8f9fa") !important; border-color: @(isCorrectOpt ? "#198754" : "#ced4da") !important;">
                                                         <input type="radio" name="correctIndex" value="@i" @(isCorrectOpt ? "checked" : "") class="form-check-input me-2" id="edit_opt_@(q.QuestionId)_@i" />
-                                                        <label class="form-check-label small fw-bold" for="edit_opt_@(q.QuestionId)_@i" style="color: @(isCorrectOpt ? "#2e7d32" : "#6c757d") !important;">
+                                                        <label class="form-check-label small fw-bold" for="edit_opt_@(q.QuestionId)_@i" style="color: @(isCorrectOpt ? "#ffffff" : "#6c757d") !important;">
                                                             @(isCorrectOpt ? "Đúng" : $"Đáp án {i+1}")
                                                         </label>
                                                     </div>
-                                                    <input type="text" name="options" class="form-control fw-semibold" value="@val" placeholder="Nhập đáp án @(i+1)..." required style="color: #212529 !important; background-color: #ffffff !important; border-color: @(isCorrectOpt ? "#2e7d32" : "#ced4da") !important;" />
+                                                    <input type="text" name="options" class="form-control fw-semibold" value="@val" placeholder="Nhập đáp án @(i+1)..." required style="color: #212529 !important; background-color: #ffffff !important; border-color: @(isCorrectOpt ? "#198754" : "#ced4da") !important;" />
                                                 </div>
                                             }
                                         </div>

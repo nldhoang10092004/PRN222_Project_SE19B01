@@ -47,8 +47,8 @@
                 <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createPostModal">
                     <i class="bi bi-pencil-square me-1"></i>Đăng bài
                 </button>
-                <div class="dropdown">
-                    <button class="btn p-0 border-0 dropdown-toggle" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="dropdown d-flex align-items-center">
+                    <button class="btn p-0 border-0 shadow-none d-flex align-items-center justify-content-center" id="ddUser" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent; outline: none;">
                         <div class="hj-avatar">@(string.IsNullOrEmpty(Model.FullName) ? "U" : Model.FullName.Substring(0, 1).ToUpper())</div>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="ddUser">

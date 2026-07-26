@@ -1,4 +1,4 @@
-﻿using CoreLibrary.Authentication;
+using CoreLibrary.Authentication;
 using CoreLibrary.Const;
 using CoreLibrary.Data;
 using CoreLibrary.Data.Entities;
@@ -253,17 +253,17 @@ namespace WebApplication1.Areas.Learner.Controllers
             {
                 LessonId = lesson.LessonId,
                 CourseId = lesson.CourseId,
-                LessonTitle = lesson.Title,
-                CourseTitle = lesson.Course?.Title ?? "",
+                LessonTitle = CoreLibrary.Utility.EncodingFixer.FixMojibake(lesson.Title),
+                CourseTitle = CoreLibrary.Utility.EncodingFixer.FixMojibake(lesson.Course?.Title ?? ""),
                 LevelName = lesson.Course?.Level?.LevelName ?? "",
-                Content = lesson.Content,
+                Content = CoreLibrary.Utility.EncodingFixer.FixMojibake(lesson.Content),
                 VideoUrl = lesson.VideoUrl,
                 IsCompleted = isCompleted,
 
                 AllLessons = courseLessons.Select(l => new SidebarLessonItem
                 {
                     LessonId = l.LessonId,
-                    Title = l.Title,
+                    Title = CoreLibrary.Utility.EncodingFixer.FixMojibake(l.Title),
                     SortOrder = l.SortOrder,
                     IsCurrent = l.LessonId == lesson.LessonId,
                     IsCompleted = completedLessonIds.Contains(l.LessonId)
@@ -272,7 +272,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                 MaterialItems = materials.Select(m => new LessonMaterialViewModel
                 {
                     MaterialId = m.MaterialId,
-                    Title = m.Title,
+                    Title = CoreLibrary.Utility.EncodingFixer.FixMojibake(m.Title),
                     Url = m.Url,
                     FileType = m.FileType ?? "link"
                 }).ToList(),

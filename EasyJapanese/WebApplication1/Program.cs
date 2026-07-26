@@ -57,13 +57,14 @@ namespace CoreWeb
 
             var app = builder.Build();
 
-            // Seed Community, Support & Voucher dump data into database
+            // Seed Community, Support & Voucher dump data into database & fix Mojibake encoding
             using (var scope = app.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 CommunityDataSeeder.SeedCommunityData(dbContext);
                 SupportDataSeeder.SeedSupportData(dbContext);
                 VoucherDataSeeder.SeedVoucherData(dbContext);
+                CoreLibrary.Utility.EncodingFixer.FixDatabase(dbContext);
             }
 
             // Configure the HTTP request pipeline.
