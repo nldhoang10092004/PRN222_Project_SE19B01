@@ -1,0 +1,59 @@
+@model WebApplication1.Areas.Learner.Models.ReadingListViewModel
+@{
+    ViewData["Title"] = "Luyện Đọc - Hi Japan!";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+<main class="hj-content">
+    <div class="container py-5">
+
+        <div class="mb-5">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/learn/Practice">Luyện tập</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Luyện Đọc</li>
+                </ol>
+            </nav>
+            <span class="hj-eyebrow">Luyện Đọc 読</span>
+            <h2 class="fw-bold mb-2" style="font-family:'Outfit',sans-serif;color:var(--color-navy);">
+                Bài đọc hiểu tiếng Nhật
+            </h2>
+            <p class="text-muted mb-0">Đọc hiểu đa chủ đề, luyện từ vựng và ngữ pháp thông qua bài đọc.</p>
+        </div>
+
+        @if (Model.Exercises.Any())
+        {
+            <div class="row g-4">
+                @foreach (var exercise in Model.Exercises)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <h5 class="fw-bold mb-3" style="color:var(--color-navy);">
+                                    @exercise.Title
+                                </h5>
+                                <div class="mb-3">
+                                    <span class="badge bg-light text-dark">@exercise.QuestionCount câu hỏi</span>
+                                </div>
+                                <div class="mt-auto">
+                                    <a href="/learn/Practice/ReadingDetail/@exercise.ExerciseId"
+                                       class="btn btn-danger w-100">
+                                        Bắt đầu đọc
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted">Chưa có bài đọc nào. Vui lòng quay lại sau.</p>
+                <a href="/learn/Practice" class="btn btn-outline-primary mt-3">Quay lại Luyện tập</a>
+            </div>
+        }
+
+    </div>
+</main>
