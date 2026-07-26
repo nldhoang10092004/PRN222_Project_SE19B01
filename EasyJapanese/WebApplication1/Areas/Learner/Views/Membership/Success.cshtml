@@ -1,0 +1,77 @@
+@model CoreLibrary.Data.Entities.Transaction
+@{
+    ViewData["Title"] = "Thanh toán thành công";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-5">
+                    @if (Model.PaymentStatus == CoreLibrary.Const.TransactionStatusConst.PAID)
+                    {
+                        <div class="mb-4">
+                            <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <span class="fs-1 text-success">✓</span>
+                            </div>
+                        </div>
+                        <h2 class="mb-3">Thanh toán thành công!</h2>
+                        <p class="text-muted mb-4">
+                            Cảm ơn bạn đã đăng ký gói <strong>@Model.Plan.PlanName</strong>.
+                            Membership của bạn đã được kích hoạt.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="mb-4">
+                            <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <span class="fs-1 text-warning">⏱</span>
+                            </div>
+                        </div>
+                        <h2 class="mb-3">Đang xử lý thanh toán</h2>
+                        <p class="text-muted mb-4">
+                            Thanh toán của bạn đang được xử lý. Vui lòng đợi trong giây lát hoặc kiểm tra lại sau.
+                        </p>
+                    }
+
+                    <div class="bg-light rounded p-4 mb-4">
+                        <div class="row text-start">
+                            <div class="col-6 mb-2">
+                                <small class="text-muted">Gói đăng ký</small>
+                                <div class="fw-semibold">@Model.Plan.PlanName</div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <small class="text-muted">Số tiền</small>
+                                <div class="fw-semibold">@Model.FinalAmount.ToString("N0") ₫</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Mã giao dịch</small>
+                                <div class="fw-semibold font-monospace small">@Model.PaymentRef</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Trạng thái</small>
+                                <div>
+                                    @if (Model.PaymentStatus == CoreLibrary.Const.TransactionStatusConst.PAID)
+                                    {
+                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Đang xử lý</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Index", "Dashboard")" class="btn btn-primary btn-lg">
+                            Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
