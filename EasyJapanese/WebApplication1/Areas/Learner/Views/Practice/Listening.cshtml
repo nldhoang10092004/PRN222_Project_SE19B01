@@ -52,59 +52,73 @@
         </div>
     </div>
 
-    <!-- Listening Exercise Cards Grid -->
+    <!-- Grouped Listening Exercises List by Course/Topic -->
     @if (Model.Exercises.Any())
     {
-        <div class="row g-4">
-            @foreach (var ex in Model.Exercises)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 rounded-4 shadow-sm hover-shadow transition-all bg-white overflow-hidden">
-                        <div class="card-body p-4 d-flex flex-direction-column justify-content-between">
-                            <div>
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <span class="badge bg-danger text-white rounded-pill px-3 py-1.5 fw-bold">
-                                        JLPT @ex.LevelName
-                                    </span>
+        var groupedExercises = Model.Exercises.GroupBy(e => e.CourseTitle ?? "Bài luyện nghe tổng hợp").ToList();
 
-                                    @if (ex.BestScore.HasValue)
-                                    {
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold">
-                                            <i class="bi bi-check-lg me-1"></i> Điểm cao nhất: @ex.BestScore%
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1">
-                                            Chưa làm
-                                        </span>
-                                    }
-                                </div>
+        @foreach (var group in groupedExercises)
+        {
+            <div class="mb-5">
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-journal-bookmark-fill text-danger fs-5"></i>
+                        <span>@group.Key</span>
+                    </h5>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1 fw-semibold small">
+                        @group.Count() bài tập
+                    </span>
+                </div>
 
-                                <h5 class="fw-bold text-dark mb-2 line-clamp-2">@ex.Title</h5>
+                <div class="row g-4">
+                    @foreach (var ex in group)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border rounded-4 shadow-sm hover-shadow transition-all bg-white overflow-hidden">
+                                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <span class="badge bg-danger text-white rounded-pill px-3 py-1.5 fw-bold">
+                                                JLPT @ex.LevelName
+                                            </span>
 
-                                @if (!string.IsNullOrEmpty(ex.CourseTitle))
-                                {
-                                    <div class="text-muted small mb-3">
-                                        <i class="bi bi-journal-text me-1 text-danger"></i> @ex.CourseTitle
+                                            @if (ex.BestScore.HasValue)
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold">
+                                                    <i class="bi bi-trophy-fill me-1 text-warning"></i> @ex.BestScore%
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1 small">
+                                                    Chưa làm
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <h5 class="fw-bold text-dark mb-2 line-clamp-2 fs-6">@ex.Title</h5>
+
+                                        <div class="text-secondary small mb-3 d-flex align-items-center gap-2">
+                                            <i class="bi bi-question-circle text-danger"></i>
+                                            <span>@ex.QuestionCount câu hỏi trắc nghiệm</span>
+                                        </div>
                                     </div>
-                                }
-                            </div>
 
-                            <div class="pt-3 border-top d-flex align-items-center justify-content-between mt-3">
-                                <span class="text-secondary small fw-semibold">
-                                    <i class="bi bi-question-circle me-1 text-danger"></i> @ex.QuestionCount câu hỏi
-                                </span>
-
-                                <a href="/learn/Practice/ListeningDetail/@ex.ExerciseId" class="btn btn-sm btn-danger rounded-pill px-3.5 py-1.5 fw-bold shadow-sm" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
-                                    Luyện ngay <i class="bi bi-play-circle-fill ms-1"></i>
-                                </a>
+                                    <div class="pt-3 border-top mt-2">
+                                        <a href="/learn/Practice/ListeningDetail/@ex.ExerciseId"
+                                           class="btn btn-danger rounded-pill w-100 fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2"
+                                           style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+                                            <span>Luyện ngay</span>
+                                            <i class="bi bi-play-circle-fill fs-6"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
                 </div>
-            }
-        </div>
+            </div>
+        }
     }
     else
     {
@@ -125,6 +139,7 @@
     .hover-shadow:hover {
         transform: translateY(-3px);
         box-shadow: 0 12px 24px -6px rgba(0,0,0,0.12) !important;
+        border-color: #fca5a5 !important;
     }
     .line-clamp-2 {
         display: -webkit-box;
