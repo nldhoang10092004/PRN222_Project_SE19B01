@@ -18,10 +18,12 @@ namespace CoreLibrary.Utility
         {
             if (string.IsNullOrWhiteSpace(input)) return input ?? "";
 
-            // Check if string contains typical Mojibake patterns
+            // Check if string contains typical Mojibake patterns for Vietnamese or Japanese
             if (!input.Contains("Ã") && !input.Contains("á»") && !input.Contains("áº") &&
                 !input.Contains("Ä") && !input.Contains("Æ") && !input.Contains("Â") &&
-                !input.Contains("áº«") && !input.Contains("cáº"))
+                !input.Contains("áº«") && !input.Contains("cáº") && !input.Contains("æ") &&
+                !input.Contains("è") && !input.Contains("ç") && !input.Contains("å") &&
+                !input.Contains("ã") && !input.Contains("ã‚") && !input.Contains("ï¿½"))
             {
                 return input;
             }
@@ -88,7 +90,9 @@ namespace CoreLibrary.Utility
                 {"tÃºp", "tập"},
                 {"vÃoi", "với"},
                 {"hÃ»", "hội"},
-                {"káºot", "kết"}
+                {"káºot", "kết"},
+                {"Kiá»fm", "Kiểm"},
+                {"cuá»oi", "cuối"}
             };
 
             foreach (var kv in map)
@@ -253,6 +257,101 @@ namespace CoreLibrary.Utility
                     }
                 }
                 if (fcChanged) db.SaveChanges();
+
+                // 10. Fix CommunityPosts & Comments
+                var posts = db.CommunityPosts.ToList();
+                bool postChanged = false;
+                foreach (var p in posts)
+                {
+                    var newTitle = FixMojibake(p.Title);
+                    var newContent = FixMojibake(p.Content);
+                    var newAuthor = FixMojibake(p.AuthorName);
+                    if (newTitle != p.Title || newContent != p.Content || newAuthor != p.AuthorName)
+                    {
+                        p.Title = newTitle;
+                        p.Content = newContent;
+                        p.AuthorName = newAuthor;
+                        postChanged = true;
+                    }
+                }
+                if (postChanged) db.SaveChanges();
+
+                var comments = db.CommunityComments.ToList();
+                bool commChanged = false;
+                foreach (var cm in comments)
+                {
+                    var newContent = FixMojibake(cm.Content);
+                    var newAuthor = FixMojibake(cm.AuthorName);
+                    if (newContent != cm.Content || newAuthor != cm.AuthorName)
+                    {
+                        cm.Content = newContent;
+                        cm.AuthorName = newAuthor;
+                        commChanged = true;
+                    }
+                }
+                if (commChanged) db.SaveChanges();
+
+                // 11. Fix SupportTickets & Messages
+                var tickets = db.SupportTickets.ToList();
+                bool tickChanged = false;
+                foreach (var st in tickets)
+                {
+                    var newSub = FixMojibake(st.Subject);
+                    var newCat = FixMojibake(st.Category);
+                    var newName = FixMojibake(st.UserFullName);
+                    if (newSub != st.Subject || newCat != st.Category || newName != st.UserFullName)
+                    {
+                        st.Subject = newSub;
+                        st.Category = newCat;
+                        st.UserFullName = newName;
+                        tickChanged = true;
+                    }
+                }
+                if (tickChanged) db.SaveChanges();
+
+                var messages = db.SupportMessages.ToList();
+                bool msgChanged = false;
+                foreach (var sm in messages)
+                {
+                    var newText = FixMojibake(sm.MessageText);
+                    if (newText != sm.MessageText)
+                    {
+                        sm.MessageText = newText;
+                        msgChanged = true;
+                    }
+                }
+                if (msgChanged) db.SaveChanges();
+
+                // 12. Fix Mentors & JlptLevels
+                var mentors = db.Mentors.ToList();
+                bool mentorChanged = false;
+                foreach (var m in mentors)
+                {
+                    var newName = FixMojibake(m.FullName);
+                    var newBio = FixMojibake(m.Bio);
+                    var newExp = FixMojibake(m.Expertise);
+                    if (newName != m.FullName || newBio != m.Bio || newExp != m.Expertise)
+                    {
+                        m.FullName = newName;
+                        m.Bio = newBio;
+                        m.Expertise = newExp;
+                        mentorChanged = true;
+                    }
+                }
+                if (mentorChanged) db.SaveChanges();
+
+                var levels = db.JlptLevels.ToList();
+                bool levelChanged = false;
+                foreach (var lvl in levels)
+                {
+                    var newDesc = FixMojibake(lvl.Description);
+                    if (newDesc != lvl.Description)
+                    {
+                        lvl.Description = newDesc;
+                        levelChanged = true;
+                    }
+                }
+                if (levelChanged) db.SaveChanges();
             }
             catch (Exception ex)
             {
