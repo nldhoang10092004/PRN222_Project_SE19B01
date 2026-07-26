@@ -15,7 +15,7 @@
     <div class="col-md-8 mx-auto">
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
-                <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input type="hidden" asp-for="LessonId" />
                     <input type="hidden" asp-for="CourseId" />
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -48,8 +48,15 @@
                     </div>
 
                     <div class="mb-4" id="videoUrlDiv" style="display: @(Model.LessonType == "Video" ? "block" : "none");">
-                        <label asp-for="VideoUrl" class="form-label fw-bold">Đường dẫn Video (YouTube, Vimeo, etc.)</label>
-                        <input asp-for="VideoUrl" class="form-control" placeholder="https://youtube.com/..." />
+                        <label for="videoFile" class="form-label fw-bold">File Video</label>
+                        @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                        {
+                            <div class="mb-2">
+                                <video src="@Model.VideoUrl" controls class="w-100 rounded" style="max-height: 240px;"></video>
+                            </div>
+                        }
+                        <input type="file" name="videoFile" id="videoFile" class="form-control" accept="video/*" />
+                        <div class="form-text">Bỏ trống nếu không muốn thay video hiện tại.</div>
                         <span asp-validation-for="VideoUrl" class="text-danger small"></span>
                         <div class="mt-3">
                             <label asp-for="Duration" class="form-label fw-bold">Thời lượng (phút)</label>
