@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CoreLibrary.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -72,9 +72,74 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<VoucherUsage> VoucherUsages { get; set; }
 
+    public virtual DbSet<CommunityPost> CommunityPosts { get; set; }
+
+    public virtual DbSet<CommunityComment> CommunityComments { get; set; }
+
+    public virtual DbSet<CommunityLike> CommunityLikes { get; set; }
+
+    public virtual DbSet<SupportTicket> SupportTickets { get; set; }
+
+    public virtual DbSet<SupportMessage> SupportMessages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("Vietnamese_CI_AS");
+
+        modelBuilder.Entity<SupportTicket>(entity =>
+        {
+            entity.HasKey(e => e.TicketId);
+            entity.Property(e => e.UserEmail).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.UserFullName).HasMaxLength(255);
+            entity.Property(e => e.Category).HasMaxLength(100).HasDefaultValue("Hỗ trợ trực tuyến");
+            entity.Property(e => e.Subject).HasMaxLength(255);
+            entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
+        });
+
+        modelBuilder.Entity<SupportMessage>(entity =>
+        {
+            entity.HasKey(e => e.MessageId);
+            entity.Property(e => e.Sender).HasMaxLength(50).HasDefaultValue("User");
+            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
+            entity.HasOne(m => m.Ticket)
+                .WithMany(t => t.Messages)
+                .HasForeignKey(m => m.TicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CommunityPost>(entity =>
+        {
+            entity.HasKey(e => e.PostId);
+            entity.Property(e => e.Title).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.AuthorName).HasMaxLength(100);
+            entity.Property(e => e.AuthorRole).HasMaxLength(20).HasDefaultValue("Student");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
+        });
+
+        modelBuilder.Entity<CommunityComment>(entity =>
+        {
+            entity.HasKey(e => e.CommentId);
+            entity.Property(e => e.AuthorName).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CommunityLike>(entity =>
+        {
+            entity.HasKey(e => e.LikeId);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.HasOne(l => l.Post)
+                .WithMany(p => p.Likes)
+                .HasForeignKey(l => l.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<Account>(entity =>
         {

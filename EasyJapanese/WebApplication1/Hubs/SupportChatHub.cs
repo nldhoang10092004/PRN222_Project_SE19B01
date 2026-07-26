@@ -1,13 +1,22 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CoreLibrary.Data;
 using WebApplication1.Areas.Admin.Controllers;
 
 namespace WebApplication1.Hubs
 {
     public class SupportChatHub : Hub
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public SupportChatHub(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
         public async Task JoinTicketGroup(int ticketId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"ticket_{ticketId}");
@@ -27,94 +36,86 @@ namespace WebApplication1.Hubs
         {
             if (string.IsNullOrWhiteSpace(messageText)) return;
 
-            var ticket = TicketsController.GetOrCreateTicketForUser(
-                string.IsNullOrEmpty(userEmail) ? "khachhang@hijapan.vn" : userEmail,
-                string.IsNullOrEmpty(userName) ? "Khách hàng" : userName
-            );
-
-            TicketsController.AddUserMessage(ticket.TicketId, messageText);
-
-            // Join caller connection to the ticket group
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"ticket_{ticket.TicketId}");
-
-            var sentAt = DateTime.UtcNow.ToString("HH:mm dd/MM/yyyy");
-
-            // Confirm ticket ID to caller
-            await Clients.Caller.SendAsync("TicketCreated", new
+            using (var scope = _serviceProvider.CreateScope())
             {
-                ticketId = ticket.TicketId,
-                userEmail = ticket.UserEmail,
-                userFullName = ticket.UserFullName
-            });
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            await Clients.Group($"ticket_{ticket.TicketId}").SendAsync("ReceiveMessage", new
-            {
-                ticketId = ticket.TicketId,
-                sender = "User",
-                messageText = messageText,
-                sentAt = sentAt
-            });
+                var ticket = TicketsController.GetOrCreateTicketForUser(
+                    db,
+                    string.IsNullOrEmpty(userEmail) ? "khachhang@hijapan.vn" : userEmail,
+                    string.IsNullOrEmpty(userName) ? "Khách hàng" : userName
+                );
 
-            await Clients.Group("admin_support_channel").SendAsync("NewTicketOrMessage", new
-            {
-                ticketId = ticket.TicketId,
-                userFullName = ticket.UserFullName,
-                userEmail = ticket.UserEmail,
-                subject = ticket.Subject,
-                status = ticket.Status,
-                sender = "User",
-                messageText = messageText,
-                sentAt = sentAt
-            });
+                TicketsController.AddUserMessage(db, ticket.TicketId, messageText);
+
+                // Join caller connection to the ticket group
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"ticket_{ticket.TicketId}");
+
+                var sentAt = DateTime.UtcNow.ToString("HH:mm dd/MM/yyyy");
+
+                // Confirm ticket ID to caller
+                await Clients.Caller.SendAsync("TicketCreated", new
+                {
+                    ticketId = ticket.TicketId,
+                    userEmail = ticket.UserEmail,
+                    userFullName = ticket.UserFullName
+                });
+
+                await Clients.Group($"ticket_{ticket.TicketId}").SendAsync("ReceiveMessage", new
+                {
+                    ticketId = ticket.TicketId,
+                    sender = "User",
+                    messageText = messageText,
+                    sentAt = sentAt
+                });
+
+                await Clients.Group("admin_support_channel").SendAsync("NewTicketOrMessage", new
+                {
+                    ticketId = ticket.TicketId,
+                    userFullName = ticket.UserFullName,
+                    userEmail = ticket.UserEmail,
+                    subject = ticket.Subject,
+                    status = ticket.Status,
+                    sender = "User",
+                    messageText = messageText,
+                    sentAt = sentAt
+                });
+            }
         }
 
         public async Task SendAdminReply(int ticketId, string messageText, string newStatus)
         {
-            var ticket = TicketsController._tickets.FirstOrDefault(t => t.TicketId == ticketId);
-            if (ticket == null) return;
-
-            if (!string.IsNullOrWhiteSpace(messageText))
+            using (var scope = _serviceProvider.CreateScope())
             {
-                ticket.ChatHistory.Add(new TicketsController.ChatMessage
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                TicketsController.AddAdminReply(db, ticketId, messageText, newStatus);
+                var ticket = db.SupportTickets.FirstOrDefault(t => t.TicketId == ticketId);
+                if (ticket == null) return;
+
+                var sentAt = DateTime.UtcNow.ToString("HH:mm dd/MM/yyyy");
+
+                await Clients.Group($"ticket_{ticketId}").SendAsync("ReceiveMessage", new
                 {
-                    Sender = "Admin",
-                    MessageText = messageText,
-                    SentAt = DateTime.UtcNow
+                    ticketId = ticketId,
+                    sender = "Admin",
+                    messageText = messageText,
+                    sentAt = sentAt,
+                    status = ticket.Status
                 });
 
-                if (ticket.Status == "Open")
+                await Clients.Group("admin_support_channel").SendAsync("NewTicketOrMessage", new
                 {
-                    ticket.Status = "InProgress";
-                }
+                    ticketId = ticket.TicketId,
+                    userFullName = ticket.UserFullName,
+                    userEmail = ticket.UserEmail,
+                    subject = ticket.Subject,
+                    status = ticket.Status,
+                    sender = "Admin",
+                    messageText = messageText,
+                    sentAt = sentAt
+                });
             }
-
-            if (!string.IsNullOrEmpty(newStatus))
-            {
-                ticket.Status = newStatus;
-            }
-
-            var sentAt = DateTime.UtcNow.ToString("HH:mm dd/MM/yyyy");
-
-            await Clients.Group($"ticket_{ticketId}").SendAsync("ReceiveMessage", new
-            {
-                ticketId = ticketId,
-                sender = "Admin",
-                messageText = messageText,
-                sentAt = sentAt,
-                status = ticket.Status
-            });
-
-            await Clients.Group("admin_support_channel").SendAsync("NewTicketOrMessage", new
-            {
-                ticketId = ticket.TicketId,
-                userFullName = ticket.UserFullName,
-                userEmail = ticket.UserEmail,
-                subject = ticket.Subject,
-                status = ticket.Status,
-                sender = "Admin",
-                messageText = messageText,
-                sentAt = sentAt
-            });
         }
     }
 }

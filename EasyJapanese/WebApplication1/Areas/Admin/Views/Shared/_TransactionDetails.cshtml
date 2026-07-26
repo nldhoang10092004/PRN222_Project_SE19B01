@@ -1,77 +1,63 @@
 @model CoreLibrary.Data.Entities.Transaction
 
 <div class="modal-header border-0 pb-0">
-    <h5 class="modal-title fw-bold"><i class="bi bi-receipt-cutoff text-danger me-2"></i>Chi tiết Hóa đơn</h5>
+    <h5 class="modal-title fw-bold">Chi tiết hóa đơn #@(string.IsNullOrEmpty(Model.PaymentRef) ? $"TX-{Model.TransactionId}" : Model.PaymentRef)</h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body p-4">
-    <div class="border-bottom border-dashed pb-3 mb-3">
-        <div class="d-flex justify-content-between text-muted small mb-1">
-            <span>Mã hóa đơn:</span>
-            <span class="fw-bold text-dark font-monospace">@(string.IsNullOrEmpty(Model.PaymentRef) ? $"TX-{Model.TransactionId}" : Model.PaymentRef)</span>
-        </div>
-        <div class="d-flex justify-content-between text-muted small">
-            <span>Ngày thanh toán:</span>
-            <span class="fw-semibold text-dark">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
-        </div>
+    <div class="d-flex justify-content-between small text-muted mb-3 pb-3 border-bottom">
+        <span>Mã hóa đơn:</span>
+        <span class="fw-bold font-monospace text-dark">@(string.IsNullOrEmpty(Model.PaymentRef) ? $"TX-{Model.TransactionId}" : Model.PaymentRef)</span>
+    </div>
+    <div class="d-flex justify-content-between small text-muted mb-3">
+        <span>Ngày thanh toán:</span>
+        <span class="fw-semibold text-dark">@((Model.PaidAt ?? Model.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</span>
     </div>
 
-    <!-- Student details -->
-    <div class="mb-4">
-        <h6 class="fw-bold mb-2 small text-muted text-uppercase">Khách hàng</h6>
-        <div class="bg-light p-3 rounded-3">
-            <p class="fw-bold text-dark mb-1">@Model.Student.FullName</p>
-            <p class="text-muted small mb-0">Email: @Model.Student.StudentNavigation?.Email</p>
-            @if(!string.IsNullOrEmpty(Model.Student.PhoneNumber))
-            {
-                <p class="text-muted small mb-0">SĐT: @Model.Student.PhoneNumber</p>
-            }
-        </div>
+    <div class="bg-light p-3 rounded-3 mb-4">
+        <label class="form-label small fw-bold text-muted d-block mb-2">KHÁCH HÀNG</label>
+        <div class="fw-bold text-dark fs-6">@Model.Student?.FullName</div>
+        <div class="small text-muted">Email: @Model.Student?.StudentNavigation?.Email</div>
     </div>
 
-    <!-- Plan details -->
-    <div class="mb-4">
-        <h6 class="fw-bold mb-2 small text-muted text-uppercase">Dịch vụ đăng ký</h6>
-        <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3">
+    <div class="bg-light p-3 rounded-3 mb-4">
+        <label class="form-label small fw-bold text-muted d-block mb-2">DỊCH VỤ ĐĂNG KÝ</label>
+        <div class="d-flex justify-content-between align-items-center">
             <div>
-                <p class="fw-bold text-dark mb-1">Gói @Model.Plan.PlanName</p>
-                <p class="text-muted small mb-0">Thời hạn: @Model.Plan.DurationDays ngày</p>
+                <div class="fw-bold text-dark">@Model.Plan?.PlanName</div>
+                <div class="small text-muted">Thời hạn: @Model.Plan?.DurationDays ngày</div>
             </div>
-            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2 fw-bold">VIP</span>
+            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 fw-bold">VIP</span>
         </div>
     </div>
 
-    <!-- Billing Summary -->
     <div class="mb-4">
-        <h6 class="fw-bold mb-2 small text-muted text-uppercase">Chi tiết thanh toán</h6>
-        <div class="d-flex flex-column gap-2 bg-light p-3 rounded-3">
-            <div class="d-flex justify-content-between small text-muted">
-                <span>Giá gốc:</span>
-                <span>@Model.OriginalAmount.ToString("N0")đ</span>
+        <label class="form-label small fw-bold text-muted d-block mb-2">CHI TIẾT THANH TOÁN</label>
+        <div class="d-flex justify-content-between small mb-1">
+            <span class="text-muted">Giá gốc:</span>
+            <span class="fw-semibold">@Model.OriginalAmount.ToString("N0")đ</span>
+        </div>
+        @if (Model.DiscountAmount > 0)
+        {
+            <div class="d-flex justify-content-between small mb-1 text-success">
+                <span>Mã giảm giá (@(Model.Voucher?.Code ?? "Áp dụng")):</span>
+                <span>-@Model.DiscountAmount.ToString("N0")đ</span>
             </div>
-            @if (Model.VoucherId != null)
-            {
-                <div class="d-flex justify-content-between small text-success fw-semibold">
-                    <span>Mã giảm giá (@Model.Voucher.Code):</span>
-                    <span>-@Model.DiscountAmount.ToString("N0")đ</span>
-                </div>
-            }
-            <hr class="my-1 border-light">
-            <div class="d-flex justify-content-between fw-bold text-dark">
-                <span>Tổng thanh toán:</span>
-                <span class="text-danger fs-5">@Model.FinalAmount.ToString("N0")đ</span>
-            </div>
+        }
+        <hr class="my-2 border-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark">Tổng thanh toán:</span>
+            <span class="fw-extrabold text-danger fs-5">@Model.FinalAmount.ToString("N0")đ</span>
         </div>
     </div>
 
-    <!-- Status & Method -->
-    <div class="d-flex justify-content-between small text-muted border-top pt-3">
+    <div class="d-flex justify-content-between small text-muted">
         <span>Phương thức:</span>
-        <span class="fw-bold text-dark">@(Model.PaymentMethod ?? "VNPAY")</span>
+        <span class="fw-bold text-dark">@(Model.PaymentMethod ?? "PayOS")</span>
     </div>
     <div class="d-flex justify-content-between small text-muted mt-2">
         <span>Trạng thái:</span>
-        @if (Model.PaymentStatus == "Completed")
+        @if (Model.PaymentStatus == "Paid" || Model.PaymentStatus == "Completed")
         {
             <span class="text-success fw-bold">Thành công</span>
         }

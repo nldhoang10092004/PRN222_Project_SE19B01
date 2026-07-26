@@ -57,6 +57,15 @@ namespace CoreWeb
 
             var app = builder.Build();
 
+            // Seed Community, Support & Voucher dump data into database
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                CommunityDataSeeder.SeedCommunityData(dbContext);
+                SupportDataSeeder.SeedSupportData(dbContext);
+                VoucherDataSeeder.SeedVoucherData(dbContext);
+            }
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {

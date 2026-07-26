@@ -59,9 +59,76 @@ namespace WebApplication1.Areas.Learner.Controllers
             return View(plan);
         }
 
+        public class ApplyVoucherDto
+        {
+            public int PlanId { get; set; }
+            public string VoucherCode { get; set; } = string.Empty;
+        }
+
+        [HttpPost("learn/membership/apply-voucher")]
+        [HttpPost("Learner/Membership/ApplyVoucher")]
+        public async Task<IActionResult> ApplyVoucher([FromBody] ApplyVoucherDto request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.VoucherCode))
+                return Json(new { success = false, message = "Vui lòng nhập mã giảm giá." });
+
+            var plan = await _db.SubscriptionPlans.FirstOrDefaultAsync(p => p.PlanId == request.PlanId);
+            if (plan == null) return Json(new { success = false, message = "Gói học không tồn tại." });
+
+            var voucherCodeClean = request.VoucherCode.Trim().ToLower();
+            var voucher = await _db.Vouchers.FirstOrDefaultAsync(v => v.Code.ToLower() == voucherCodeClean && v.IsActive);
+            if (voucher == null)
+                return Json(new { success = false, message = "Mã giảm giá không tồn tại hoặc đã bị ẩn." });
+
+            if (voucher.StartsAt.HasValue && voucher.StartsAt.Value.Date > DateTime.UtcNow.Date)
+                return Json(new { success = false, message = "Mã giảm giá chưa đến ngày áp dụng." });
+
+            if (voucher.ExpiresAt.HasValue && voucher.ExpiresAt.Value.Date.AddDays(1) < DateTime.UtcNow)
+                return Json(new { success = false, message = "Mã giảm giá đã hết hạn sử dụng." });
+
+            if (voucher.ApplicablePlanId.HasValue && voucher.ApplicablePlanId.Value != plan.PlanId)
+                return Json(new { success = false, message = "Mã giảm giá không áp dụng cho gói học này." });
+
+            if (voucher.MaxUsesTotal.HasValue && voucher.UsedCount >= voucher.MaxUsesTotal.Value)
+                return Json(new { success = false, message = "Mã giảm giá đã hết lượt sử dụng." });
+
+            if (plan.Price < voucher.MinOrderValue)
+                return Json(new { success = false, message = $"Giá trị đơn hàng tối thiểu để dùng mã này là {voucher.MinOrderValue:N0}đ." });
+
+            decimal discountAmount = 0;
+            bool isPercent = voucher.DiscountType.StartsWith("Percent", StringComparison.OrdinalIgnoreCase);
+
+            if (isPercent)
+            {
+                discountAmount = plan.Price * (voucher.DiscountValue / 100m);
+                if (voucher.MaxDiscountCap.HasValue && voucher.MaxDiscountCap.Value > 0)
+                {
+                    discountAmount = Math.Min(discountAmount, voucher.MaxDiscountCap.Value);
+                }
+            }
+            else
+            {
+                discountAmount = voucher.DiscountValue;
+            }
+
+            discountAmount = Math.Min(discountAmount, plan.Price);
+            decimal finalPrice = Math.Max(0, plan.Price - discountAmount);
+
+            return Json(new
+            {
+                success = true,
+                voucherId = voucher.VoucherId,
+                voucherCode = voucher.Code,
+                originalPrice = plan.Price,
+                discountAmount = discountAmount,
+                finalPrice = finalPrice,
+                message = "Áp dụng mã giảm giá thành công!"
+            });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ProcessCheckout(int planId, string paymentMethod, CancellationToken cancellationToken)
+        public async Task<IActionResult> ProcessCheckout(int planId, string paymentMethod, string? voucherCode, CancellationToken cancellationToken)
         {
             var currentUser = await _auth.GetCurrentUserAsync(HttpContext);
             if (currentUser == null) return Unauthorized();
@@ -69,14 +136,55 @@ namespace WebApplication1.Areas.Learner.Controllers
             var plan = await _db.SubscriptionPlans.FirstOrDefaultAsync(p => p.PlanId == planId, cancellationToken);
             if (plan == null) return NotFound();
 
-            // Tạo Transaction với status PENDING
+            decimal discountAmount = 0;
+            decimal finalAmount = plan.Price;
+            int? appliedVoucherId = null;
+
+            if (!string.IsNullOrWhiteSpace(voucherCode))
+            {
+                var voucherCodeClean = voucherCode.Trim().ToLower();
+                var voucher = await _db.Vouchers.FirstOrDefaultAsync(v => v.Code.ToLower() == voucherCodeClean && v.IsActive, cancellationToken);
+                if (voucher != null && (voucher.ExpiresAt == null || voucher.ExpiresAt.Value.Date.AddDays(1) >= DateTime.UtcNow))
+                {
+                    bool isPercent = voucher.DiscountType.StartsWith("Percent", StringComparison.OrdinalIgnoreCase);
+                    if (isPercent)
+                    {
+                        discountAmount = plan.Price * (voucher.DiscountValue / 100m);
+                        if (voucher.MaxDiscountCap.HasValue && voucher.MaxDiscountCap.Value > 0)
+                        {
+                            discountAmount = Math.Min(discountAmount, voucher.MaxDiscountCap.Value);
+                        }
+                    }
+                    else
+                    {
+                        discountAmount = voucher.DiscountValue;
+                    }
+
+                    discountAmount = Math.Min(discountAmount, plan.Price);
+                    finalAmount = Math.Max(0, plan.Price - discountAmount);
+                    appliedVoucherId = voucher.VoucherId;
+
+                    // Update voucher usage count
+                    voucher.UsedCount += 1;
+                    _db.VoucherUsages.Add(new VoucherUsage
+                    {
+                        VoucherId = voucher.VoucherId,
+                        StudentId = currentUser.AccountId,
+                        DiscountApplied = discountAmount,
+                        AppliedAt = DateTime.UtcNow
+                    });
+                }
+            }
+
+            // Create Transaction in DB
             var transaction = new Transaction
             {
                 StudentId = currentUser.AccountId,
                 PlanId = plan.PlanId,
+                VoucherId = appliedVoucherId,
                 OriginalAmount = plan.Price,
-                DiscountAmount = 0,
-                FinalAmount = plan.Price,
+                DiscountAmount = discountAmount,
+                FinalAmount = finalAmount,
                 PaymentMethod = "PayOS",
                 PaymentStatus = TransactionStatusConst.PENDING,
                 CreatedAt = DateTime.UtcNow
@@ -85,15 +193,50 @@ namespace WebApplication1.Areas.Learner.Controllers
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync(cancellationToken);
 
-            // Generate unique orderCode (timestamp + TransactionId)
+            // Handle 100% free voucher (finalAmount == 0)
+            if (finalAmount <= 0)
+            {
+                transaction.PaymentStatus = TransactionStatusConst.PAID;
+                transaction.PaidAt = DateTime.UtcNow;
+                transaction.PaymentRef = "VOUCHER_FREE_100";
+
+                // Add or extend student VIP membership directly
+                var existingMembership = await _db.StudentMemberships
+                    .FirstOrDefaultAsync(m => m.StudentId == currentUser.AccountId && m.IsActive && m.EndDate > DateTime.UtcNow, cancellationToken);
+
+                DateTime startDate = DateTime.UtcNow;
+                DateTime endDate = startDate.AddDays(plan.DurationDays);
+
+                if (existingMembership != null)
+                {
+                    existingMembership.EndDate = existingMembership.EndDate.AddDays(plan.DurationDays);
+                }
+                else
+                {
+                    _db.StudentMemberships.Add(new StudentMembership
+                    {
+                        StudentId = currentUser.AccountId,
+                        PlanId = plan.PlanId,
+                        TransactionId = transaction.TransactionId,
+                        StartDate = startDate,
+                        EndDate = endDate,
+                        IsActive = true
+                    });
+                }
+
+                await _db.SaveChangesAsync(cancellationToken);
+                return RedirectToAction(nameof(Success), new { transactionId = transaction.TransactionId });
+            }
+
+            // Generate unique orderCode
             var orderCode = long.Parse($"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}{transaction.TransactionId:D6}");
 
-            // Build returnUrl và cancelUrl
+            // Return and cancel URLs
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var returnUrl = $"{baseUrl}/learn/membership/success?transactionId={transaction.TransactionId}";
-            var cancelUrl = $"{baseUrl}/learn/membership/cancelled?transactionId={transaction.TransactionId}";
+            var returnUrl = $"{baseUrl}/Learner/Membership/Success?transactionId={transaction.TransactionId}";
+            var cancelUrl = $"{baseUrl}/Learner/Membership/Cancelled?transactionId={transaction.TransactionId}";
 
-            // Tạo PayOS payment link
+            // PayOS payment link
             var paymentRequest = new CreatePaymentLinkRequest
             {
                 OrderCode = orderCode,
@@ -105,11 +248,9 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             var paymentResponse = await _payment.CreatePaymentLinkAsync(paymentRequest, cancellationToken);
 
-            // Lưu orderCode vào PaymentRef
             transaction.PaymentRef = orderCode.ToString();
             await _db.SaveChangesAsync(cancellationToken);
 
-            // Redirect user đến PayOS checkout page
             return Redirect(paymentResponse.CheckoutUrl);
         }
 

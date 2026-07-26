@@ -41,7 +41,14 @@ namespace WebApplication1.Areas.Admin.Controllers
 
             if (!string.IsNullOrEmpty(statusFilter))
             {
-                query = query.Where(t => t.PaymentStatus == statusFilter);
+                if (statusFilter == "Paid" || statusFilter == "Completed")
+                {
+                    query = query.Where(t => t.PaymentStatus == "Paid" || t.PaymentStatus == "Completed");
+                }
+                else
+                {
+                    query = query.Where(t => t.PaymentStatus == statusFilter);
+                }
             }
 
             var transactions = await query
