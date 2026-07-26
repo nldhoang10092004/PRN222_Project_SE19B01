@@ -1,10 +1,12 @@
 using CoreLibrary.Data;
 using CoreLibrary.Data.Entities;
 using CoreLibrary.Const;
+using CoreLibrary.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreLibrary.Utility;
@@ -17,10 +19,12 @@ namespace WebApplication1.Areas.Teacher.Controllers
     public class LessonsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IStorageService _storage;
 
-        public LessonsController(AppDbContext context)
+        public LessonsController(AppDbContext context, IStorageService storage)
         {
             _context = context;
+            _storage = storage;
         }
 
         // GET: /teacher/lessons?courseId=1
@@ -55,7 +59,8 @@ namespace WebApplication1.Areas.Teacher.Controllers
         // POST: /teacher/lessons/create
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CourseId,Title,LessonType,VideoUrl,Content,Duration,IsPreview,SortOrder")] Lesson lesson)
+        [RequestSizeLimit(1024L * 1024 * 1024)]
+        public async Task<IActionResult> Create([Bind("CourseId,Title,LessonType,Content,Duration,IsPreview,SortOrder")] Lesson lesson, IFormFile? videoFile)
         {
             var mentorId = GetCurrentMentorId();
             var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == lesson.CourseId && c.CreatedBy == mentorId);
@@ -63,15 +68,25 @@ namespace WebApplication1.Areas.Teacher.Controllers
 
             ModelState.Remove("Course");
 
+            if (lesson.LessonType == "Video" && videoFile == null)
+            {
+                ModelState.AddModelError("VideoUrl", "Vui lòng chọn file video.");
+            }
+
             if (ModelState.IsValid)
             {
+                if (lesson.LessonType == "Video" && videoFile != null)
+                {
+                    lesson.VideoUrl = await UploadLessonVideoAsync(videoFile);
+                }
+
                 lesson.CreatedAt = DateTime.UtcNow;
                 _context.Add(lesson);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Đã thêm bài giảng thành công.";
                 return RedirectToAction(nameof(Index), new { courseId = lesson.CourseId });
             }
-            
+
             ViewData["CourseId"] = lesson.CourseId;
             return View(lesson);
         }
@@ -94,7 +109,8 @@ namespace WebApplication1.Areas.Teacher.Controllers
         // POST: /teacher/lessons/edit/5
         [HttpPost("edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("LessonId,CourseId,Title,LessonType,VideoUrl,Content,Duration,IsPreview,SortOrder")] Lesson lesson)
+        [RequestSizeLimit(1024L * 1024 * 1024)]
+        public async Task<IActionResult> Edit(int id, [Bind("LessonId,CourseId,Title,LessonType,VideoUrl,Content,Duration,IsPreview,SortOrder")] Lesson lesson, IFormFile? videoFile)
         {
             var mentorId = GetCurrentMentorId();
             if (id != lesson.LessonId) return NotFound();
@@ -107,15 +123,24 @@ namespace WebApplication1.Areas.Teacher.Controllers
 
             ModelState.Remove("Course");
 
+            if (lesson.LessonType == "Video" && videoFile == null && string.IsNullOrEmpty(existing.VideoUrl))
+            {
+                ModelState.AddModelError("VideoUrl", "Vui lòng chọn file video.");
+            }
+
             if (ModelState.IsValid)
             {
                 existing.Title = lesson.Title;
                 existing.LessonType = lesson.LessonType;
-                existing.VideoUrl = lesson.VideoUrl;
                 existing.Content = lesson.Content;
                 existing.Duration = lesson.Duration;
                 existing.IsPreview = lesson.IsPreview;
                 existing.SortOrder = lesson.SortOrder;
+
+                if (lesson.LessonType == "Video" && videoFile != null)
+                {
+                    existing.VideoUrl = await UploadLessonVideoAsync(videoFile);
+                }
 
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Cập nhật bài giảng thành công.";
@@ -124,6 +149,15 @@ namespace WebApplication1.Areas.Teacher.Controllers
 
             ViewData["CourseId"] = lesson.CourseId;
             return View(lesson);
+        }
+
+        private async Task<string> UploadLessonVideoAsync(IFormFile videoFile)
+        {
+            var extension = Path.GetExtension(videoFile.FileName);
+            var key = $"{StorageConst.FOLDER_VIDEOS}{Guid.NewGuid()}{extension}";
+
+            using var stream = videoFile.OpenReadStream();
+            return await _storage.UploadAsync(key, stream, videoFile.ContentType);
         }
 
         // POST: /teacher/lessons/delete/5

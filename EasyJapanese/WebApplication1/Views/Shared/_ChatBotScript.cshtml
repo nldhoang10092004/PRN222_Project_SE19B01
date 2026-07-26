@@ -120,11 +120,17 @@
             );
         }
 
+        function formatMessage(text) {
+            return escapeHtml(text)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
         function appendMessage(container, text, type) {
             const div = document.createElement('div');
 
             div.className = 'hj-chatbot-msg ' + type;
-            div.textContent = text;
+            div.innerHTML = formatMessage(text);
 
             container.appendChild(div);
             scrollToBottom(container);
