@@ -238,12 +238,6 @@ namespace WebApplication1.Areas.Learner.Controllers
         });
 
         // GET: /learn/Practice/Reading
-        [HttpGet("Reading")]
-        public IActionResult Reading() => View("ComingSoon", new ComingSoonViewModel
-        {
-            FeatureName = "Luyện Đọc",
-            Description = "Bài đọc hiểu đa dạng chủ đề, từ vựng Hán tự và ngữ pháp đi kèm."
-        });
         [HttpGet]
         public async Task<IActionResult> Reading()
         {
