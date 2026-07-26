@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Thêm Kanji mới";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Thêm Kanji mới</h3>
+    <a href="/teacher/kanji" class="btn btn-light">Quay lại</a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <form method="post" action="/teacher/kanji/create">
+            @Html.AntiForgeryToken()
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="character" class="form-label">Ký tự Kanji <span class="text-danger">*</span></label>
+                    <input type="text" name="character" id="character" class="form-control" placeholder="VD: 日" required style="font-size: 2rem; height: 60px;">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="levelId" class="form-label">Cấp độ JLPT <span class="text-danger">*</span></label>
+                    <select name="levelId" id="levelId" class="form-select" required>
+                        <option value="">-- Chọn cấp độ --</option>
+                        @foreach (var level in ViewBag.Levels)
+                        {
+                            <option value="@level.LevelId">@level.LevelName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="meaning" class="form-label">Nghĩa</label>
+                <input type="text" name="meaning" id="meaning" class="form-control" placeholder="VD: mặt trời, ngày">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="onYomi" class="form-label">On-yomi (âm Hán)</label>
+                    <input type="text" name="onYomi" id="onYomi" class="form-control" placeholder="VD: ニチ、ジツ">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="kunYomi" class="form-label">Kun-yomi (âm Nhật)</label>
+                    <input type="text" name="kunYomi" id="kunYomi" class="form-control" placeholder="VD: ひ、か">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="strokeCount" class="form-label">Số nét viết</label>
+                    <input type="number" name="strokeCount" id="strokeCount" class="form-control" placeholder="VD: 4" min="1">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="strokeOrderUrl" class="form-label">URL ảnh thứ tự nét</label>
+                    <input type="url" name="strokeOrderUrl" id="strokeOrderUrl" class="form-control" placeholder="https://...">
+                    <div class="form-text">Link ảnh minh họa thứ tự nét viết</div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Lưu</button>
+                <a href="/teacher/kanji" class="btn btn-light">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>

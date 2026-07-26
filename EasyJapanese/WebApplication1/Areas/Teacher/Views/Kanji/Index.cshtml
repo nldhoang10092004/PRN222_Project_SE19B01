@@ -1,0 +1,99 @@
+@model IEnumerable<CoreLibrary.Data.Entities.KanjiEntry>
+@{
+    ViewData["Title"] = "Quản lý Thư viện Kanji";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: var(--color-navy);">Thư viện Kanji</h3>
+    <a href="/teacher/kanji/create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Thêm Kanji mới</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select name="levelId" class="form-select">
+                    <option value="">-- Tất cả cấp độ --</option>
+                    @foreach (var level in ViewBag.Levels)
+                    {
+                        @if (level.LevelId == (int?)(ViewData["LevelId"]))
+                        {
+                            <option value="@level.LevelId" selected>@level.LevelName</option>
+                        }
+                        else
+                        {
+                            <option value="@level.LevelId">@level.LevelName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" name="searchString" value="@ViewData["SearchString"]" class="form-control" placeholder="Tìm theo ký tự Kanji hoặc nghĩa...">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary me-2">Tìm kiếm</button>
+                <a href="/teacher/kanji" class="btn btn-light">Xóa bộ lọc</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Kanji</th>
+                        <th>Nghĩa</th>
+                        <th>On-yomi</th>
+                        <th>Kun-yomi</th>
+                        <th>Số nét</th>
+                        <th>Cấp độ</th>
+                        <th>Số ví dụ</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark" style="font-size: 1.5rem;">@item.Character</div>
+                            </td>
+                            <td>@item.Meaning</td>
+                            <td>@item.OnYomi</td>
+                            <td>@item.KunYomi</td>
+                            <td>@item.StrokeCount</td>
+                            <td><span class="badge bg-secondary">@item.Level.LevelName</span></td>
+                            <td>@item.Examples.Count</td>
+                            <td class="text-end pe-4">
+                                <a href="/teacher/kanji/edit/@item.KanjiId" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                <form method="post" action="/teacher/kanji/delete/@item.KanjiId" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa Kanji này? Tất cả ví dụ liên quan cũng sẽ bị xóa.');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

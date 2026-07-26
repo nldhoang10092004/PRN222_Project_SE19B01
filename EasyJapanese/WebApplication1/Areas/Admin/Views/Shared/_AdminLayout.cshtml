@@ -29,6 +29,9 @@
                     <a href="/Admin/Courses" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Courses" ? "active" : "")">
                         <i class="bi bi-book-half me-3"></i> Khóa học
                     </a>
+                    <a href="/admin/lesson-materials" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LessonMaterial" ? "active" : "")">
+                        <i class="bi bi-file-earmark-text me-3"></i> Tài liệu Bài học
+                    </a>
                     <a href="/Admin/Transactions" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transactions" ? "active" : "")">
                         <i class="bi bi-credit-card-fill me-3"></i> Giao dịch
                     </a>
