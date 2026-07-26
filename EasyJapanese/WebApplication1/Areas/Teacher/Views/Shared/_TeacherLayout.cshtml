@@ -32,9 +32,12 @@
                     <a href="/teacher/flashcard-sets" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "FlashcardSets" ? "active" : "")">
                         <i class="bi bi-collection-fill me-3"></i> Bộ Flashcard
                     </a>
-                    <a href="/Teacher/Quizzes" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Quizzes" ? "active" : "")">
-                        <i class="bi bi-ui-checks me-3"></i> Bài tập (Quizzes)
-                    </a>
+                <a href="/Teacher/Quizzes" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Quizzes" ? "active" : "")">
+                    <i class="bi bi-ui-checks me-3"></i> Bài tập (Quizzes)
+                </a>
+                <a href="/Teacher/Exercises" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Exercises" ? "active" : "")">
+                    <i class="bi bi-pencil-square me-3"></i> Luyện tập (Exercises)
+                </a>
                     <a href="/Teacher/Reviews" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reviews" ? "active" : "")">
                         <i class="bi bi-star-fill me-3"></i> Đánh giá học viên
                     </a>
