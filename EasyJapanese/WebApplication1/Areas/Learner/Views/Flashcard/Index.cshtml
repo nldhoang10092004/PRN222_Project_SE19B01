@@ -1,0 +1,123 @@
+﻿@model List<WebApplication1.Areas.Learner.Models.FlashcardSetListItemViewModel>
+@{
+    ViewData["Title"] = "Flashcard - Hi Japan!";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .hj-fc-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--color-border, #e5e0d8);
+            background: #fff;
+            color: var(--color-navy, #1c1c2e);
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+            .hj-fc-back:hover {
+                border-color: var(--color-primary, #c8102e);
+                color: var(--color-primary, #c8102e);
+            }
+
+        .hj-set-card {
+            background: #fff;
+            border: 1px solid var(--color-border, #e5e0d8);
+            border-radius: 18px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+            transition: box-shadow .15s, border-color .15s;
+        }
+
+            .hj-set-card:hover {
+                border-color: var(--color-primary, #c8102e);
+                box-shadow: 0 4px 16px rgba(0,0,0,.06);
+            }
+
+        .hj-set-title {
+            font-weight: 700;
+            font-family: 'Outfit',sans-serif;
+            margin-bottom: .25rem;
+        }
+
+        .hj-set-desc {
+            color: #6c757d;
+            font-size: .85rem;
+            min-height: 2.4em;
+        }
+
+        .hj-set-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            font-size: .8rem;
+        }
+
+        .hj-set-due {
+            color: var(--color-primary, #c8102e);
+            font-weight: 700;
+        }
+
+        .hj-set-notstarted {
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+}
+
+<main class="hj-content">
+    <div class="container py-5">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="/learn/Practice" class="hj-fc-back" aria-label="Quay về Luyện tập">&#8592;</a>
+            <div>
+                <span class="hj-eyebrow">Luyện tập</span>
+                <h2 class="fw-bold mb-0" style="font-family:'Outfit',sans-serif;">Bộ Flashcard</h2>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="row g-4">
+                @foreach (var s in Model)
+                {
+                    <div class="col-md-4">
+                        <a href="/learn/Flashcard/Set/@s.FlashcardSetId" class="hj-set-card">
+                            <div class="hj-set-title">@s.Title</div>
+                            <div class="hj-set-desc">@s.Description</div>
+                            <div class="hj-set-meta">
+                                <span class="text-muted">@s.TotalCount thẻ</span>
+                                @if (!s.Started)
+                                {
+                                    <span class="hj-set-notstarted">Chưa bắt đầu</span>
+                                }
+                                else if (s.DueCount > 0)
+                                {
+                                    <span class="hj-set-due">@s.DueCount thẻ cần ôn</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Đã ôn xong</span>
+                                }
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted mt-3">Hiện chưa có bộ flashcard nào được thiết lập. Vui lòng quay lại sau.</p>
+        }
+    </div>
+</main>
