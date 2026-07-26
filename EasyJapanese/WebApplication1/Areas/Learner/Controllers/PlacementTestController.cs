@@ -34,7 +34,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                 return RedirectToAction("Index", "Login", new { area = "" });
             }
 
-            return View();
+            return RedirectToAction("Index");
         }
 
         // GET: /Learner/PlacementTest/Index
@@ -44,11 +44,15 @@ namespace WebApplication1.Areas.Learner.Controllers
             var test = await _db.PlacementTests
                 .Include(t => t.Questions)
                     .ThenInclude(q => q.AnswerOptions)
-                .FirstOrDefaultAsync(t => t.IsActive);
+                .FirstOrDefaultAsync(t => t.IsActive)
+                ?? await _db.PlacementTests
+                .Include(t => t.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                .FirstOrDefaultAsync();
 
             if (test == null)
             {
-                return Content("Chưa có bài test trình độ nào được kích hoạt.");
+                return Content("Chưa có bài test trình độ nào trong hệ thống.");
             }
 
             var questions = test.Questions
@@ -85,8 +89,7 @@ namespace WebApplication1.Areas.Learner.Controllers
             var test = await _db.PlacementTests
                 .Include(t => t.Questions)
                     .ThenInclude(q => q.AnswerOptions)
-                .FirstOrDefaultAsync(t =>
-                    t.TestId == req.TestId && t.IsActive);
+                .FirstOrDefaultAsync(t => t.TestId == req.TestId);
 
             if (test == null)
             {

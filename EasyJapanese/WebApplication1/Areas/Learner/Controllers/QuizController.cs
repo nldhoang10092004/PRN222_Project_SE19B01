@@ -51,9 +51,9 @@ namespace WebApplication1.Areas.Learner.Controllers
                 return RedirectToAction("Detail", "Course", new { id = courseId });
             }
 
-            ViewBag.CourseName = course.Title;
+            ViewBag.CourseName = EncodingFixer.FixMojibake(course.Title);
             ViewBag.LevelName = course.Level?.LevelName ?? "";
-            ViewBag.QuizTitle = quiz.Title;
+            ViewBag.QuizTitle = EncodingFixer.FixMojibake(quiz.Title);
             ViewBag.Duration = quiz.Duration ?? 45;
             ViewBag.QuestionCount = quiz.Questions.Count;
             ViewBag.PassScore = quiz.PassScore;
@@ -85,13 +85,13 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .Select(q => new
                 {
                     questionId = q.QuestionId,
-                    text = q.QuestionText,
+                    text = EncodingFixer.FixMojibake(q.QuestionText),
                     points = q.Points,
                     options = q.AnswerOptions
                         .Select(o => new
                         {
                             optionId = o.OptionId,
-                            text = o.AnswerText
+                            text = EncodingFixer.FixMojibake(o.AnswerText)
                         })
                         .ToList()
                 })

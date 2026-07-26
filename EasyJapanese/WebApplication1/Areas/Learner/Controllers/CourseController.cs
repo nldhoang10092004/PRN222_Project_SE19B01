@@ -1,4 +1,4 @@
-﻿using CoreLibrary.Authentication;
+using CoreLibrary.Authentication;
 using CoreLibrary.Const;
 using CoreLibrary.Data;
 using CoreLibrary.Data.Entities;
@@ -45,9 +45,6 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .Include(c => c.Level)
                 .Include(c => c.Mentor)
                 .AsQueryable();
-
-            if (!hasMembership)
-                query = query.Where(c => c.IsFree);
 
             int? recommendedLevelId = null;
             string? recommendedLevelName = null;
@@ -253,17 +250,17 @@ namespace WebApplication1.Areas.Learner.Controllers
             {
                 LessonId = lesson.LessonId,
                 CourseId = lesson.CourseId,
-                LessonTitle = lesson.Title,
-                CourseTitle = lesson.Course?.Title ?? "",
+                LessonTitle = CoreLibrary.Utility.EncodingFixer.FixMojibake(lesson.Title),
+                CourseTitle = CoreLibrary.Utility.EncodingFixer.FixMojibake(lesson.Course?.Title ?? ""),
                 LevelName = lesson.Course?.Level?.LevelName ?? "",
-                Content = lesson.Content,
+                Content = CoreLibrary.Utility.EncodingFixer.FixMojibake(lesson.Content),
                 VideoUrl = lesson.VideoUrl,
                 IsCompleted = isCompleted,
 
                 AllLessons = courseLessons.Select(l => new SidebarLessonItem
                 {
                     LessonId = l.LessonId,
-                    Title = l.Title,
+                    Title = CoreLibrary.Utility.EncodingFixer.FixMojibake(l.Title),
                     SortOrder = l.SortOrder,
                     IsCurrent = l.LessonId == lesson.LessonId,
                     IsCompleted = completedLessonIds.Contains(l.LessonId)
@@ -272,7 +269,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                 MaterialItems = materials.Select(m => new LessonMaterialViewModel
                 {
                     MaterialId = m.MaterialId,
-                    Title = m.Title,
+                    Title = CoreLibrary.Utility.EncodingFixer.FixMojibake(m.Title),
                     Url = m.Url,
                     FileType = m.FileType ?? "link"
                 }).ToList(),
@@ -426,8 +423,8 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .Select(e => new LessonExerciseItemViewModel
                 {
                     ExerciseId = e.ExerciseId,
-                    Title = e.Title,
-                    Content = e.Content,
+                    Title = CoreLibrary.Utility.EncodingFixer.FixMojibake(e.Title),
+                    Content = CoreLibrary.Utility.EncodingFixer.FixMojibake(e.Content),
                     AudioUrl = e.AudioUrl,
                     StrokeOrderUrl = e.StrokeOrderUrl,
                     SortOrder = e.SortOrder,
@@ -437,7 +434,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                         .Select(q => new ExerciseQuestionViewModel
                         {
                             QuestionId = q.QuestionId,
-                            QuestionText = q.QuestionText,
+                            QuestionText = CoreLibrary.Utility.EncodingFixer.FixMojibake(q.QuestionText),
                             QuestionType = q.QuestionType,
                             SortOrder = q.SortOrder,
 
@@ -445,7 +442,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                                 .Select(a => new ExerciseAnswerOptionViewModel
                                 {
                                     OptionId = a.OptionId,
-                                    AnswerText = a.AnswerText,
+                                    AnswerText = CoreLibrary.Utility.EncodingFixer.FixMojibake(a.AnswerText),
                                     IsCorrect = a.IsCorrect
                                 })
                                 .ToList()

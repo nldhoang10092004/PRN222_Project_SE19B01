@@ -6,17 +6,39 @@
 <div class="hj-test-page">
   <div class="hj-test-container">
 
-    <div class="card-premium text-center w-100" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-premium text-center w-100 overflow-hidden" style="max-width: 600px; margin: 0 auto; border-radius: 20px;">
 
       @* ============== INTRO ============== *@
       <div id="test-intro" class="p-5 fade-in">
-        <i class="bi bi-clipboard2-check text-primary mb-4 d-inline-block" style="font-size: 4rem;"></i>
-        <h2 class="mb-3">Kiểm tra năng lực</h2>
-        <p class="text-muted mb-4">
-          Làm bài trắc nghiệm ngắn này để xác định trình độ tiếng Nhật hiện tại của bạn.
-          Chúng tôi sẽ gợi ý lộ trình học phù hợp nhất.
+        <div class="bg-danger bg-opacity-10 text-danger rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+          <i class="bi bi-clipboard2-check-fill" style="font-size: 2.5rem; color: #c8102e;"></i>
+        </div>
+        <h3 class="fw-bold mb-3 text-dark">Kiểm tra năng lực tiếng Nhật</h3>
+        <p class="text-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+          Bài test trắc nghiệm giúp xác định chính xác trình độ hiện tại của bạn, từ đó đề xuất lộ trình học N5 - N1 tối ưu nhất.
         </p>
-        <button id="btn-start" class="btn btn-primary btn-lg w-100 py-3">Bắt đầu ngay</button>
+
+        <div class="d-flex justify-content-center gap-3 mb-4 text-start">
+          <div class="p-3 bg-light rounded-3 flex-fill text-center">
+            <i class="bi bi-clock-history text-danger fs-4 d-block mb-1"></i>
+            <span class="fw-bold d-block small">~15 Phút</span>
+            <span class="text-muted micro-text" style="font-size: 11px;">Thời gian</span>
+          </div>
+          <div class="p-3 bg-light rounded-3 flex-fill text-center">
+            <i class="bi bi-ui-checks text-danger fs-4 d-block mb-1"></i>
+            <span class="fw-bold d-block small">Trắc nghiệm</span>
+            <span class="text-muted micro-text" style="font-size: 11px;">Hình thức</span>
+          </div>
+          <div class="p-3 bg-light rounded-3 flex-fill text-center">
+            <i class="bi bi-bullseye text-danger fs-4 d-block mb-1"></i>
+            <span class="fw-bold d-block small">N5 - N1</span>
+            <span class="text-muted micro-text" style="font-size: 11px;">Đánh giá</span>
+          </div>
+        </div>
+
+        <button id="btn-start" class="btn btn-danger btn-lg w-100 py-3 rounded-pill fw-bold shadow-sm" style="background-color: #c8102e !important; border-color: #c8102e !important;">
+          <i class="bi bi-play-fill me-1 fs-5"></i>Bắt đầu ngay
+        </button>
       </div>
 
       @* ============== ACTIVE ============== *@
