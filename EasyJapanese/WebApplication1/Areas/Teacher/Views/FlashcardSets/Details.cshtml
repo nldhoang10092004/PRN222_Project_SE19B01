@@ -1,0 +1,243 @@
+@model CoreLibrary.Data.Entities.FlashcardSet
+@{
+    Layout = "~/Areas/Teacher/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/teacher/flashcard-sets">Bộ Flashcards</a></li>
+                <li class="breadcrumb-item active">@Model.Title</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h3 class="fw-bold mb-2">@Model.Title</h3>
+                <p class="text-muted mb-0">@(Model.Description ?? "Không có mô tả")</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/teacher/flashcard-sets/edit/@Model.FlashcardSetId" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil me-2"></i>Sửa thông tin
+                </a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash me-2"></i>Xóa bộ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h2 class="fw-bold text-primary mb-0">@Model.Flashcards.Count</h2>
+                    <p class="text-muted small mb-0">Số lượng thẻ</p>
+                </div>
+            </div>
+        </div>
+        @if (Model.Course != null)
+        {
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <p class="small text-muted mb-1">Khóa học</p>
+                        <p class="fw-semibold mb-0">@Model.Course.Title</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">Danh sách Flashcards</h5>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCardModal">
+                        <i class="bi bi-plus-circle me-2"></i>Thêm thẻ mới
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Import Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (!Model.Flashcards.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-stack text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Chưa có flashcard nào. Thêm thẻ đầu tiên!</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40%">Mặt trước</th>
+                                <th style="width: 40%">Mặt sau</th>
+                                <th style="width: 20%" class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var card in Model.Flashcards)
+                            {
+                                <tr>
+                                    <td>@card.FrontText</td>
+                                    <td>@card.BackText</td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="editCard(@card.FlashcardId, '@card.FrontText.Replace("'", "\\'").Replace("\"", "&quot;")', '@card.BackText.Replace("'", "\\'").Replace("\"", "&quot;")')">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form method="post" action="/teacher/flashcard-sets/remove-card" class="d-inline" onsubmit="return confirm('Xóa flashcard này?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="flashcardSetId" value="@Model.FlashcardSetId" />
+                                            <input type="hidden" name="flashcardId" value="@card.FlashcardId" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Card -->
+<div class="modal fade" id="addCardModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/teacher/flashcard-sets/add-card">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="flashcardSetId" value="@Model.FlashcardSetId" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Thêm Flashcard Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mặt trước <span class="text-danger">*</span></label>
+                        <input type="text" name="frontText" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mặt sau <span class="text-danger">*</span></label>
+                        <input type="text" name="backText" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm thẻ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Card -->
+<div class="modal fade" id="editCardModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/teacher/flashcard-sets/edit-card">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="flashcardSetId" value="@Model.FlashcardSetId" />
+                <input type="hidden" name="flashcardId" id="editCardId" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Sửa Flashcard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mặt trước</label>
+                        <input type="text" name="frontText" id="editFrontText" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mặt sau</label>
+                        <input type="text" name="backText" id="editBackText" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Import Excel -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/teacher/flashcard-sets/import-excel" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="flashcardSetId" value="@Model.FlashcardSetId" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Import Flashcards từ Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chọn file Excel</label>
+                        <input type="file" name="excelFile" class="form-control" accept=".xlsx,.xls" required />
+                        <div class="form-text">
+                            Format: Cột A = Mặt trước, Cột B = Mặt sau (bỏ qua dòng đầu tiên)
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Delete Set -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/teacher/flashcard-sets/delete">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.FlashcardSetId" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-danger">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc muốn xóa bộ flashcards <strong>@Model.Title</strong>?</p>
+                    <p class="text-danger small mb-0">Lưu ý: Tất cả @Model.Flashcards.Count flashcard(s) bên trong sẽ bị xóa theo.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xóa bộ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editCard(id, front, back) {
+    document.getElementById('editCardId').value = id;
+    document.getElementById('editFrontText').value = front;
+    document.getElementById('editBackText').value = back;
+    new bootstrap.Modal(document.getElementById('editCardModal')).show();
+}
+</script>

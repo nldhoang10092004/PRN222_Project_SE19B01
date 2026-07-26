@@ -5,6 +5,7 @@
 
 @section Styles {
     @await Html.PartialAsync("_CourseStyle")
+    <link rel="stylesheet" href="~/css/flashcard-viewer.css" asp-append-version="true" />
     <style>
         /* ── Detail-only overrides ── */
         .hj-detail-wrap {
@@ -411,6 +412,41 @@
                         </div>
                     }
                 </div>
+
+                <!-- ── FLASHCARDS ── -->
+                @if (ViewBag.FlashcardSets != null && ((List<CoreLibrary.Data.Entities.FlashcardSet>)ViewBag.FlashcardSets).Any())
+                {
+                    <div class="hj-syllabus-card mt-4">
+                        <div class="hj-syllabus-head">
+                            <span class="hj-syllabus-title">Bộ Flashcards</span>
+                            <span class="text-muted" style="font-size:13px;">@((List<CoreLibrary.Data.Entities.FlashcardSet>)ViewBag.FlashcardSets).Count bộ thẻ</span>
+                        </div>
+
+                        <div class="row g-3">
+                            @foreach (var set in (List<CoreLibrary.Data.Entities.FlashcardSet>)ViewBag.FlashcardSets)
+                            {
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;transition:all .2s;"
+                                         onclick="openFlashcardModal(@set.FlashcardSetId)"
+                                         onmouseover="this.style.boxShadow='0 8px 20px rgba(0,0,0,.12)';this.style.transform='translateY(-2px)';"
+                                         onmouseout="this.style.boxShadow='';this.style.transform='';">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">@set.Title</h6>
+                                            @if (!string.IsNullOrEmpty(set.Description))
+                                            {
+                                                <p class="text-muted small mb-2" style="font-size:13px;">@set.Description</p>
+                                            }
+                                            <div class="d-flex align-items-center gap-2 text-muted" style="font-size:12px;">
+                                                <i class="bi bi-stack"></i>
+                                                <span>@set.Flashcards.Count thẻ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
 
         </div>
@@ -425,4 +461,36 @@ else
             Quay lại danh sách
         </a>
     </div>
+}
+
+<!-- ── FLASHCARD MODAL ── -->
+<div id="flashcardModal" class="flashcard-modal">
+    <button class="close-btn" onclick="closeFlashcardModal()" aria-label="Đóng">×</button>
+
+    <div class="flashcard-modal-content">
+        <div class="flashcard-navigation">
+            <button id="prevBtn" class="nav-btn" onclick="prevCard()" aria-label="Thẻ trước">‹</button>
+
+            <div class="flashcard-container">
+                <div id="flashcard" class="flashcard" onclick="flipCard()">
+                    <div class="flashcard-front">
+                        <div id="flashcardFrontText" class="flashcard-text"></div>
+                        <div class="flashcard-hint">Nhấn để lật thẻ</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div id="flashcardBackText" class="flashcard-text"></div>
+                        <div class="flashcard-hint">Nhấn để quay lại</div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="nextBtn" class="nav-btn" onclick="nextCard()" aria-label="Thẻ tiếp">›</button>
+        </div>
+
+        <div id="flashcardCounter" class="flashcard-counter"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/flashcard-viewer.js" asp-append-version="true"></script>
 }

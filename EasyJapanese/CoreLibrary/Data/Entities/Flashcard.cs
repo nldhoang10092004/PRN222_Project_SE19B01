@@ -7,7 +7,7 @@ public partial class Flashcard
 {
     public int FlashcardId { get; set; }
 
-    public int StudentId { get; set; }
+    public int? StudentId { get; set; }
 
     public int? CourseId { get; set; }
 
