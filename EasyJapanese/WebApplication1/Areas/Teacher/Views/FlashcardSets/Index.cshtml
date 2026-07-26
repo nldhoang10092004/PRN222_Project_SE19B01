@@ -1,0 +1,97 @@
+@model IEnumerable<CoreLibrary.Data.Entities.FlashcardSet>
+@{
+    Layout = "~/Areas/Teacher/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Quản lý Bộ Flashcards</h3>
+            <p class="text-muted mb-0">Tạo và quản lý các bộ flashcards cho khóa học</p>
+        </div>
+        <a href="/teacher/flashcard-sets/create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Tạo bộ mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Lọc theo khóa học</label>
+                    <select name="courseId" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tất cả khóa học</option>
+                        @foreach (var course in ViewBag.Courses)
+                        {
+                            <option value="@course.CourseId" selected="@(ViewBag.SelectedCourseId == course.CourseId)">
+                                @course.Title
+                            </option>
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-collection text-muted" style="font-size: 4rem;"></i>
+            <p class="text-muted mt-3">Chưa có bộ flashcards nào. Tạo bộ đầu tiên của bạn!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var set in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        @if (!string.IsNullOrEmpty(set.ImageUrl))
+                        {
+                            <img src="@set.ImageUrl" class="card-img-top" alt="@set.Title" style="height: 180px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <i class="bi bi-collection text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@set.Title</h5>
+                            <p class="card-text text-muted small">@(set.Description ?? "Không có mô tả")</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge bg-primary">@set.Flashcards.Count thẻ</span>
+                                @if (set.Course != null)
+                                {
+                                    <span class="text-muted small">@set.Course.Title</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <a href="/teacher/flashcard-sets/details/@set.FlashcardSetId" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i>Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

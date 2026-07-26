@@ -165,6 +165,13 @@ namespace WebApplication1.Areas.Learner.Controllers
             ViewBag.IsEnrolled = studentId.HasValue
                 && course.Enrollments.Any(e => e.StudentId == studentId.Value);
 
+            // Query FlashcardSets for this course
+            var flashcardSets = await _db.FlashcardSets
+                .Include(fs => fs.Flashcards)
+                .Where(fs => fs.CourseId == id && fs.Flashcards.Any())
+                .ToListAsync();
+            ViewBag.FlashcardSets = flashcardSets;
+
             return View(course);
         }
 
@@ -538,6 +545,24 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .AnyAsync(m => m.StudentId == studentId.Value
                             && m.IsActive
                             && m.EndDate > DateTime.UtcNow);
+        }
+
+        // GET: /learn/Course/Flashcards/{setId}
+        [HttpGet("~/learn/Course/Flashcards/{setId}")]
+        public async Task<IActionResult> GetFlashcardsJson(int setId)
+        {
+            var flashcards = await _db.Flashcards
+                .Where(f => f.FlashcardSetId == setId)
+                .OrderBy(f => f.FlashcardId)
+                .Select(f => new
+                {
+                    id = f.FlashcardId,
+                    front = f.FrontText,
+                    back = f.BackText
+                })
+                .ToListAsync();
+
+            return Json(flashcards);
         }
     }
 }
