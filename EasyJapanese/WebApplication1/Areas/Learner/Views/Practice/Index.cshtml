@@ -44,18 +44,12 @@
             </div>
 
             <div class="col-md-6 col-lg-3">
-                <a asp-area="Learner" asp-controller="Flashcard" asp-action="Review"
+                <a asp-area="Learner" asp-controller="Flashcard" asp-action="Index"
                    class="hj-practice-card text-decoration-none">
                     <span class="hj-practice-card-mark">語</span>
                     <h5 class="hj-practice-card-title">Flashcard</h5>
-                    <p class="hj-practice-card-desc">
-                        @(Model.FlashcardDueCount > 0
-                            ? $"Có <strong>{Model.FlashcardDueCount}</strong> thẻ cần ôn hôm nay"
-                            : (Model.FlashcardTotal > 0 ? "Ôn tập từ vựng SRS của bạn" : "Tạo bộ flashcard đầu tiên"))
-                    </p>
-                    <span class="hj-practice-card-link">
-                        @(Model.FlashcardDueCount > 0 ? "Ôn ngay →" : "Mở Flashcard →")
-                    </span>
+                    <p class="hj-practice-card-desc">Quản lý các bộ thẻ và ôn tập từ vựng theo SRS.</p>
+                    <span class="hj-practice-card-link">Xem các bộ thẻ →</span>
                 </a>
             </div>
         </div>

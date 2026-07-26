@@ -1,11 +1,230 @@
+@model WebApplication1.Areas.Learner.Models.FlashcardReviewPageViewModel
 @{
-    ViewData["Title"] = "Ôn tập Flashcard";
-    Layout = "_Layout";
+    ViewData["Title"] = "Ôn tập Flashcard - Hi Japan!";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
 }
 
-<div class="container py-5 text-center mt-5" style="background-color: #f4f6f9; min-height: 60vh;">
-    <i class="bi bi-stack" style="font-size: 5rem; color: var(--color-primary);"></i>
-    <h2 class="mt-4" style="font-family: 'Outfit', sans-serif; font-weight: 700;">Tính năng ôn tập đang được cập nhật</h2>
-    <p class="text-muted mb-4">Giao diện học Flashcard sẽ sớm được hoàn thiện.</p>
-    <a asp-area="Learner" asp-controller="Dashboard" asp-action="Index" class="btn btn-primary px-4 py-2" style="border-radius: 50px;">Quay lại Dashboard</a>
-</div>
+@section Styles {
+    <style>
+        .hj-fc-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--color-border, #e5e0d8);
+            background: #fff;
+            color: var(--color-navy, #1c1c2e);
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+            .hj-fc-back:hover {
+                border-color: var(--color-primary, #c8102e);
+                color: var(--color-primary, #c8102e);
+            }
+
+        .hj-fc-stage {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .hj-fc-empty {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #6c757d;
+        }
+
+        .hj-fc-card {
+            background: #fff;
+            border: 1px solid var(--color-border, #e5e0d8);
+            border-radius: 20px;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2.5rem 2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .hj-fc-card-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: 'Outfit',sans-serif;
+        }
+
+        .hj-fc-card-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: #9a9186;
+            margin-top: 1rem;
+            font-weight: 400;
+        }
+
+        .hj-fc-card img {
+            max-height: 140px;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+        }
+
+        .hj-fc-answer-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+            .hj-fc-answer-row button {
+                flex: 1;
+                border: none;
+                border-radius: 12px;
+                padding: 0.75rem 0.5rem;
+                font-weight: 600;
+                font-size: 0.9rem;
+                color: #fff;
+            }
+
+        .hj-fc-btn-again {
+            background: #d9534f;
+        }
+
+        .hj-fc-btn-hard {
+            background: #e0a13b;
+        }
+
+        .hj-fc-btn-good {
+            background: #4a90a4;
+        }
+
+        .hj-fc-btn-easy {
+            background: #4a9d6e;
+        }
+
+        .hj-fc-answer-row button:disabled {
+            opacity: 0.5;
+        }
+    </style>
+}
+
+<main class="hj-content">
+    <div class="container py-5" style="max-width: 900px;">
+
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <a href="/learn/Flashcard/Set/@Model.FlashcardSetId" class="hj-fc-back" aria-label="Quay về bộ thẻ">&#8592;</a>
+            <div>
+                <span class="hj-eyebrow">Luyện tập</span>
+                <h2 class="fw-bold mb-0" style="font-family:'Outfit',sans-serif;">Ôn tập: @Model.SetTitle</h2>
+            </div>
+        </div>
+
+        <p class="text-muted mb-4" id="progress-text">
+            @if (Model.TotalCount == 0)
+            {
+                <text>Bộ thẻ này chưa có thẻ nào.</text>
+            }
+            else
+            {
+                <text>@Model.DueCount / @Model.TotalCount thẻ cần ôn hôm nay</text>
+            }
+        </p>
+
+        <div class="hj-fc-stage" id="stage">
+            <div class="hj-fc-empty" id="loading-msg">Đang tải thẻ...</div>
+        </div>
+    </div>
+</main>
+
+<script>
+    (function () {
+      const csrfToken = () => document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+      const setId = @Model.FlashcardSetId;
+
+      let queue = [];
+      let current = null;
+      let showingBack = false;
+
+      async function loadQueue() {
+        const res = await fetch(`/learn/Flashcard/GetDueCards?setId=${setId}`);
+        const data = await res.json();
+        queue = data.cards ?? [];
+        next();
+      }
+
+      function next() {
+        if (queue.length === 0) {
+          renderEmpty();
+          return;
+        }
+        current = queue.shift();
+        showingBack = false;
+        render();
+      }
+
+      function renderEmpty() {
+        document.getElementById('stage').innerHTML = `
+          <div class="hj-fc-empty">
+            <h5 class="fw-bold mb-2">Hoàn thành!</h5>
+            <p class="mb-3">Bạn đã ôn hết thẻ cần ôn trong bộ này hôm nay.</p>
+            <a href="/learn/Flashcard/Set/${setId}" class="btn btn-outline-primary rounded-3">Về bộ thẻ</a>
+          </div>`;
+        document.getElementById('progress-text').innerText = 'Đã ôn xong tất cả thẻ hôm nay';
+      }
+
+      function render() {
+        const img = current.imageUrl ? `<img src="${current.imageUrl}" alt="" /><br/>` : '';
+        const text = showingBack ? current.backText : current.frontText;
+        const hint = showingBack ? '' : '<span class="hj-fc-card-hint">Bấm vào thẻ để xem đáp án</span>';
+
+        document.getElementById('stage').innerHTML = `
+          <div class="hj-fc-card" id="flip-card">
+            <div>${img}<div class="hj-fc-card-text">${escapeHtml(text)}</div>${hint}</div>
+          </div>
+          <div class="hj-fc-answer-row d-none" id="answer-row">
+            <button class="hj-fc-btn-again" data-quality="0">Quên</button>
+            <button class="hj-fc-btn-hard" data-quality="3">Khó</button>
+            <button class="hj-fc-btn-good" data-quality="4">Tốt</button>
+            <button class="hj-fc-btn-easy" data-quality="5">Dễ</button>
+          </div>`;
+
+        document.getElementById('flip-card').addEventListener('click', flip);
+        document.querySelectorAll('#answer-row button').forEach(btn => {
+          btn.addEventListener('click', () => submitAnswer(parseInt(btn.dataset.quality)));
+        });
+      }
+
+      function flip() {
+        if (showingBack) return;
+        showingBack = true;
+        render();
+        document.getElementById('answer-row').classList.remove('d-none');
+      }
+
+      async function submitAnswer(quality) {
+        document.querySelectorAll('#answer-row button').forEach(b => b.disabled = true);
+        try {
+          const res = await fetch('/learn/Flashcard/SubmitAnswer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken() },
+            body: JSON.stringify({ flashcardId: current.flashcardId, quality })
+          });
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          document.getElementById('progress-text').innerText = `${data.remainingDue} thẻ còn lại hôm nay`;
+        } catch {
+          alert('Có lỗi khi lưu kết quả. Thẻ này sẽ được hỏi lại.');
+        }
+        next();
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+      }
+
+      loadQueue();
+    })();
+</script>

@@ -1,0 +1,204 @@
+﻿@model WebApplication1.Areas.Learner.Models.FlashcardSetDetailViewModel
+@{
+    ViewData["Title"] = $"{Model.Title} - Flashcard";
+    Layout = "~/Areas/Learner/Views/Shared/_LearnerLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .hj-fc-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--color-border, #e5e0d8);
+            background: #fff;
+            color: var(--color-navy, #1c1c2e);
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+            .hj-fc-back:hover {
+                border-color: var(--color-primary, #c8102e);
+                color: var(--color-primary, #c8102e);
+            }
+
+        .hj-flip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .hj-flip-outer {
+            perspective: 1000px;
+            height: 140px;
+            cursor: pointer;
+        }
+
+        .hj-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+
+        .hj-flip-outer.flipped .hj-flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .hj-flip-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            border: 1px solid var(--color-border, #e5e0d8);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .hj-flip-front {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .hj-flip-back {
+            transform: rotateY(180deg);
+            background: #faf8f5;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .hj-speak-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--color-border, #e5e0d8);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            z-index: 2;
+        }
+
+            .hj-speak-btn:hover {
+                border-color: var(--color-primary, #c8102e);
+                background: #fdf2f3;
+            }
+
+            .hj-speak-btn svg {
+                width: 14px;
+                height: 14px;
+                fill: var(--color-navy, #1c1c2e);
+            }
+
+            .hj-speak-btn:hover svg, .hj-speak-btn.speaking svg {
+                fill: var(--color-primary, #c8102e);
+            }
+
+        .hj-flip-hint {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #9a9186;
+            margin-top: 6px;
+        }
+    </style>
+}
+
+<main class="hj-content">
+    <div class="container py-5" style="max-width: 900px;">
+
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <a href="/learn/Flashcard" class="hj-fc-back" aria-label="Quay về danh sách bộ thẻ">&#8592;</a>
+            <h2 class="fw-bold mb-0" style="font-family:'Outfit',sans-serif;">@Model.Title</h2>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="text-muted mb-3">@Model.Description</p>
+        }
+        <p class="text-muted mb-4">@Model.TotalCount thẻ trong bộ này</p>
+
+        <a href="/learn/Flashcard/Review/@Model.FlashcardSetId" class="btn btn-primary rounded-3 mb-4">
+            Bắt đầu ôn tập
+        </a>
+
+        <h6 class="fw-bold mb-3">Nội dung bộ thẻ</h6>
+
+        <div class="hj-flip-grid">
+            @foreach (var c in Model.PreviewCards)
+            {
+                <div>
+                    <div class="hj-flip-outer">
+                        <div class="hj-flip-inner">
+                            <div class="hj-flip-face hj-flip-front">
+                                <button type="button" class="hj-speak-btn" data-text="@c.FrontText" aria-label="Nghe phát âm">
+                                    <svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" /></svg>
+                                </button>
+                                <span>@c.FrontText</span>
+                            </div>
+                            <div class="hj-flip-face hj-flip-back">
+                                <span>@c.BackText</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hj-flip-hint">Bấm để lật</div>
+                </div>
+            }
+        </div>
+
+        @if (!Model.PreviewCards.Any())
+        {
+            <p class="text-muted text-center py-4">Bộ thẻ này chưa có nội dung.</p>
+        }
+    </div>
+</main>
+
+<script>
+    (function () {
+        // Bấm vào thẻ để lật, trừ khi bấm đúng nút loa
+        document.querySelectorAll('.hj-flip-outer').forEach(outer => {
+            outer.addEventListener('click', (e) => {
+                if (e.target.closest('.hj-speak-btn')) return;
+                outer.classList.toggle('flipped');
+            });
+        });
+
+        if (!('speechSynthesis' in window)) return;
+
+        function speak(text, btn) {
+            window.speechSynthesis.cancel();
+
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'ja-JP';
+            utter.rate = 0.9;
+
+            document.querySelectorAll('.hj-speak-btn.speaking').forEach(b => b.classList.remove('speaking'));
+            btn.classList.add('speaking');
+
+            utter.onend = () => btn.classList.remove('speaking');
+            utter.onerror = () => btn.classList.remove('speaking');
+
+            window.speechSynthesis.speak(utter);
+        }
+
+        document.querySelectorAll('.hj-speak-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                speak(btn.dataset.text, btn);
+            });
+        });
+    })();
+</script>
