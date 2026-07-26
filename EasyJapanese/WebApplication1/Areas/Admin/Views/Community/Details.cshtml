@@ -1,0 +1,112 @@
+@model CoreLibrary.Data.Entities.CommunityPost
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Chi tiết Bài viết Cộng đồng";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <a href="/admin/community" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+        <h3 class="fw-bold mb-0 text-dark">@Model.Title</h3>
+        <p class="text-muted small mb-0">Chủ đề: <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2.5">@Model.Category</span> &bull; Đăng bởi <strong>@Model.AuthorName</strong> (@Model.AuthorRole) &bull; @Model.CreatedAt.ToString("HH:mm dd/MM/yyyy")</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form asp-action="ToggleApproval" asp-route-id="@Model.PostId" method="post" class="d-inline">
+            <button type="submit" class="btn @(Model.IsApproved ? "btn-warning" : "btn-success") rounded-pill btn-sm fw-semibold">
+                <i class="bi @(Model.IsApproved ? "bi-eye-slash" : "bi-check-circle") me-1"></i>
+                @(Model.IsApproved ? "Ẩn bài" : "Duyệt bài")
+            </button>
+        </form>
+        <form asp-action="TogglePin" asp-route-id="@Model.PostId" method="post" class="d-inline">
+            <button type="submit" class="btn @(Model.IsPinned ? "btn-secondary" : "btn-info text-white") rounded-pill btn-sm fw-semibold">
+                <i class="bi bi-pin-angle me-1"></i>
+                @(Model.IsPinned ? "Bỏ ghim" : "Ghim bài")
+            </button>
+        </form>
+        <form asp-action="DeletePost" asp-route-id="@Model.PostId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này và tất cả bình luận liên quan?')">
+            <button type="submit" class="btn btn-danger rounded-pill btn-sm fw-semibold">
+                <i class="bi bi-trash me-1"></i> Xóa bài viết
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4 shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Cột trái: Nội dung bài viết -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="card-img-top img-fluid" style="max-height: 380px; object-fit: cover;" alt="@Model.Title" />
+            }
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                            @(string.IsNullOrEmpty(Model.AuthorName) ? "U" : Model.AuthorName.Substring(0, 1).ToUpper())
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">@Model.AuthorName</h6>
+                            <span class="text-muted small">ID Tác giả: #@Model.AuthorId &bull; Thể loại: @Model.AuthorRole</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 text-muted small">
+                        <span><i class="bi bi-heart-fill text-danger me-1"></i>@Model.LikeCount lượt thích</span>
+                        <span><i class="bi bi-eye me-1"></i>@Model.ViewCount lượt xem</span>
+                    </div>
+                </div>
+
+                <div class="post-content style-content mb-3" style="font-size: 1rem; line-height: 1.7; white-space: pre-line;">
+                    @Model.Content
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột phải: Quản lý Bình luận -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-chat-left-text me-2 text-danger"></i>Danh sách Bình luận (@Model.Comments.Count)</h5>
+            
+            @if (Model.Comments.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedAt))
+                    {
+                        <div class="p-3 bg-light rounded-3 border position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold text-dark" style="font-size: 0.92rem;">@comment.AuthorName</span>
+                                    <span class="text-muted small" style="font-size: 0.75rem;">@comment.CreatedAt.ToString("HH:mm dd/MM/yyyy")</span>
+                                </div>
+                                <form asp-action="DeleteComment" asp-route-id="@comment.CommentId" method="post" class="m-0" onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm p-1 rounded-circle border-0" title="Xóa bình luận này">
+                                        <i class="bi bi-trash fs-6"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <p class="mb-0 text-secondary" style="font-size: 0.9rem; line-height: 1.5;">@comment.Content</p>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-chat-square-dots fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    <span>Chưa có bình luận nào cho bài viết này.</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>

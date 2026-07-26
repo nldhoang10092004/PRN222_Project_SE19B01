@@ -1,4 +1,5 @@
 using CoreLibrary.Authentication;
+using CoreLibrary.Data;
 using CoreWeb.Models.ChatBot;
 using CoreWeb.Service.ChatBot;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +11,13 @@ namespace WebApplication1.Controllers
     {
         private readonly IChatBotService _chatBot;
         private readonly IAuthenticationService _auth;
+        private readonly AppDbContext _db;
 
-        public ChatController(IChatBotService chatBot, IAuthenticationService auth)
+        public ChatController(IChatBotService chatBot, IAuthenticationService auth, AppDbContext db)
         {
             _chatBot = chatBot;
             _auth = auth;
+            _db = db;
         }
 
         [HttpPost]
@@ -50,7 +53,7 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> GetSupportMessages()
         {
             var identity = await GetUserOrGuestIdentityAsync();
-            var ticket = TicketsController.GetTicketForUser(identity.Email);
+            var ticket = TicketsController.GetTicketForUser(_db, identity.Email);
             if (ticket == null)
             {
                 return Json(new
@@ -69,7 +72,7 @@ namespace WebApplication1.Controllers
                 userEmail = ticket.UserEmail,
                 userFullName = ticket.UserFullName,
                 status = ticket.Status,
-                messages = ticket.ChatHistory.Select(m => new
+                messages = ticket.Messages.OrderBy(m => m.SentAt).Select(m => new
                 {
                     sender = m.Sender,
                     messageText = m.MessageText,
@@ -90,8 +93,8 @@ namespace WebApplication1.Controllers
                 return BadRequest(new { error = "Tin nhắn không được để trống." });
 
             var identity = await GetUserOrGuestIdentityAsync();
-            var ticket = TicketsController.GetOrCreateTicketForUser(identity.Email, identity.Name);
-            TicketsController.AddUserMessage(ticket.TicketId, request.Message);
+            var ticket = TicketsController.GetOrCreateTicketForUser(_db, identity.Email, identity.Name);
+            TicketsController.AddUserMessage(_db, ticket.TicketId, request.Message);
 
             return Json(new
             {
@@ -99,7 +102,7 @@ namespace WebApplication1.Controllers
                 ticketId = ticket.TicketId,
                 userEmail = ticket.UserEmail,
                 userFullName = ticket.UserFullName,
-                messages = ticket.ChatHistory.Select(m => new
+                messages = ticket.Messages.OrderBy(m => m.SentAt).Select(m => new
                 {
                     sender = m.Sender,
                     messageText = m.MessageText,

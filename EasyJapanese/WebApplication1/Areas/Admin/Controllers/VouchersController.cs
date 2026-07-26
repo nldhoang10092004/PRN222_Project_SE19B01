@@ -38,21 +38,24 @@ namespace WebApplication1.Areas.Admin.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Create(Voucher model)
         {
-            var user = HttpContext.Session.GetObject<CoreLibrary.Authentication.CurrentUser>(CoreLibrary.Authentication.IAuthenticationService.SessionKeyCurrentUser);
-            var adminId = user?.AccountId ?? 0;
-
-            // Make sure admin exists in Admins table
-            var adminExists = await _context.Admins.AnyAsync(a => a.AdminId == adminId);
-            if (!adminExists)
+            // Ensure a valid Admin exists for CreatedBy Foreign Key
+            var admin = await _context.Admins.FirstOrDefaultAsync();
+            int adminId;
+            if (admin == null)
             {
                 var newAdmin = new CoreLibrary.Data.Entities.Admin
                 {
-                    AdminId = adminId,
-                    FullName = user?.FullName ?? "Admin",
+                    AdminId = 1,
+                    FullName = "System Admin",
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Admins.Add(newAdmin);
                 await _context.SaveChangesAsync();
+                adminId = 1;
+            }
+            else
+            {
+                adminId = admin.AdminId;
             }
 
             model.Code = model.Code.Trim().ToUpper();

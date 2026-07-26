@@ -171,6 +171,37 @@ namespace WebApplication1.Areas.Admin.Controllers
             return RedirectToAction(nameof(Questions), new { testId });
         }
 
+        [HttpPost("questions/{testId}/edit")]
+        public async Task<IActionResult> EditQuestion(int testId, int questionId, string questionText, int points, List<string> options, int correctIndex)
+        {
+            var question = await _context.Questions
+                .Include(q => q.AnswerOptions)
+                .FirstOrDefaultAsync(q => q.QuestionId == questionId && q.TestId == testId);
+
+            if (question == null) return NotFound();
+
+            question.QuestionText = questionText;
+            question.Points = points;
+
+            _context.AnswerOptions.RemoveRange(question.AnswerOptions);
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (string.IsNullOrWhiteSpace(options[i])) continue;
+                var opt = new AnswerOption
+                {
+                    QuestionId = question.QuestionId,
+                    AnswerText = options[i],
+                    IsCorrect = (i == correctIndex)
+                };
+                _context.AnswerOptions.Add(opt);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật câu hỏi thành công.";
+            return RedirectToAction(nameof(Questions), new { testId });
+        }
+
         [HttpPost("questions/{testId}/delete")]
         public async Task<IActionResult> DeleteQuestion(int testId, int questionId)
         {

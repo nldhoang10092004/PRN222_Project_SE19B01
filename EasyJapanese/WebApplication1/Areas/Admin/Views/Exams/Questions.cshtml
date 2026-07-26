@@ -28,17 +28,26 @@
             @{ int index = 1; }
             @foreach (var q in Model.Questions.OrderBy(x => x.QuestionId))
             {
-                <div class="card border-0 jp-omni-card rounded-4 p-4">
+                var optsList = q.AnswerOptions.ToList();
+                int correctIdx = optsList.FindIndex(o => o.IsCorrect);
+                if (correctIdx < 0) correctIdx = 0;
+
+                <div class="card border-0 jp-omni-card rounded-4 p-4 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2 fw-semibold">
                             Câu hỏi @index (@q.Points điểm)
                         </span>
-                        <form asp-action="DeleteQuestion" asp-route-testId="@Model.TestId" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa câu hỏi này?');">
-                            <input type="hidden" name="questionId" value="@q.QuestionId" />
-                            <button type="submit" class="btn btn-link text-danger p-0">
-                                <i class="bi bi-trash3-fill fs-5"></i>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#editModal_@q.QuestionId">
+                                <i class="bi bi-pencil me-1"></i>Sửa
                             </button>
-                        </form>
+                            <form asp-action="DeleteQuestion" asp-route-testId="@Model.TestId" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa câu hỏi này?');" class="m-0">
+                                <input type="hidden" name="questionId" value="@q.QuestionId" />
+                                <button type="submit" class="btn btn-link text-danger p-0 ms-2">
+                                    <i class="bi bi-trash3-fill fs-5"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                     <h5 class="fw-bold mb-3">@q.QuestionText</h5>
@@ -53,6 +62,52 @@
                         }
                     </div>
                 </div>
+
+                <!-- Modal Sửa câu hỏi -->
+                <div class="modal fade" id="editModal_@q.QuestionId" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div class="modal-header bg-primary text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Sửa câu hỏi #@index</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form asp-action="EditQuestion" asp-route-testId="@Model.TestId" method="post">
+                                <input type="hidden" name="questionId" value="@q.QuestionId" />
+                                <div class="modal-body p-4">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted">Nội dung câu hỏi</label>
+                                        <textarea name="questionText" class="form-control rounded-3" rows="3" required>@q.QuestionText</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted">Số điểm</label>
+                                        <input type="number" name="points" class="form-control rounded-3" value="@q.Points" min="1" required />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted d-block">Các lựa chọn & Đáp án đúng</label>
+                                        <div class="d-flex flex-column gap-3 mt-2">
+                                            @for (int i = 0; i < 4; i++)
+                                            {
+                                                var val = i < optsList.Count ? optsList[i].AnswerText : "";
+                                                <div class="input-group">
+                                                    <div class="input-group-text bg-light border-end-0">
+                                                        <input type="radio" name="correctIndex" value="@i" @(i == correctIdx ? "checked" : "") class="form-check-input" />
+                                                    </div>
+                                                    <input type="text" name="options" class="form-control" value="@val" placeholder="Đáp án @(i+1)" required />
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light py-3">
+                                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Cập nhật câu hỏi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 index++;
             }
 
@@ -97,7 +152,7 @@
                     <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Tích chọn nút tròn bên trái đáp án để chọn làm đáp án đúng.</small>
                 </div>
 
-                <button type="submit" class="btn btn-jp-primary w-100 rounded-3 py-2">
+                <button type="submit" class="btn btn-danger w-100 rounded-3 py-2 fw-bold">
                     <i class="bi bi-check-lg me-1"></i> Lưu câu hỏi
                 </button>
             </form>

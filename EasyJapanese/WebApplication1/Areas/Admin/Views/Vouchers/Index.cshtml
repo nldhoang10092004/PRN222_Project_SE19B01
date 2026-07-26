@@ -25,6 +25,7 @@
 <div class="row g-4">
     @foreach (var voucher in Model)
     {
+        bool isPercent = voucher.DiscountType == "Percent" || voucher.DiscountType == "Percentage";
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 jp-omni-card h-100 rounded-4">
                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -71,7 +72,7 @@
 
                     <div class="flex-grow-1">
                         <p class="text-dark fw-semibold mb-1">
-                            Giảm: @(voucher.DiscountType == "Percentage" ? $"{voucher.DiscountValue:0}%" : $"{voucher.DiscountValue:N0}đ")
+                            Giảm: @(isPercent ? $"{voucher.DiscountValue:0}%" : $"{voucher.DiscountValue:N0}đ")
                         </p>
                         <p class="text-muted small mb-2">@voucher.Description</p>
                         
@@ -124,8 +125,8 @@
                                 <div class="col-6">
                                     <label class="form-label small fw-bold text-muted">Loại giảm giá</label>
                                     <select name="DiscountType" class="form-select rounded-3">
-                                        <option value="Percentage" selected="@(voucher.DiscountType == "Percentage")">Phần trăm (%)</option>
-                                        <option value="FixedAmount" selected="@(voucher.DiscountType == "FixedAmount")">Số tiền mặt (đ)</option>
+                                        <option value="Percent" selected="@(isPercent)">Phần trăm (%)</option>
+                                        <option value="Fixed" selected="@(!isPercent)">Số tiền mặt (đ)</option>
                                     </select>
                                 </div>
                                 <div class="col-6">
@@ -212,8 +213,8 @@
                         <div class="col-6">
                             <label class="form-label small fw-bold text-muted">Loại giảm giá</label>
                             <select name="DiscountType" class="form-select rounded-3">
-                                <option value="Percentage" selected>Phần trăm (%)</option>
-                                <option value="FixedAmount">Số tiền mặt (đ)</option>
+                                <option value="Percent" selected>Phần trăm (%)</option>
+                                <option value="Fixed">Số tiền mặt (đ)</option>
                             </select>
                         </div>
                         <div class="col-6">
@@ -260,7 +261,7 @@
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-jp-primary rounded-3">Tạo mã</button>
+                    <button type="submit" class="btn btn-jp-primary rounded-3">Tạo Voucher</button>
                 </div>
             </form>
         </div>

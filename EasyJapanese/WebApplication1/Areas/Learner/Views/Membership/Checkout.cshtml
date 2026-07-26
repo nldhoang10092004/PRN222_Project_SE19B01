@@ -1,6 +1,6 @@
 @model CoreLibrary.Data.Entities.SubscriptionPlan
 @{
-    ViewData["Title"] = "Thanh toán gói học";
+    ViewData["Title"] = "Thanh toán gói học VIP";
     Layout = "_Layout";
 }
 
@@ -49,8 +49,8 @@
             border-color: #d0d0d0;
         }
         .payment-method-box.active {
-            border-color: var(--color-primary);
-            background-color: rgba(200,16,46,0.02);
+            border-color: var(--color-primary, #A61D24);
+            background-color: rgba(166,29,36,0.02);
         }
         .payment-logo {
             width: 40px;
@@ -69,34 +69,25 @@
         </div>
         
         <div class="p-4 p-md-5">
-            <form asp-action="ProcessCheckout" method="post">
+            <form asp-action="ProcessCheckout" method="post" id="checkoutForm">
                 <input type="hidden" name="planId" value="@Model.PlanId" />
-                <input type="hidden" name="paymentMethod" id="paymentMethodInput" value="vnpay" />
+                <input type="hidden" name="paymentMethod" id="paymentMethodInput" value="PayOS" />
 
                 <div class="row g-5">
                     <div class="col-md-6">
                         <h4 class="mb-4" style="font-family: 'Outfit', sans-serif; font-weight: 700;">Phương thức thanh toán</h4>
                         
-                        <div class="payment-method-box active" onclick="selectPayment('vnpay', this)">
-                            <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418189387.png" alt="VNPay" class="payment-logo">
+                        <div class="payment-method-box active" onclick="selectPayment('PayOS', this)">
+                            <img src="https://img.vietqr.io/image/vietqr-logo.png" alt="PayOS" class="payment-logo">
                             <div>
-                                <div class="fw-bold">Thanh toán qua VNPAY</div>
-                                <div class="text-muted small">ATM / Internet Banking</div>
+                                <div class="fw-bold">Thanh toán qua PayOS (QR Code / VNPAY)</div>
+                                <div class="text-muted small">Quét mã QR Ngân hàng / Ví điện tử</div>
                             </div>
-                            <i class="bi bi-check-circle-fill ms-auto text-primary" style="font-size: 1.2rem; display: block;"></i>
-                        </div>
-
-                        <div class="payment-method-box" onclick="selectPayment('momo', this)">
-                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="Momo" class="payment-logo">
-                            <div>
-                                <div class="fw-bold">Thanh toán qua MoMo</div>
-                                <div class="text-muted small">Ví điện tử MoMo</div>
-                            </div>
-                            <i class="bi bi-check-circle-fill ms-auto text-primary check-icon" style="font-size: 1.2rem; display: none;"></i>
+                            <i class="bi bi-check-circle-fill ms-auto text-danger" style="font-size: 1.2rem; display: block;"></i>
                         </div>
                         
-                        <div class="alert alert-warning mt-4">
-                            <strong>Lưu ý (Mock):</strong> Đây là giao diện giả lập. Bấm xác nhận sẽ kích hoạt tài khoản trực tiếp mà không trừ tiền.
+                        <div class="alert alert-info mt-4 rounded-3 border-0 shadow-sm">
+                            <i class="bi bi-info-circle-fill me-2"></i>Thanh toán trực tiếp qua PayOS bảo mật, hỗ trợ tất cả các ngân hàng Việt Nam.
                         </div>
                     </div>
 
@@ -106,24 +97,41 @@
                         <div class="plan-summary">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="fs-5 fw-bold">@Model.PlanName</span>
-                                <span class="fs-5 text-primary fw-bold">@Model.Price.ToString("N0")đ</span>
+                                <span class="fs-5 text-dark fw-bold">@Model.Price.ToString("N0")đ</span>
                             </div>
                             <div class="d-flex justify-content-between text-muted mb-3 border-bottom pb-3">
                                 <span>Thời hạn sử dụng</span>
                                 <span>@Model.DurationDays ngày</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
+
+                            <!-- Voucher Code Input -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">Mã giảm giá (Voucher)</label>
+                                <div class="input-group">
+                                    <input type="text" id="voucherCodeInput" name="voucherCode" class="form-control text-uppercase font-monospace rounded-start-3" placeholder="Gõ HIJAPAN20...">
+                                    <button type="button" class="btn btn-danger fw-bold rounded-end-3 px-3" onclick="applyVoucher()">Áp dụng</button>
+                                </div>
+                                <div id="voucherMessage" class="mt-2 small fw-semibold" style="display: none;"></div>
+                            </div>
+
+                            <!-- Discount Row -->
+                            <div class="d-flex justify-content-between align-items-center text-success mb-2" id="discountRow" style="display: none;">
+                                <span>Giảm giá Voucher</span>
+                                <span class="fw-bold" id="discountAmountText">-0đ</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                                 <span class="fw-bold fs-5">Tổng thanh toán</span>
-                                <span class="fs-3 text-danger fw-bold" style="font-family: 'Outfit', sans-serif;">@Model.Price.ToString("N0")đ</span>
+                                <span class="fs-3 text-danger fw-bold" id="finalPriceText" style="font-family: 'Outfit', sans-serif;">@Model.Price.ToString("N0")đ</span>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-3" style="background-color: var(--color-primary); border: none; font-weight: 600; font-size: 1.1rem; border-radius: 50px;">
-                            Xác nhận thanh toán
+                        <button type="submit" class="btn btn-danger w-100 py-3 shadow-sm" style="background-color: var(--color-kurenai, #A61D24); border: none; font-weight: 700; font-size: 1.1rem; border-radius: 50px;">
+                            Xác nhận thanh toán <i class="bi bi-arrow-right ms-2"></i>
                         </button>
                         
                         <div class="text-center mt-3">
-                            <a asp-action="Plans" class="text-muted text-decoration-none"><i class="bi bi-arrow-left"></i> Quay lại chọn gói</a>
+                            <a asp-action="Plans" class="text-muted text-decoration-none small"><i class="bi bi-arrow-left me-1"></i> Quay lại chọn gói</a>
                         </div>
                     </div>
                 </div>
@@ -136,17 +144,46 @@
     <script>
         function selectPayment(method, element) {
             document.getElementById('paymentMethodInput').value = method;
-            
-            var boxes = document.querySelectorAll('.payment-method-box');
-            boxes.forEach(b => {
-                b.classList.remove('active');
-                var icon = b.querySelector('.bi-check-circle-fill');
-                if(icon) icon.style.display = 'none';
+        }
+
+        function applyVoucher() {
+            var code = document.getElementById("voucherCodeInput").value.trim();
+            var planId = @Model.PlanId;
+            var msgDiv = document.getElementById("voucherMessage");
+            msgDiv.style.display = "block";
+
+            if (!code) {
+                msgDiv.className = "mt-2 small text-danger";
+                msgDiv.textContent = "Vui lòng nhập mã giảm giá.";
+                return;
+            }
+
+            fetch('/learn/membership/apply-voucher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ planId: planId, voucherCode: code })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    msgDiv.className = "mt-2 small text-success";
+                    msgDiv.textContent = data.message + " (Giảm " + data.discountAmount.toLocaleString('vi-VN') + "đ)";
+                    
+                    var discountRow = document.getElementById("discountRow");
+                    discountRow.style.setProperty("display", "flex", "important");
+                    
+                    document.getElementById("discountAmountText").textContent = "-" + data.discountAmount.toLocaleString('vi-VN') + "đ";
+                    document.getElementById("finalPriceText").textContent = data.finalPrice.toLocaleString('vi-VN') + "đ";
+                } else {
+                    msgDiv.className = "mt-2 small text-danger";
+                    msgDiv.textContent = data.message;
+                }
+            })
+            .catch(err => {
+                console.error("Voucher error:", err);
+                msgDiv.className = "mt-2 small text-danger";
+                msgDiv.textContent = "Lỗi khi kiểm tra mã giảm giá.";
             });
-            
-            element.classList.add('active');
-            var icon = element.querySelector('.bi-check-circle-fill');
-            if(icon) icon.style.display = 'block';
         }
     </script>
 }

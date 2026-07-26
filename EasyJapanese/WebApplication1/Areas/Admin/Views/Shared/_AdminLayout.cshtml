@@ -20,32 +20,41 @@
             </div>
             
             <nav class="nav flex-column jp-sidebar-nav mt-3">
-                    <a href="/admin/dashboard" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
-                        <i class="bi bi-bar-chart-fill me-3"></i> Thống kê
-                    </a>
-                    <a href="/admin" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
-                        <i class="bi bi-people-fill me-3"></i> Người dùng
-                    </a>
-                    <a href="/Admin/Courses" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Courses" ? "active" : "")">
-                        <i class="bi bi-book-half me-3"></i> Khóa học
-                    </a>
-                    <a href="/Admin/Transactions" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transactions" ? "active" : "")">
-                        <i class="bi bi-credit-card-fill me-3"></i> Giao dịch
-                    </a>
-                    <a href="/Admin/Vouchers" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vouchers" ? "active" : "")">
-                        <i class="bi bi-ticket-perforated-fill me-3"></i> Vouchers
-                    </a>
-                    <a href="/admin/tickets" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
-                        <i class="bi bi-headset me-3"></i> Ticket Support
-                    </a>
-                </nav>
-            </div>
+                <a href="/admin/dashboard" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <i class="bi bi-bar-chart-fill me-3"></i> Thống kê
+                </a>
+                <a href="/admin" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
+                    <i class="bi bi-people-fill me-3"></i> Người dùng
+                </a>
+                <a href="/Admin/Courses" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Courses" ? "active" : "")">
+                    <i class="bi bi-book-half me-3"></i> Khóa học
+                </a>
+                <a href="/admin/community" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Community" ? "active" : "")">
+                    <i class="bi bi-chat-square-quote-fill me-3"></i> Quản lý Cộng đồng
+                </a>
+                <a href="/admin/exams" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Exams" ? "active" : "")">
+                    <i class="bi bi-file-earmark-check-fill me-3"></i> Đề thi Đầu vào
+                </a>
+                <a href="/admin/lesson-materials" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LessonMaterial" ? "active" : "")">
+                    <i class="bi bi-file-earmark-text me-3"></i> Tài liệu Bài học
+                </a>
+                <a href="/Admin/Transactions" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transactions" ? "active" : "")">
+                    <i class="bi bi-credit-card-fill me-3"></i> Giao dịch
+                </a>
+                <a href="/Admin/Vouchers" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vouchers" ? "active" : "")">
+                    <i class="bi bi-ticket-perforated-fill me-3"></i> Vouchers
+                </a>
+                <a href="/admin/tickets" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active" : "")">
+                    <i class="bi bi-headset me-3"></i> Ticket Support
+                </a>
+            </nav>
         </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="admin-main-content">
-            @RenderBody()
-        </div>
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        @RenderBody()
+    </div>
 </div>
 
 @section Scripts {
