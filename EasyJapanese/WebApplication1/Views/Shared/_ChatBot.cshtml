@@ -1,4 +1,4 @@
-﻿<div id="hjChatbot" class="hj-chatbot">
+<div id="hjChatbot" class="hj-chatbot">
     <button type="button"
             id="hjChatbotToggle"
             class="hj-chatbot-toggle"
@@ -21,7 +21,7 @@
             </button>
         </div>
 
-        <!-- Hai tab -->
+        <!-- Ba tab -->
         <div class="hj-chatbot-tabs">
             <button type="button"
                     class="hj-chatbot-tab active"
@@ -35,6 +35,13 @@
                     data-tab="dictionary">
                 <i class="bi bi-book"></i>
                 Từ điển
+            </button>
+
+            <button type="button"
+                    class="hj-chatbot-tab"
+                    data-tab="support">
+                <i class="bi bi-headset"></i>
+                Hỗ trợ
             </button>
         </div>
 
@@ -89,8 +96,34 @@ Ví dụ: <strong>"飲む nghĩa là gì"</strong><strong>, "ありがとう"</s
                 </button>
             </form>
         </div>
+
+        <!-- TAB HỖ TRỢ ADMIN -->
+        <div id="hjSupportTab"
+             class="hj-chatbot-tab-content">
+
+            <div id="hjSupportMessages"
+                 class="hj-chatbot-messages">
+
+                <div class="hj-chatbot-msg bot">Xin chào! Nhập nội dung bên dưới để chat trực tiếp với đội ngũ Admin hỗ trợ.</div>
+            </div>
+
+            <form id="hjSupportForm"
+                  class="hj-chatbot-input-bar">
+
+                <input type="text"
+                       id="hjSupportInput"
+                       placeholder="Nhập yêu cầu hỗ trợ gửi Admin..."
+                       autocomplete="off" />
+
+                <button type="submit"
+                        aria-label="Gửi tin nhắn hỗ trợ">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
 @await Html.PartialAsync("/Views/Shared/_ChatbotStyle.cshtml")
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 @await Html.PartialAsync("/Views/Shared/_ChatbotScript.cshtml")

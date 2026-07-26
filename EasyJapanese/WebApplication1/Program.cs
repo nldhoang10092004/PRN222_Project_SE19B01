@@ -8,6 +8,7 @@ using CoreWeb.Service.ChatBot;
 using WebApplication1.Areas.Admin;
 using WebApplication1.Areas.Learner;
 using WebApplication1.Areas.Teacher;
+using WebApplication1.Hubs;
 
 namespace CoreWeb
 {
@@ -19,6 +20,7 @@ namespace CoreWeb
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSignalR();
 
             // HttpContextAccessor (dùng cho partial view _Header đọc session)
             builder.Services.AddHttpContextAccessor();
@@ -73,6 +75,8 @@ namespace CoreWeb
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Map SignalR Hub
+            app.MapHub<SupportChatHub>("/hubs/supportChat");
 
             // Khu vực học viên: /learn/...
             app.MapLearnerArea();
@@ -80,8 +84,6 @@ namespace CoreWeb
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            
 
             // Khu vực quản trị: /admin/...
             app.MapAdminArea();

@@ -422,6 +422,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var chatStream = document.getElementById("chatStream");
@@ -436,12 +437,75 @@
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
             });
-            
-            // Allow Ctrl+Enter to submit
+        }
+
+        // Initialize SignalR
+        var selectedTicketId = @(selectedTicket != null ? selectedTicket.TicketId : 0);
+        var userName = "@Html.Raw(selectedTicket?.UserFullName ?? "Học viên")";
+
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/supportChat")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessage", function (data) {
+            if (data.ticketId === selectedTicketId && chatStream) {
+                var isUser = (data.sender === "User");
+                var wrapper = document.createElement("div");
+                wrapper.className = "chat-bubble-wrapper " + (isUser ? "user-side" : "admin-side");
+                
+                var bubble = document.createElement("div");
+                bubble.className = "support-chat-bubble";
+                bubble.textContent = data.messageText;
+
+                var meta = document.createElement("div");
+                meta.className = "chat-meta";
+                meta.textContent = (isUser ? userName : "Hệ thống") + " • " + (data.sentAt || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+
+                wrapper.appendChild(bubble);
+                wrapper.appendChild(meta);
+                chatStream.appendChild(wrapper);
+                chatStream.scrollTop = chatStream.scrollHeight;
+            }
+        });
+
+        connection.on("NewTicketOrMessage", function (data) {
+            console.log("Ticket updated real-time:", data);
+            if (data.sender === "User" && (selectedTicketId === 0 || data.ticketId !== selectedTicketId)) {
+                window.location.href = "/admin/tickets?selectedTicketId=" + data.ticketId;
+            }
+        });
+
+        connection.start().then(function () {
+            connection.invoke("JoinAdminChannel");
+            if (selectedTicketId > 0) {
+                connection.invoke("JoinTicketGroup", selectedTicketId);
+            }
+        }).catch(function (err) {
+            console.error("SignalR Admin error:", err);
+        });
+
+        var adminChatForm = tx ? tx.form : null;
+        if (adminChatForm) {
+            adminChatForm.addEventListener("submit", function (e) {
+                var msgText = tx.value.trim();
+                if (!msgText) return;
+                
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    e.preventDefault();
+                    tx.value = "";
+                    tx.style.height = 'auto';
+                    connection.invoke("SendAdminReply", selectedTicketId, msgText, "").catch(function(err) {
+                        console.error("Error sending SignalR admin reply:", err);
+                        adminChatForm.submit();
+                    });
+                }
+            });
+
             tx.addEventListener("keydown", function(e) {
                 if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    this.form.submit();
+                    adminChatForm.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
                 }
             });
         }

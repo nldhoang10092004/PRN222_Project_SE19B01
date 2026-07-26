@@ -132,7 +132,9 @@ else
             </a>
 
             @{
-                var area = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+                var area = currentUser.Role == CoreLibrary.Const.RoleConst.ADMIN ? "Admin"
+                : currentUser.Role == CoreLibrary.Const.RoleConst.MENTOR ? "Teacher"
+                : "";
             }
             @if (area == "Admin")
             {
@@ -164,6 +166,7 @@ else
                     <li><a href="/learn/Practice" class="hj-nav-link @(currentController == "Practice" ? "active" : "")">Luyện tập</a></li>
                     <li><a href="/learn/Document" class="hj-nav-link @(currentController == "Document" ? "active" : "")">Tài liệu</a></li>
                     <li><a href="/learn/Blog" class="hj-nav-link @(currentController == "Blog" ? "active" : "")">Cộng đồng</a></li>
+                    <li><a href="javascript:void(0)" onclick="openSupportChat()" class="hj-nav-link">Hỗ trợ</a></li>
                 </ul>
             }
 
@@ -176,7 +179,16 @@ else
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="ddUser">
                         <li><span class="dropdown-item-text fw-bold text-dark px-3 pt-2">@(currentUser.FullName ?? currentUser.Email)</span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item py-2" href="/learn/Profile"><i class="bi bi-person me-2 text-muted"></i>Tài khoản</a></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="/@(currentUser.Role == CoreLibrary.Const.RoleConst.ADMIN ? "Admin" : currentUser.Role == CoreLibrary.Const.RoleConst.MENTOR ? "Teacher" : "Learner")/Profile">
+                                <i class="bi bi-person me-2 text-muted"></i>Tài khoản
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="javascript:void(0)" onclick="openSupportChat()">
+                                <i class="bi bi-headset me-2 text-muted"></i>Hỗ trợ Admin
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form asp-area="" asp-controller="Login" asp-action="Logout" method="post" class="m-0 p-0">

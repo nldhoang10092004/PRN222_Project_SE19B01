@@ -1,4 +1,4 @@
-﻿<script>
+<script>
     (function () {
         const toggleBtn = document.getElementById('hjChatbotToggle');
         const closeBtn = document.getElementById('hjChatbotClose');
@@ -7,6 +7,7 @@
         const tabButtons = document.querySelectorAll('.hj-chatbot-tab');
         const chatTab = document.getElementById('hjChatTab');
         const dictionaryTab = document.getElementById('hjDictionaryTab');
+        const supportTab = document.getElementById('hjSupportTab');
 
         const chatForm = document.getElementById('hjChatForm');
         const chatInput = document.getElementById('hjChatInput');
@@ -16,26 +17,36 @@
         const dictionaryInput = document.getElementById('hjDictionaryInput');
         const dictionaryMessages = document.getElementById('hjDictionaryMessages');
 
+        const supportForm = document.getElementById('hjSupportForm');
+        const supportInput = document.getElementById('hjSupportInput');
+        const supportMessages = document.getElementById('hjSupportMessages');
+
         if (!toggleBtn || !closeBtn || !panel ||
             !chatForm || !chatInput || !chatMessages ||
-            !dictionaryForm || !dictionaryInput || !dictionaryMessages) {
+            !dictionaryForm || !dictionaryInput || !dictionaryMessages ||
+            !supportForm || !supportInput || !supportMessages) {
             console.error('Không tìm thấy thành phần chatbot.');
             return;
         }
 
         let activeTab = 'chat';
         let history = [];
+        let supportPollInterval = null;
 
         toggleBtn.addEventListener('click', function () {
             panel.classList.toggle('open');
 
             if (panel.classList.contains('open')) {
                 focusCurrentInput();
+                checkPollSupport();
+            } else {
+                stopPollSupport();
             }
         });
 
         closeBtn.addEventListener('click', function () {
             panel.classList.remove('open');
+            stopPollSupport();
         });
 
         tabButtons.forEach(function (button) {
@@ -49,28 +60,49 @@
                     );
                 });
 
-                chatTab.classList.toggle(
-                    'active',
-                    activeTab === 'chat'
-                );
-
-                dictionaryTab.classList.toggle(
-                    'active',
-                    activeTab === 'dictionary'
-                );
+                if (chatTab) chatTab.classList.toggle('active', activeTab === 'chat');
+                if (dictionaryTab) dictionaryTab.classList.toggle('active', activeTab === 'dictionary');
+                if (supportTab) supportTab.classList.toggle('active', activeTab === 'support');
 
                 focusCurrentInput();
+                checkPollSupport();
             });
         });
+
+        window.openSupportChat = function () {
+            panel.classList.add('open');
+            const supportTabBtn = document.querySelector('.hj-chatbot-tab[data-tab="support"]');
+            if (supportTabBtn) supportTabBtn.click();
+        };
 
         function focusCurrentInput() {
             setTimeout(function () {
                 if (activeTab === 'dictionary') {
                     dictionaryInput.focus();
+                } else if (activeTab === 'support') {
+                    supportInput.focus();
                 } else {
                     chatInput.focus();
                 }
             }, 50);
+        }
+
+        function checkPollSupport() {
+            if (activeTab === 'support' && panel.classList.contains('open')) {
+                loadSupportMessages();
+                if (!supportPollInterval) {
+                    supportPollInterval = setInterval(loadSupportMessages, 4000);
+                }
+            } else {
+                stopPollSupport();
+            }
+        }
+
+        function stopPollSupport() {
+            if (supportPollInterval) {
+                clearInterval(supportPollInterval);
+                supportPollInterval = null;
+            }
         }
 
         function escapeHtml(str) {
@@ -88,11 +120,17 @@
             );
         }
 
+        function formatMessage(text) {
+            return escapeHtml(text)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
         function appendMessage(container, text, type) {
             const div = document.createElement('div');
 
             div.className = 'hj-chatbot-msg ' + type;
-            div.textContent = text;
+            div.innerHTML = formatMessage(text);
 
             container.appendChild(div);
             scrollToBottom(container);
@@ -178,6 +216,85 @@
             }
 
             return data;
+        }
+
+        let userSignalrConn = null;
+        let currentTicketId = 0;
+        let userEmail = '';
+        let userFullName = '';
+
+        async function initUserSignalR() {
+            if (!userSignalrConn && window.signalR) {
+                userSignalrConn = new signalR.HubConnectionBuilder()
+                    .withUrl('/hubs/supportChat')
+                    .withAutomaticReconnect()
+                    .build();
+
+                userSignalrConn.on('ReceiveMessage', function (data) {
+                    if (data.ticketId === currentTicketId) {
+                        appendSupportBubble(data.sender, data.messageText, data.sentAt);
+                    }
+                });
+
+                try {
+                    await userSignalrConn.start();
+                    if (currentTicketId > 0) {
+                        await userSignalrConn.invoke('JoinTicketGroup', currentTicketId);
+                    }
+                } catch (err) {
+                    console.error('Lỗi kết nối SignalR User:', err);
+                }
+            }
+        }
+
+        async function loadSupportMessages() {
+            try {
+                const response = await fetch('/Chat/GetSupportMessages');
+                if (!response.ok) return;
+                const data = await response.json();
+
+                currentTicketId = data.ticketId;
+                userEmail = data.userEmail;
+                userFullName = data.userFullName;
+
+                renderSupportMessages(data.messages || []);
+                await initUserSignalR();
+                if (userSignalrConn && userSignalrConn.state === signalR.HubConnectionState.Connected) {
+                    await userSignalrConn.invoke('JoinTicketGroup', currentTicketId);
+                }
+            } catch (err) {
+                console.error('Lỗi tải tin nhắn support:', err);
+            }
+        }
+
+        function appendSupportBubble(sender, messageText, sentAt) {
+            const isUser = (sender === 'User');
+            const div = document.createElement('div');
+            div.className = 'hj-chatbot-msg ' + (isUser ? 'user' : 'admin');
+            
+            const timeSpan = sentAt ? ' <small style="font-size:10px; opacity:0.75; display:block; margin-top:2px;">' + escapeHtml(sentAt) + '</small>' : '';
+            const senderPrefix = !isUser ? '<strong>[Admin]</strong> ' : '';
+            div.innerHTML = senderPrefix + escapeHtml(messageText) + timeSpan;
+            
+            supportMessages.appendChild(div);
+            scrollToBottom(supportMessages);
+        }
+
+        function renderSupportMessages(messages) {
+            supportMessages.innerHTML = '<div class="hj-chatbot-msg bot">Xin chào! Nhập nội dung bên dưới để chat trực tiếp với đội ngũ Admin hỗ trợ.</div>';
+            
+            messages.forEach(m => {
+                const div = document.createElement('div');
+                const isUser = (m.sender === 'User');
+                div.className = 'hj-chatbot-msg ' + (isUser ? 'user' : 'admin');
+                
+                const timeSpan = m.sentAt ? ' <small style="font-size:10px; opacity:0.75; display:block; margin-top:2px;">' + escapeHtml(m.sentAt) + '</small>' : '';
+                const senderPrefix = !isUser ? '<strong>[Admin]</strong> ' : '';
+                div.innerHTML = senderPrefix + escapeHtml(m.messageText) + timeSpan;
+                
+                supportMessages.appendChild(div);
+            });
+            scrollToBottom(supportMessages);
         }
 
         // TAB CHAT
@@ -300,6 +417,49 @@
             } finally {
                 dictionaryInput.disabled = false;
                 dictionaryInput.focus();
+            }
+        });
+
+        // TAB HỖ TRỢ ADMIN
+        supportForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const text = supportInput.value.trim();
+
+            if (!text) {
+                return;
+            }
+
+            supportInput.value = '';
+
+            if (userSignalrConn && userSignalrConn.state === signalR.HubConnectionState.Connected && currentTicketId > 0) {
+                try {
+                    await userSignalrConn.invoke('SendUserMessage', currentTicketId, text, userEmail, userFullName);
+                    return;
+                } catch (err) {
+                    console.error('Lỗi gửi SignalR user message:', err);
+                }
+            }
+
+            try {
+                const response = await fetch('/Chat/SendSupportMessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.messages) {
+                    renderSupportMessages(data.messages);
+                } else {
+                    appendMessage(supportMessages, data.error || 'Lỗi gửi tin nhắn.', 'bot');
+                }
+            } catch (error) {
+                appendMessage(supportMessages, 'Không thể gửi tin nhắn hỗ trợ lúc này.', 'bot');
+            } finally {
+                supportInput.focus();
             }
         });
     })();
