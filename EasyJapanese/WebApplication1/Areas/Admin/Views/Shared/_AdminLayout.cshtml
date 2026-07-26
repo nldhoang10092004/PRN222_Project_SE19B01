@@ -35,8 +35,14 @@
                 <a href="/admin/exams" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Exams" ? "active" : "")">
                     <i class="bi bi-file-earmark-check-fill me-3"></i> Đề thi Đầu vào
                 </a>
+                <a href="/admin/placement-tests" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "PlacementTest" ? "active" : "")">
+                    <i class="bi bi-clipboard-check me-3"></i> Bài test Đầu vào
+                </a>
                 <a href="/admin/lesson-materials" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LessonMaterial" ? "active" : "")">
                     <i class="bi bi-file-earmark-text me-3"></i> Tài liệu Bài học
+                </a>
+                <a href="/admin/reading-exercises" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ReadingExercise" ? "active" : "")">
+                    <i class="bi bi-book-fill me-3"></i> Bài Đọc Luyện tập
                 </a>
                 <a href="/Admin/Transactions" class="nav-link jp-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transactions" ? "active" : "")">
                     <i class="bi bi-credit-card-fill me-3"></i> Giao dịch

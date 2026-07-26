@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreWeb.Areas.Learner.Models;
+using WebApplication1.Areas.Learner.Models;
 
 namespace WebApplication1.Areas.Learner.Controllers
 {
@@ -243,6 +244,125 @@ namespace WebApplication1.Areas.Learner.Controllers
             FeatureName = "Luyện Đọc",
             Description = "Bài đọc hiểu đa dạng chủ đề, từ vựng Hán tự và ngữ pháp đi kèm."
         });
+        [HttpGet]
+        public async Task<IActionResult> Reading()
+        {
+            var exercises = await _db.Exercises
+                .Include(e => e.Questions)
+                .Where(e => e.ExerciseType == "Reading" && e.CourseId == null)
+                .OrderBy(e => e.SortOrder)
+                .ToListAsync();
+
+            var vm = new ReadingListViewModel
+            {
+                Exercises = exercises.Select(e => new ReadingExerciseVm
+                {
+                    ExerciseId = e.ExerciseId,
+                    Title = e.Title,
+                    QuestionCount = e.Questions.Count
+                }).ToList()
+            };
+
+            return View(vm);
+        }
+
+        // GET: /learn/Practice/ReadingDetail/{id}
+        [HttpGet]
+        public async Task<IActionResult> ReadingDetail(int id)
+        {
+            var exercise = await _db.Exercises
+                .Include(e => e.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                .FirstOrDefaultAsync(e => e.ExerciseId == id && e.ExerciseType == "Reading" && e.CourseId == null);
+
+            if (exercise == null)
+            {
+                return NotFound();
+            }
+
+            var vm = new ReadingDetailViewModel
+            {
+                ExerciseId = exercise.ExerciseId,
+                Title = exercise.Title,
+                Content = exercise.Content ?? "",
+                Questions = exercise.Questions.OrderBy(q => q.SortOrder).Select(q => new ReadingQuestionVm
+                {
+                    QuestionId = q.QuestionId,
+                    QuestionText = q.QuestionText,
+                    SortOrder = q.SortOrder,
+                    AnswerOptions = q.AnswerOptions.Select(o => new ReadingOptionVm
+                    {
+                        OptionId = o.OptionId,
+                        AnswerText = o.AnswerText
+                    }).ToList()
+                }).ToList()
+            };
+
+            return View(vm);
+        }
+
+        // POST: /learn/Practice/ReadingSubmit
+        [HttpPost]
+        public async Task<IActionResult> ReadingSubmit(int id, Dictionary<int, int> answers)
+        {
+            var exercise = await _db.Exercises
+                .Include(e => e.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                .FirstOrDefaultAsync(e => e.ExerciseId == id);
+
+            if (exercise == null)
+            {
+                return NotFound();
+            }
+
+            var results = new List<QuestionResultVm>();
+            var correctCount = 0;
+
+            foreach (var question in exercise.Questions.OrderBy(q => q.SortOrder))
+            {
+                var selectedOptionId = answers.ContainsKey(question.QuestionId) ? answers[question.QuestionId] : 0;
+                var selectedOption = question.AnswerOptions.FirstOrDefault(o => o.OptionId == selectedOptionId);
+                var correctOption = question.AnswerOptions.FirstOrDefault(o => o.IsCorrect);
+                var isCorrect = selectedOption != null && selectedOption.IsCorrect;
+
+                if (isCorrect) correctCount++;
+
+                results.Add(new QuestionResultVm
+                {
+                    QuestionText = question.QuestionText,
+                    SelectedAnswer = selectedOption?.AnswerText ?? "Chưa trả lời",
+                    CorrectAnswer = correctOption?.AnswerText ?? "",
+                    IsCorrect = isCorrect
+                });
+            }
+
+            var resultVm = new ReadingResultViewModel
+            {
+                ExerciseId = exercise.ExerciseId,
+                Title = exercise.Title,
+                TotalQuestions = exercise.Questions.Count,
+                CorrectCount = correctCount,
+                ScorePercent = exercise.Questions.Count > 0 ? (decimal)correctCount / exercise.Questions.Count * 100 : 0,
+                Results = results
+            };
+
+            TempData["ReadingResult"] = System.Text.Json.JsonSerializer.Serialize(resultVm);
+            return RedirectToAction(nameof(ReadingResult));
+        }
+
+        // GET: /learn/Practice/ReadingResult
+        [HttpGet]
+        public IActionResult ReadingResult()
+        {
+            var resultJson = TempData["ReadingResult"] as string;
+            if (string.IsNullOrEmpty(resultJson))
+            {
+                return RedirectToAction(nameof(Reading));
+            }
+
+            var vm = System.Text.Json.JsonSerializer.Deserialize<ReadingResultViewModel>(resultJson);
+            return View(vm);
+        }
     }
 
     public class PracticeIndexViewModel
