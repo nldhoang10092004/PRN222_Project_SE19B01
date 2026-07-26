@@ -238,7 +238,7 @@ namespace WebApplication1.Areas.Learner.Controllers
         });
 
         // GET: /learn/Practice/Reading
-        [HttpGet]
+        [HttpGet("Reading")]
         public async Task<IActionResult> Reading()
         {
             var exercises = await _db.Exercises
@@ -261,7 +261,7 @@ namespace WebApplication1.Areas.Learner.Controllers
         }
 
         // GET: /learn/Practice/ReadingDetail/{id}
-        [HttpGet]
+        [HttpGet("ReadingDetail/{id}")]
         public async Task<IActionResult> ReadingDetail(int id)
         {
             var exercise = await _db.Exercises
@@ -296,7 +296,7 @@ namespace WebApplication1.Areas.Learner.Controllers
         }
 
         // POST: /learn/Practice/ReadingSubmit
-        [HttpPost]
+        [HttpPost("ReadingSubmit")]
         public async Task<IActionResult> ReadingSubmit(int id, Dictionary<int, int> answers)
         {
             var exercise = await _db.Exercises
@@ -345,7 +345,7 @@ namespace WebApplication1.Areas.Learner.Controllers
         }
 
         // GET: /learn/Practice/ReadingResult
-        [HttpGet]
+        [HttpGet("ReadingResult")]
         public IActionResult ReadingResult()
         {
             var resultJson = TempData["ReadingResult"] as string;
