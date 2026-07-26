@@ -146,8 +146,8 @@
           document.getElementById('result-level').innerText = data.recommendedLevelName;
           document.getElementById('result-score').innerText =
             `Điểm: ${data.correctCount} / ${data.totalPoints} câu đúng`;
-          document.getElementById('result-course-link').href =
-            `/Learner/Course?level=${data.recommendedLevelName}`;
+            document.getElementById('result-course-link').href =
+      `/learn/Course?level=${data.recommendedLevelName}`;
         })
         .catch(() => {
           alert('Có lỗi khi nộp bài. Vui lòng thử lại.');

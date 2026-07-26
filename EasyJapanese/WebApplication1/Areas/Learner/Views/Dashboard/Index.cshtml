@@ -151,8 +151,20 @@
                         <div class="hj-free-card p-4 h-100">
                             <div class="text-success small fw-600 mb-2">Miễn phí · Không cần membership</div>
                             <h5 class="text-success fw-bold mb-2" style="font-family:'Outfit',sans-serif;">Test xếp lớp</h5>
-                            <p class="text-muted small mb-3">40 câu, ~20 phút. Xác định trình độ N5–N1 ngay bây giờ — kết quả sẽ gợi ý lộ trình học phù hợp.</p>
-                            <a href="/learn/PlacementTest" class="btn-hj-primary" style="font-size:13px;padding:7px 18px;">Làm bài test →</a>
+
+                            @if (hasTest)
+                            {
+                                <p class="text-muted small mb-3">
+                                    Bạn đã hoàn thành — điểm <strong>@Model.JlptGoal?.Score/@Model.JlptGoal?.TotalPoints</strong>,
+                                    trình độ đề xuất: <strong>@Model.JlptGoal?.RecommendedLevelName</strong>.
+                                </p>
+                                <a href="/learn/PlacementTest" class="btn-hj-outline" style="font-size:13px;padding:7px 18px;">Làm lại bài test →</a>
+                            }
+                            else
+                            {
+                                <p class="text-muted small mb-3">40 câu, ~20 phút. Xác định trình độ N5–N1 ngay bây giờ — kết quả sẽ gợi ý lộ trình học phù hợp.</p>
+                                <a href="/learn/PlacementTest" class="btn-hj-primary" style="font-size:13px;padding:7px 18px;">Làm bài test →</a>
+                            }
                         </div>
                     </div>
                 </div>
