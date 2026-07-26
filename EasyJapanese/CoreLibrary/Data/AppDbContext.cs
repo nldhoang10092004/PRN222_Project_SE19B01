@@ -64,6 +64,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<StudentPlacementResult> StudentPlacementResults { get; set; }
 
+    public virtual DbSet<StudentExerciseResult> StudentExerciseResults { get; set; }
+
     public virtual DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
@@ -603,6 +605,22 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TestId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__StudentPl__TestI__797309D9");
+        });
+
+        modelBuilder.Entity<StudentExerciseResult>(entity =>
+        {
+            entity.HasKey(e => e.ResultId);
+            entity.Property(e => e.SubmittedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Student)
+                .WithMany()
+                .HasForeignKey(d => d.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.Exercise)
+                .WithMany()
+                .HasForeignKey(d => d.ExerciseId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<SubscriptionPlan>(entity =>

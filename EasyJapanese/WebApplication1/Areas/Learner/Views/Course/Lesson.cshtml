@@ -234,9 +234,9 @@
                     <div class="audio-card">
                         <button class="audio-play-btn"
                                 type="button"
-                                @(string.IsNullOrEmpty(item.AudioUrl) ? "disabled" : "")
                                 data-audio="@(item.AudioUrl ?? "")"
-                                title="@(string.IsNullOrEmpty(item.AudioUrl) ? "Audio đang cập nhật" : "Phát audio")">
+                                data-text="@(item.Content ?? item.Title)"
+                                title="Phát audio bài nghe">
                             <i class="bi bi-play-fill"></i>
                         </button>
 
@@ -248,16 +248,9 @@
                                 <div class="audio-content">@item.Content</div>
                             }
 
-                            @if (!string.IsNullOrEmpty(item.AudioUrl))
-                            {
-                                <div class="audio-progress">
-                                    <div class="audio-progress-fill"></div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="audio-content">Audio đang được cập nhật</div>
-                            }
+                            <div class="audio-progress">
+                                <div class="audio-progress-fill"></div>
+                            </div>
 
                             <button type="button"
                                     class="btn-practice"

@@ -1,0 +1,150 @@
+@model WebApplication1.Areas.Learner.Controllers.ListeningHubViewModel
+@{
+    ViewData["Title"] = "Trung Tâm Luyện Nghe (Listening Practice)";
+    var levels = new[] { "ALL", "N5", "N4", "N3", "N2", "N1" };
+}
+
+<div class="container-fluid px-4 px-lg-5 py-4" style="max-width: 1400px; margin: 0 auto;">
+    <!-- Header Hero Banner -->
+    <div class="card border-0 rounded-4 shadow-sm text-white mb-4 overflow-hidden" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-white text-danger font-monospace px-3 py-2 rounded-pill mb-3 shadow-sm">
+                        <i class="bi bi-headphones me-1"></i> LISTENING PRACTICE HUB
+                    </span>
+                    <h1 class="fw-extrabold fs-2 mb-2">Trung Tâm Luyện Nghe Tiếng Nhật</h1>
+                    <p class="text-white-50 mb-4 fs-6">
+                        Rèn luyện kỹ năng nghe hiểu JLPT qua các bài luyện nghe thực tế từ N5 đến N1 được thiết kế trực tiếp bởi giáo viên.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 text-white small">
+                        <div class="d-flex align-items-center bg-white bg-opacity-10 px-3 py-2 rounded-pill">
+                            <i class="bi bi-collection-play me-2 fs-5"></i>
+                            <span><strong>@Model.TotalCount</strong> Bài luyện nghe</span>
+                        </div>
+                        <div class="d-flex align-items-center bg-white bg-opacity-10 px-3 py-2 rounded-pill">
+                            <i class="bi bi-check-circle me-2 fs-5 text-warning"></i>
+                            <span><strong>@Model.CompletedCount</strong> Bài đã đạt (≥80%)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center text-md-end mt-4 mt-md-0 d-none d-md-block">
+                    <i class="bi bi-broadcast-pin text-white-50" style="font-size: 8rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JLPT Level Filter Tabs -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div class="btn-group p-1 bg-white border rounded-pill shadow-sm" role="group">
+            @foreach (var lvl in levels)
+            {
+                var isActive = Model.SelectedLevel == lvl;
+                <a href="/learn/Practice/Listening?level=@lvl"
+                   class="btn btn-sm rounded-pill px-4 py-2 text-decoration-none fw-bold transition-all @(isActive ? "btn-danger shadow-sm text-white" : "btn-light text-secondary")">
+                    @(lvl == "ALL" ? "Tất cả cấp độ" : $"Trình độ {lvl}")
+                </a>
+            }
+        </div>
+        <div class="text-muted small fw-semibold">
+            Hiển thị <strong>@Model.Exercises.Count</strong> bài tập nghe
+        </div>
+    </div>
+
+    <!-- Grouped Listening Exercises List by Course/Topic -->
+    @if (Model.Exercises.Any())
+    {
+        var groupedExercises = Model.Exercises.GroupBy(e => e.CourseTitle ?? "Bài luyện nghe tổng hợp").ToList();
+
+        @foreach (var group in groupedExercises)
+        {
+            <div class="mb-5">
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-journal-bookmark-fill text-danger fs-5"></i>
+                        <span>@group.Key</span>
+                    </h5>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1 fw-semibold small">
+                        @group.Count() bài tập
+                    </span>
+                </div>
+
+                <div class="row g-4">
+                    @foreach (var ex in group)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border rounded-4 shadow-sm hover-shadow transition-all bg-white overflow-hidden">
+                                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <span class="badge bg-danger text-white rounded-pill px-3 py-1.5 fw-bold">
+                                                JLPT @ex.LevelName
+                                            </span>
+
+                                            @if (ex.BestScore.HasValue)
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold">
+                                                    <i class="bi bi-trophy-fill me-1 text-warning"></i> @ex.BestScore%
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1 small">
+                                                    Chưa làm
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <h5 class="fw-bold text-dark mb-2 line-clamp-2 fs-6">@ex.Title</h5>
+
+                                        <div class="text-secondary small mb-3 d-flex align-items-center gap-2">
+                                            <i class="bi bi-question-circle text-danger"></i>
+                                            <span>@ex.QuestionCount câu hỏi trắc nghiệm</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3 border-top mt-2">
+                                        <a href="/learn/Practice/ListeningDetail/@ex.ExerciseId"
+                                           class="btn btn-danger rounded-pill w-100 fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2"
+                                           style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+                                            <span>Luyện ngay</span>
+                                            <i class="bi bi-play-circle-fill fs-6"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="card border-0 rounded-4 shadow-sm p-5 text-center bg-white">
+            <i class="bi bi-headphones text-muted opacity-50 display-3 mb-3"></i>
+            <h5 class="fw-bold text-dark mb-1">Chưa Có Bài Luyện Nghe Cho Trình Độ Này</h5>
+            <p class="text-muted small">Vui lòng chọn cấp độ JLPT khác hoặc quay lại sau khi Giáo viên cập nhật bài mới.</p>
+            <div class="mt-2">
+                <a href="/learn/Practice/Listening" class="btn btn-sm btn-danger rounded-pill px-4 py-2 fw-bold">
+                    Xem tất cả bài nghe
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px -6px rgba(0,0,0,0.12) !important;
+        border-color: #fca5a5 !important;
+    }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>

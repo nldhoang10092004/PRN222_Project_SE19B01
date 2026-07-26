@@ -358,6 +358,11 @@ namespace WebApplication1.Areas.Learner.Controllers
         [HttpPost]
         public async Task<IActionResult> CheckExercise([FromBody] ExerciseAnswerRequest request)
         {
+            if (request == null || request.Answers == null || !request.Answers.Any())
+            {
+                return BadRequest("Dữ liệu nộp bài không hợp lệ.");
+            }
+
             var questionIds = request.Answers
                 .Select(x => x.QuestionId)
                 .ToList();
@@ -368,7 +373,10 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .Include(q => q.AnswerOptions)
                 .ToListAsync();
 
-            var result = questions.Select(question =>
+            int correctCount = 0;
+            var resultList = new List<object>();
+
+            foreach (var question in questions)
             {
                 var selected = request.Answers
                     .FirstOrDefault(a => a.QuestionId == question.QuestionId);
@@ -380,15 +388,42 @@ namespace WebApplication1.Areas.Learner.Controllers
                                  correctOption != null &&
                                  selected.OptionId == correctOption.OptionId;
 
-                return new
+                if (isCorrect) correctCount++;
+
+                resultList.Add(new
                 {
                     questionId = question.QuestionId,
                     isCorrect,
                     correctOptionId = correctOption?.OptionId
-                };
-            });
+                });
+            }
 
-            return Json(new { answers = result });
+            // Save score to DB if student is logged in
+            var currentUser = await _auth.GetCurrentUserAsync(HttpContext);
+            if (currentUser?.AccountId != null)
+            {
+                var student = await _db.Students.FirstOrDefaultAsync(s => s.StudentId == currentUser.AccountId);
+                if (student != null)
+                {
+                    int totalQuestions = questions.Count;
+                    int scorePercent = totalQuestions > 0 ? (int)Math.Round((double)correctCount / totalQuestions * 100) : 0;
+
+                    var attempt = new StudentExerciseResult
+                    {
+                        StudentId = student.StudentId,
+                        ExerciseId = request.ExerciseId,
+                        Score = scorePercent,
+                        TotalQuestions = totalQuestions,
+                        CorrectAnswers = correctCount,
+                        SubmittedAt = DateTime.UtcNow
+                    };
+
+                    _db.StudentExerciseResults.Add(attempt);
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            return Json(new { answers = resultList, correctCount, totalQuestions = questions.Count });
         }
 
         [HttpGet]
