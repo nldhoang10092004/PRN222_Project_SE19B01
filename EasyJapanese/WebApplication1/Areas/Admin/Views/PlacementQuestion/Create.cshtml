@@ -1,0 +1,157 @@
+@model WebApplication1.Areas.Admin.Models.CreateQuestionViewModel
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var testTitle = ViewData["TestTitle"];
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin/placement-tests">Bài test Đầu vào</a></li>
+            <li class="breadcrumb-item"><a href="/admin/placement-tests/manage-questions/@Model.TestId">@testTitle</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Thêm câu hỏi</li>
+        </ol>
+    </nav>
+    <h3 class="mb-0 fw-bold">Thêm Câu hỏi mới</h3>
+    <p class="text-muted">Bài test: @testTitle</p>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <form method="post" asp-action="Create" id="questionForm">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.TestId)
+
+            @if (!ViewContext.ModelState.IsValid && ViewContext.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach (var error in ViewContext.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="QuestionText" class="form-label fw-semibold">Nội dung câu hỏi <span class="text-danger">*</span></label>
+                <textarea asp-for="QuestionText" class="form-control" rows="3" required></textarea>
+                <span asp-validation-for="QuestionText" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="QuestionType" class="form-label fw-semibold">Loại câu hỏi <span class="text-danger">*</span></label>
+                    <select asp-for="QuestionType" class="form-select" required>
+                        <option value="">-- Chọn loại --</option>
+                        <option value="Multiple Choice">Multiple Choice</option>
+                        <option value="True/False">True/False</option>
+                        <option value="Fill in the Blank">Fill in the Blank</option>
+                    </select>
+                    <span asp-validation-for="QuestionType" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Points" class="form-label fw-semibold">Điểm <span class="text-danger">*</span></label>
+                    <input asp-for="Points" type="number" class="form-control" min="1" max="100" required />
+                    <span asp-validation-for="Points" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="SortOrder" class="form-label fw-semibold">Thứ tự</label>
+                    <input asp-for="SortOrder" type="number" class="form-control" min="1" />
+                    <span asp-validation-for="SortOrder" class="text-danger"></span>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-semibold">Đáp án <span class="text-danger">*</span></h5>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addAnswerOption()">Thêm đáp án</button>
+                </div>
+                <p class="text-muted small">Ít nhất 2 đáp án, tích chọn đáp án đúng</p>
+
+                <div id="answerOptionsContainer">
+                    @for (int i = 0; i < Model.AnswerOptions.Count; i++)
+                    {
+                        <div class="answer-option-item mb-3 p-3 border rounded" data-index="@i">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <input type="text" name="AnswerOptions[@i].AnswerText" value="@Model.AnswerOptions[i].AnswerText"
+                                           class="form-control" placeholder="Nhập nội dung đáp án" required />
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="AnswerOptions[@i].IsCorrect" value="true"
+                                               @(Model.AnswerOptions[i].IsCorrect ? "checked" : "")
+                                               class="form-check-input" id="correct_@i" />
+                                        <label class="form-check-label" for="correct_@i">Đúng</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeAnswerOption(this)">Xóa</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-danger">Lưu câu hỏi</button>
+                <a href="/admin/placement-tests/manage-questions/@Model.TestId" class="btn btn-light">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        let answerIndex = @Model.AnswerOptions.Count;
+
+        function addAnswerOption() {
+            const container = document.getElementById('answerOptionsContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'answer-option-item mb-3 p-3 border rounded';
+            newItem.setAttribute('data-index', answerIndex);
+
+            newItem.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <input type="text" name="AnswerOptions[${answerIndex}].AnswerText"
+                               class="form-control" placeholder="Nhập nội dung đáp án" required />
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-check">
+                            <input type="checkbox" name="AnswerOptions[${answerIndex}].IsCorrect" value="true"
+                                   class="form-check-input" id="correct_${answerIndex}" />
+                            <label class="form-check-label" for="correct_${answerIndex}">Đúng</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeAnswerOption(this)">Xóa</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(newItem);
+            answerIndex++;
+        }
+
+        function removeAnswerOption(button) {
+            const container = document.getElementById('answerOptionsContainer');
+            const items = container.querySelectorAll('.answer-option-item');
+
+            if (items.length <= 2) {
+                alert('Phải có ít nhất 2 đáp án!');
+                return;
+            }
+
+            button.closest('.answer-option-item').remove();
+        }
+    </script>
+}

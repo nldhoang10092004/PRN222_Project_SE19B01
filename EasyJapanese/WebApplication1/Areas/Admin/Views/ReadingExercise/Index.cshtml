@@ -1,0 +1,143 @@
+@model IEnumerable<CoreLibrary.Data.Entities.Exercise>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1 fw-bold">Quản lý Bài Đọc</h3>
+        <p class="text-muted small mb-0">Soạn thảo bài đọc và câu hỏi cho khu vực Luyện tập của học viên.</p>
+    </div>
+    <button class="btn btn-jp-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+        <i class="bi bi-plus-lg me-1"></i> Thêm bài đọc
+    </button>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    @foreach (var exercise in Model)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 jp-omni-card h-100 rounded-4">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-semibold">
+                            @(exercise.Questions?.Count ?? 0) câu hỏi
+                        </span>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical fs-5"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                <li>
+                                    <button class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#editModal-@exercise.ExerciseId">
+                                        <i class="bi bi-pencil me-2 text-muted"></i> Chỉnh sửa
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-action="Delete" method="post" onsubmit="return confirm('Xóa bài đọc này và toàn bộ câu hỏi liên quan?');">
+                                        <input type="hidden" name="exerciseId" value="@exercise.ExerciseId" />
+                                        <button type="submit" class="dropdown-item py-2 text-danger">
+                                            <i class="bi bi-trash3 me-2"></i> Xóa
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-2">@exercise.Title</h5>
+                    <p class="text-muted small flex-grow-1" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">
+                        @(string.IsNullOrEmpty(exercise.Content) ? "Chưa có nội dung bài đọc." : exercise.Content)
+                    </p>
+
+                    <a href="/admin/reading-exercises/questions/@exercise.ExerciseId" class="btn btn-jp-outline w-100 mt-3 text-decoration-none">
+                        <i class="bi bi-gear-fill me-1"></i> Quản lý câu hỏi
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Sửa -->
+        <div class="modal fade" id="editModal-@exercise.ExerciseId" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Chỉnh sửa bài đọc</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="exerciseId" value="@exercise.ExerciseId" />
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Tiêu đề</label>
+                                <input type="text" name="title" class="form-control rounded-3" value="@exercise.Title" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Thứ tự hiển thị</label>
+                                <input type="number" name="sortOrder" class="form-control rounded-3" value="@exercise.SortOrder" min="0" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Nội dung bài đọc</label>
+                                <textarea name="content" class="form-control rounded-3" rows="10">@exercise.Content</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-jp-primary rounded-3">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-book fs-1 mb-3"></i>
+            <h5>Chưa có bài đọc nào</h5>
+            <p class="small">Hãy thêm bài đọc đầu tiên bằng nút "Thêm bài đọc" phía trên.</p>
+        </div>
+    }
+</div>
+
+<!-- Modal Tạo mới -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Thêm bài đọc mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Tiêu đề</label>
+                        <input type="text" name="title" class="form-control rounded-3" placeholder="Ví dụ: Bài đọc về gia đình Nhật Bản" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Thứ tự hiển thị</label>
+                        <input type="number" name="sortOrder" class="form-control rounded-3" value="0" min="0" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Nội dung bài đọc</label>
+                        <textarea name="content" class="form-control rounded-3" rows="10" placeholder="Nhập đoạn văn tiếng Nhật..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-jp-primary rounded-3">Tạo bài đọc</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

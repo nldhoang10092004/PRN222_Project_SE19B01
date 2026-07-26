@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace CoreLibrary.Data.Entities;
@@ -7,7 +7,7 @@ public partial class Exercise
 {
     public int ExerciseId { get; set; }
 
-    public int CourseId { get; set; }
+    public int? CourseId { get; set; }
 
     public string ExerciseType { get; set; } = null!;
 
@@ -22,11 +22,12 @@ public partial class Exercise
     public int SortOrder { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
     public int? LessonId { get; set; }
 
     public virtual Lesson? Lesson { get; set; }
 
-    public virtual Course Course { get; set; } = null!;
+    public virtual Course? Course { get; set; }
 
     public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
 }

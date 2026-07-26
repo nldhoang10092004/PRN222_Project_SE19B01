@@ -1,0 +1,110 @@
+@model IEnumerable<CoreLibrary.Data.Entities.PlacementTest>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0 fw-bold">Quản lý Bài test Đầu vào</h3>
+    <a href="/admin/placement-tests/create" class="btn btn-danger">Tạo bài test mới</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên bài test</th>
+                            <th>Thời gian (phút)</th>
+                            <th>Điểm đạt</th>
+                            <th>Số câu hỏi</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var test in Model)
+                        {
+                            <tr>
+                                <td>@test.TestId</td>
+                                <td class="fw-bold">@test.Title</td>
+                                <td>@test.Duration</td>
+                                <td>@test.PassScore</td>
+                                <td>
+                                    <span class="badge bg-info">@test.Questions.Count câu</span>
+                                </td>
+                                <td>
+                                    @if (test.IsActive)
+                                    {
+                                        <span class="badge bg-success">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không hoạt động</span>
+                                    }
+                                </td>
+                                <td>@test.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/placement-tests/manage-questions/@test.TestId" class="btn btn-sm btn-primary" title="Quản lý câu hỏi">
+                                            Câu hỏi
+                                        </a>
+                                        <a href="/admin/placement-tests/edit/@test.TestId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            Sửa
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(@test.TestId, '@test.Title')" title="Xóa">
+                                            Xóa
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted">Chưa có bài test nào. Hãy tạo bài test đầu tiên!</p>
+                <a href="/admin/placement-tests/create" class="btn btn-danger">Tạo bài test mới</a>
+            </div>
+        }
+    </div>
+</div>
+
+<form id="deleteForm" method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script>
+        function confirmDelete(testId, testTitle) {
+            if (confirm('Bạn có chắc chắn muốn xóa bài test "' + testTitle + '"?\n\nLưu ý: Không thể xóa bài test đã có học viên tham gia.')) {
+                const form = document.getElementById('deleteForm');
+                form.action = '/admin/placement-tests/delete/' + testId;
+                form.submit();
+            }
+        }
+    </script>
+}
