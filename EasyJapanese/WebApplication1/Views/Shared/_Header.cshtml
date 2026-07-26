@@ -132,7 +132,9 @@ else
             </a>
 
             @{
-                var area = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+                var area = currentUser.Role == CoreLibrary.Const.RoleConst.ADMIN ? "Admin"
+                : currentUser.Role == CoreLibrary.Const.RoleConst.MENTOR ? "Teacher"
+                : "";
             }
             @if (area == "Admin")
             {
@@ -176,7 +178,11 @@ else
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="ddUser">
                         <li><span class="dropdown-item-text fw-bold text-dark px-3 pt-2">@(currentUser.FullName ?? currentUser.Email)</span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item py-2" href="/learn/Profile"><i class="bi bi-person me-2 text-muted"></i>Tài khoản</a></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="/@(currentUser.Role == CoreLibrary.Const.RoleConst.ADMIN ? "Admin" : currentUser.Role == CoreLibrary.Const.RoleConst.MENTOR ? "Teacher" : "Learner")/Profile">
+                                <i class="bi bi-person me-2 text-muted"></i>Tài khoản
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form asp-area="" asp-controller="Login" asp-action="Logout" method="post" class="m-0 p-0">
