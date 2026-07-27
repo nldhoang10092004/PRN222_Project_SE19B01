@@ -41,10 +41,21 @@ namespace CoreLibrary.Utility
             }
             catch
             {
-                // Fallback to manual dictionary replacement below if CP1252 decode fails
+                // Fallback to manual dictionary replacement
             }
-
             return ApplyManualReplacements(input);
+        }
+
+        public static string CleanAnswerText(string? input)
+        {
+            var text = FixMojibake(input);
+            if (string.IsNullOrWhiteSpace(text)) return "";
+            return text
+                .Replace(" (đúng)", "")
+                .Replace("(đúng)", "")
+                .Replace(" (Đúng)", "")
+                .Replace("(Đúng)", "")
+                .Trim();
         }
 
         private static string ApplyManualReplacements(string text)

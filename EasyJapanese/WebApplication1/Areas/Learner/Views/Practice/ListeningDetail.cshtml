@@ -368,19 +368,30 @@
                     const questionBlocks = document.querySelectorAll('.question-block');
                     if (questionBlocks.length === 0) return;
 
-                    let correctCount = 0;
+                    let unansweredCount = 0;
                     const answers = [];
 
                     questionBlocks.forEach(block => {
                         const qId = block.getAttribute('data-question-id');
                         const selectedOption = block.querySelector(`input[name="q_${qId}"]:checked`);
-                        const optVal = selectedOption ? parseInt(selectedOption.value) : 0;
+                        if (!selectedOption) {
+                            unansweredCount++;
+                            block.classList.add('border-danger');
+                        } else {
+                            block.classList.remove('border-danger');
+                        }
 
+                        const optVal = selectedOption ? parseInt(selectedOption.value) : 0;
                         answers.push({
                             questionId: parseInt(qId),
-                            selectedOptionId: optVal
+                            optionId: optVal
                         });
                     });
+
+                    if (unansweredCount > 0) {
+                        alert(`Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài! (Còn ${unansweredCount} câu chưa trả lời)`);
+                        return;
+                    }
 
                     fetch('/learn/Practice/SubmitListening', {
                         method: 'POST',
@@ -405,14 +416,23 @@
                                         const options = block.querySelectorAll('.option-item');
                                         options.forEach(opt => {
                                             const radio = opt.querySelector('input[type="radio"]');
+                                            if (radio) radio.disabled = true;
                                             const optId = parseInt(radio.value);
 
-                                            if (optId === detail.correctOptionId) {
+                                            const existingBadge = opt.querySelector('.badge-result');
+                                            if (existingBadge) existingBadge.remove();
+
+                                            if (optId === detail.userOptionId) {
+                                                if (detail.isCorrect) {
+                                                    opt.classList.add('correct');
+                                                    opt.innerHTML += ' <span class="badge bg-success ms-auto badge-result"><i class="bi bi-check-lg me-1"></i>Bạn chọn đúng</span>';
+                                                } else {
+                                                    opt.classList.add('incorrect');
+                                                    opt.innerHTML += ' <span class="badge bg-danger ms-auto badge-result"><i class="bi bi-x-lg me-1"></i>Bạn chọn sai</span>';
+                                                }
+                                            } else if (optId === detail.correctOptionId && !detail.isCorrect) {
                                                 opt.classList.add('correct');
-                                                opt.innerHTML += ' <span class="badge bg-success ms-auto"><i class="bi bi-check-lg me-1"></i>Đáp án đúng</span>';
-                                            } else if (optId === detail.userOptionId && !detail.isCorrect) {
-                                                opt.classList.add('incorrect');
-                                                opt.innerHTML += ' <span class="badge bg-danger ms-auto"><i class="bi bi-x-lg me-1"></i>Bạn chọn sai</span>';
+                                                opt.innerHTML += ' <span class="badge bg-success ms-auto badge-result"><i class="bi bi-check-lg me-1"></i>Đáp án đúng</span>';
                                             }
                                         });
                                     }
