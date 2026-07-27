@@ -43,7 +43,7 @@ BEGIN
 
             INSERT INTO AnswerOptions (QuestionId, AnswerText, IsCorrect)
             VALUES
-                (@QuestionId, N'Đáp án A (đúng)', 1),
+                (@QuestionId, N'Đáp án A', 1),
                 (@QuestionId, N'Đáp án B', 0),
                 (@QuestionId, N'Đáp án C', 0),
                 (@QuestionId, N'Đáp án D', 0);
