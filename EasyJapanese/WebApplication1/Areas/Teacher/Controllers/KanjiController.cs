@@ -24,7 +24,7 @@ namespace WebApplication1.Areas.Teacher.Controllers
 
             var query = _context.KanjiEntries
                 .Include(k => k.Level)
-                .Include(k => k.Examples)
+                .Include(k => k.KanjiExamples)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -87,7 +87,7 @@ namespace WebApplication1.Areas.Teacher.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var kanji = await _context.KanjiEntries
-                .Include(k => k.Examples)
+                .Include(k => k.KanjiExamples)
                 .FirstOrDefaultAsync(k => k.KanjiId == id);
 
             if (kanji == null)
@@ -139,7 +139,7 @@ namespace WebApplication1.Areas.Teacher.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var kanji = await _context.KanjiEntries
-                .Include(k => k.Examples)
+                .Include(k => k.KanjiExamples)
                 .FirstOrDefaultAsync(k => k.KanjiId == id);
 
             if (kanji == null)

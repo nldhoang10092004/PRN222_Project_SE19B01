@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using CoreLibrary.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +21,12 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Admin> Admins { get; set; }
 
     public virtual DbSet<AnswerOption> AnswerOptions { get; set; }
+
+    public virtual DbSet<CommunityComment> CommunityComments { get; set; }
+
+    public virtual DbSet<CommunityLike> CommunityLikes { get; set; }
+
+    public virtual DbSet<CommunityPost> CommunityPosts { get; set; }
 
     public virtual DbSet<Course> Courses { get; set; }
 
@@ -64,9 +70,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<StudentPlacementResult> StudentPlacementResults { get; set; }
 
-    public virtual DbSet<StudentExerciseResult> StudentExerciseResults { get; set; }
-
     public virtual DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+
+    public virtual DbSet<SupportMessage> SupportMessages { get; set; }
+
+    public virtual DbSet<SupportTicket> SupportTickets { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
 
@@ -74,74 +82,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<VoucherUsage> VoucherUsages { get; set; }
 
-    public virtual DbSet<CommunityPost> CommunityPosts { get; set; }
-
-    public virtual DbSet<CommunityComment> CommunityComments { get; set; }
-
-    public virtual DbSet<CommunityLike> CommunityLikes { get; set; }
-
-    public virtual DbSet<SupportTicket> SupportTickets { get; set; }
-
-    public virtual DbSet<SupportMessage> SupportMessages { get; set; }
+    // OnConfiguring đã được implement trong AppDbContext.Configuration.cs (partial class)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("Vietnamese_CI_AS");
-
-        modelBuilder.Entity<SupportTicket>(entity =>
-        {
-            entity.HasKey(e => e.TicketId);
-            entity.Property(e => e.UserEmail).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.UserFullName).HasMaxLength(255);
-            entity.Property(e => e.Category).HasMaxLength(100).HasDefaultValue("Hỗ trợ trực tuyến");
-            entity.Property(e => e.Subject).HasMaxLength(255);
-            entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
-        });
-
-        modelBuilder.Entity<SupportMessage>(entity =>
-        {
-            entity.HasKey(e => e.MessageId);
-            entity.Property(e => e.Sender).HasMaxLength(50).HasDefaultValue("User");
-            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
-            entity.HasOne(m => m.Ticket)
-                .WithMany(t => t.Messages)
-                .HasForeignKey(m => m.TicketId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<CommunityPost>(entity =>
-        {
-            entity.HasKey(e => e.PostId);
-            entity.Property(e => e.Title).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.AuthorName).HasMaxLength(100);
-            entity.Property(e => e.AuthorRole).HasMaxLength(20).HasDefaultValue("Student");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
-        });
-
-        modelBuilder.Entity<CommunityComment>(entity =>
-        {
-            entity.HasKey(e => e.CommentId);
-            entity.Property(e => e.AuthorName).HasMaxLength(100);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.HasOne(c => c.Post)
-                .WithMany(p => p.Comments)
-                .HasForeignKey(c => c.PostId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<CommunityLike>(entity =>
-        {
-            entity.HasKey(e => e.LikeId);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.HasOne(l => l.Post)
-                .WithMany(p => p.Likes)
-                .HasForeignKey(l => l.PostId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
 
         modelBuilder.Entity<Account>(entity =>
         {
@@ -184,6 +129,44 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Question).WithMany(p => p.AnswerOptions)
                 .HasForeignKey(d => d.QuestionId)
                 .HasConstraintName("FK__AnswerOpt__Quest__73BA3083");
+        });
+
+        modelBuilder.Entity<CommunityComment>(entity =>
+        {
+            entity.HasKey(e => e.CommentId).HasName("PK__Communit__C3B4DFCA2C8BC0FD");
+
+            entity.Property(e => e.AuthorName).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.CommunityComments)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("FK_CommunityComments_CommunityPosts");
+        });
+
+        modelBuilder.Entity<CommunityLike>(entity =>
+        {
+            entity.HasKey(e => e.LikeId).HasName("PK__Communit__A2922C14DEA84B2D");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.CommunityLikes)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("FK_CommunityLikes_CommunityPosts");
+        });
+
+        modelBuilder.Entity<CommunityPost>(entity =>
+        {
+            entity.HasKey(e => e.PostId).HasName("PK__Communit__AA126018FCC17F99");
+
+            entity.Property(e => e.AuthorName).HasMaxLength(100);
+            entity.Property(e => e.AuthorRole)
+                .HasMaxLength(20)
+                .HasDefaultValue("Student");
+            entity.Property(e => e.Category).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.IsApproved).HasDefaultValue(true);
+            entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
         });
 
         modelBuilder.Entity<Course>(entity =>
@@ -275,13 +258,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.StrokeOrderUrl).HasMaxLength(500);
             entity.Property(e => e.Title).HasMaxLength(200);
 
-            entity.HasOne(d => d.Lesson).WithMany(p => p.Exercises)
-                .HasForeignKey(d => d.LessonId)
-                .HasConstraintName("FK_Exercises_Lessons");
-
             entity.HasOne(d => d.Course).WithMany(p => p.Exercises)
                 .HasForeignKey(d => d.CourseId)
                 .HasConstraintName("FK__Exercises__Cours__1EA48E88");
+
+            entity.HasOne(d => d.Lesson).WithMany(p => p.Exercises)
+                .HasForeignKey(d => d.LessonId)
+                .HasConstraintName("FK_Exercises_Lessons");
         });
 
         modelBuilder.Entity<Flashcard>(entity =>
@@ -301,7 +284,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.Course).WithMany(p => p.Flashcards)
                 .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .HasConstraintName("FK__Flashcard__Cours__3493CFA7");
 
             entity.HasOne(d => d.FlashcardSet).WithMany(p => p.Flashcards)
                 .HasForeignKey(d => d.FlashcardSetId)
@@ -309,26 +292,23 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.Student).WithMany(p => p.Flashcards)
                 .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Flashcard__Stude__339FAB6E");
         });
 
         modelBuilder.Entity<FlashcardSet>(entity =>
         {
-            entity.HasKey(e => e.FlashcardSetId).HasName("PK_FlashcardSets");
-
-            entity.Property(e => e.Title).HasMaxLength(200);
-            entity.Property(e => e.ImageUrl).HasMaxLength(500);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.Title).HasMaxLength(200);
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
 
-            entity.HasOne(d => d.Course).WithMany()
+            entity.HasOne(d => d.Course).WithMany(p => p.FlashcardSets)
                 .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FlashcardSets_Course");
 
-            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.FlashcardSets)
                 .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FlashcardSets_Creator");
         });
 
@@ -344,31 +324,36 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<KanjiEntry>(entity =>
         {
-            entity.HasKey(e => e.KanjiId);
+            entity.HasKey(e => e.KanjiId).HasName("PK__KanjiEnt__8406F828D3767AC2");
+
             entity.HasIndex(e => e.LevelId, "IX_KanjiEntries_LevelId");
+
             entity.Property(e => e.Character).HasMaxLength(10);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.KunYomi).HasMaxLength(200);
             entity.Property(e => e.Meaning).HasMaxLength(300);
             entity.Property(e => e.OnYomi).HasMaxLength(200);
-            entity.Property(e => e.KunYomi).HasMaxLength(200);
             entity.Property(e => e.StrokeOrderUrl).HasMaxLength(500);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
-            entity.HasOne(d => d.Level).WithMany()
+            entity.HasOne(d => d.Level).WithMany(p => p.KanjiEntries)
                 .HasForeignKey(d => d.LevelId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_KanjiEntries_Level");
         });
 
         modelBuilder.Entity<KanjiExample>(entity =>
         {
-            entity.HasKey(e => e.ExampleId);
-            entity.HasIndex(e => e.KanjiId, "IX_KanjiExamples_KanjiId");
-            entity.Property(e => e.Word).HasMaxLength(50);
-            entity.Property(e => e.Reading).HasMaxLength(100);
-            entity.Property(e => e.Meaning).HasMaxLength(300);
+            entity.HasKey(e => e.ExampleId).HasName("PK__KanjiExa__C4647709D175F134");
 
-            entity.HasOne(d => d.Kanji).WithMany(p => p.Examples)
+            entity.HasIndex(e => e.KanjiId, "IX_KanjiExamples_KanjiId");
+
+            entity.Property(e => e.Meaning).HasMaxLength(300);
+            entity.Property(e => e.Reading).HasMaxLength(100);
+            entity.Property(e => e.Word).HasMaxLength(50);
+
+            entity.HasOne(d => d.Kanji).WithMany(p => p.KanjiExamples)
                 .HasForeignKey(d => d.KanjiId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasConstraintName("FK_KanjiExamples_Kanji");
         });
 
         modelBuilder.Entity<Lesson>(entity =>
@@ -391,14 +376,18 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<LessonMaterial>(entity =>
         {
-            entity.HasKey(e => e.MaterialId);
+            entity.HasKey(e => e.MaterialId).HasName("PK__LessonMa__C50610F7AF656D37");
+
+            entity.HasIndex(e => e.LessonId, "IX_LessonMaterials_Lesson");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.FileType).HasMaxLength(20);
             entity.Property(e => e.Title).HasMaxLength(255);
             entity.Property(e => e.Url).HasMaxLength(500);
-            entity.Property(e => e.FileType).HasMaxLength(20);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.HasOne(d => d.Lesson).WithMany(p => p.Materials)
+
+            entity.HasOne(d => d.Lesson).WithMany(p => p.LessonMaterials)
                 .HasForeignKey(d => d.LessonId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasConstraintName("FK_LessonMaterials_Lessons");
         });
 
         modelBuilder.Entity<LessonProgress>(entity =>
@@ -607,22 +596,6 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__StudentPl__TestI__797309D9");
         });
 
-        modelBuilder.Entity<StudentExerciseResult>(entity =>
-        {
-            entity.HasKey(e => e.ResultId);
-            entity.Property(e => e.SubmittedAt).HasDefaultValueSql("(getutcdate())");
-
-            entity.HasOne(d => d.Student)
-                .WithMany()
-                .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(d => d.Exercise)
-                .WithMany()
-                .HasForeignKey(d => d.ExerciseId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
         modelBuilder.Entity<SubscriptionPlan>(entity =>
         {
             entity.HasKey(e => e.PlanId).HasName("PK__Subscrip__755C22B7DA59F4C5");
@@ -633,6 +606,37 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PlanName).HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(12, 2)");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
+        });
+
+        modelBuilder.Entity<SupportMessage>(entity =>
+        {
+            entity.HasKey(e => e.MessageId).HasName("PK__SupportM__C87C0C9C29AC8DD3");
+
+            entity.Property(e => e.Sender)
+                .HasMaxLength(50)
+                .HasDefaultValue("User");
+            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Ticket).WithMany(p => p.SupportMessages)
+                .HasForeignKey(d => d.TicketId)
+                .HasConstraintName("FK_SupportMessages_SupportTickets");
+        });
+
+        modelBuilder.Entity<SupportTicket>(entity =>
+        {
+            entity.HasKey(e => e.TicketId).HasName("PK__SupportT__712CC607161E61D4");
+
+            entity.Property(e => e.Category)
+                .HasMaxLength(100)
+                .HasDefaultValue("Hỗ trợ trực tuyến");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Open");
+            entity.Property(e => e.Subject).HasMaxLength(255);
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UserEmail).HasMaxLength(255);
+            entity.Property(e => e.UserFullName).HasMaxLength(255);
         });
 
         modelBuilder.Entity<Transaction>(entity =>

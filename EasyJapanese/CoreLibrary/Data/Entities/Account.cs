@@ -27,6 +27,8 @@ public partial class Account
 
     public virtual Admin? Admin { get; set; }
 
+    public virtual ICollection<FlashcardSet> FlashcardSets { get; set; } = new List<FlashcardSet>();
+
     public virtual Mentor? Mentor { get; set; }
 
     public virtual ICollection<ReviewResponse> ReviewResponses { get; set; } = new List<ReviewResponse>();

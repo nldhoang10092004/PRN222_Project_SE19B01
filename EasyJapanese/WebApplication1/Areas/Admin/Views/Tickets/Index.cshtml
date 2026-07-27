@@ -257,7 +257,7 @@
         <div class="support-ticket-list">
             @foreach (var ticket in Model)
             {
-                var lastMessage = ticket.Messages.OrderBy(m => m.SentAt).LastOrDefault()?.MessageText ?? "Chưa có tin nhắn mới";
+                var lastMessage = ticket.SupportMessages.OrderBy(m => m.SentAt).LastOrDefault()?.MessageText ?? "Chưa có tin nhắn mới";
                 if (lastMessage.Length > 60) lastMessage = lastMessage.Substring(0, 57) + "...";
                 
                 <a href="/admin/tickets?selectedTicketId=@ticket.TicketId&statusFilter=@ViewData["StatusFilter"]" 
@@ -343,7 +343,7 @@
                     </span>
                 </div>
 
-                @foreach (var msg in selectedTicket.Messages.OrderBy(m => m.SentAt))
+                @foreach (var msg in selectedTicket.SupportMessages.OrderBy(m => m.SentAt))
                 {
                     <div class="chat-bubble-wrapper @(msg.Sender == "Admin" ? "admin-side" : "user-side")">
                         <div class="support-chat-bubble">

@@ -39,7 +39,7 @@ namespace WebApplication1.Areas.Learner.Controllers
             }
 
             var query = _context.CommunityPosts
-                .Include(p => p.Comments)
+                .Include(p => p.CommunityComments)
                 .Where(p => p.IsApproved)
                 .AsQueryable();
 
@@ -59,7 +59,7 @@ namespace WebApplication1.Areas.Learner.Controllers
             if (string.IsNullOrWhiteSpace(category) && string.IsNullOrWhiteSpace(search))
             {
                 featured = await _context.CommunityPosts
-                    .Include(p => p.Comments)
+                    .Include(p => p.CommunityComments)
                     .FirstOrDefaultAsync(p => p.IsPinned && p.IsApproved);
                 
                 if (featured == null)
@@ -124,8 +124,8 @@ namespace WebApplication1.Areas.Learner.Controllers
             }
 
             var post = await _context.CommunityPosts
-                .Include(p => p.Comments)
-                .Include(p => p.Likes)
+                .Include(p => p.CommunityComments)
+                .Include(p => p.CommunityLikes)
                 .FirstOrDefaultAsync(p => p.PostId == id && p.IsApproved);
 
             if (post == null) return NotFound();
@@ -139,7 +139,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
 
-            bool isLiked = post.Likes.Any(l => l.AccountId == currentUser.AccountId);
+            bool isLiked = post.CommunityLikes.Any(l => l.AccountId == currentUser.AccountId);
 
             var vm = new CommunityDetailsViewModel
             {
@@ -239,10 +239,10 @@ namespace WebApplication1.Areas.Learner.Controllers
             var currentUser = await _auth.GetCurrentUserAsync(HttpContext);
             if (currentUser == null) return Json(new { success = false, message = "Chưa đăng nhập" });
 
-            var post = await _context.CommunityPosts.Include(p => p.Likes).FirstOrDefaultAsync(p => p.PostId == id);
+            var post = await _context.CommunityPosts.Include(p => p.CommunityLikes).FirstOrDefaultAsync(p => p.PostId == id);
             if (post == null) return Json(new { success = false, message = "Bài viết không tồn tại" });
 
-            var existingLike = post.Likes.FirstOrDefault(l => l.AccountId == currentUser.AccountId);
+            var existingLike = post.CommunityLikes.FirstOrDefault(l => l.AccountId == currentUser.AccountId);
             bool isLiked;
             if (existingLike != null)
             {

@@ -86,11 +86,11 @@
                          data-meaning="@kanji.Meaning"
                          title="Bấm để xem rõ hơn" />
 
-                    @if (kanji.Examples.Any())
+                    @if (kanji.KanjiExamples.Any())
                     {
                         <div class="hj-kanji-doc-examples">
                             <div class="hj-kanji-doc-examples-title">Ví dụ:</div>
-                            @foreach (var ex in kanji.Examples.OrderBy(e => e.SortOrder))
+                            @foreach (var ex in kanji.KanjiExamples.OrderBy(e => e.SortOrder))
                             {
                                 <div class="hj-kanji-doc-example-item">
                                     <span class="hj-kanji-doc-example-word">@ex.Word</span>

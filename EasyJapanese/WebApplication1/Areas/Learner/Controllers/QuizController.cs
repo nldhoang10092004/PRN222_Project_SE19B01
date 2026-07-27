@@ -87,6 +87,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                     questionId = q.QuestionId,
                     text = EncodingFixer.FixMojibake(q.QuestionText),
                     points = q.Points,
+                    difficultyLevel = q.DifficultyLevel,
                     options = q.AnswerOptions
                         .Select(o => new
                         {

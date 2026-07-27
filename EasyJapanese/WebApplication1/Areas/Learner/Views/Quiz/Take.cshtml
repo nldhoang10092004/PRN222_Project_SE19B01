@@ -21,6 +21,9 @@
                     </div>
                 </div>
 
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span id="difficulty-badge"></span>
+                </div>
                 <h4 id="question-text" class="hj-question-text mb-4">Đang tải câu hỏi...</h4>
 
                 <div id="options-container" class="hj-options d-grid gap-2"></div>
@@ -71,6 +74,17 @@
                 document.getElementById('current-num').innerText = currentIndex + 1;
                 document.getElementById('progress-fill').style.width =
                     `${((currentIndex + 1) / questions.length) * 100}%`;
+
+                const badge = document.getElementById('difficulty-badge');
+                if (q.difficultyLevel) {
+                    const map = { 1: ['Dễ', 'success'], 2: ['Trung bình', 'warning'], 3: ['Khó', 'danger'] };
+                    const [label, color] = map[q.difficultyLevel] || ['', ''];
+                    badge.innerHTML = label
+                        ? `<span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill px-3 py-2 fw-semibold">${label}</span>`
+                        : '';
+                } else {
+                    badge.innerHTML = '';
+                }
 
                 const container = document.getElementById('options-container');
                 container.innerHTML = '';

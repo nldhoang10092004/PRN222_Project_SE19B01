@@ -1,15 +1,19 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CoreLibrary.Data.Entities
+namespace CoreLibrary.Data.Entities;
+
+public partial class SupportMessage
 {
-    public class SupportMessage
-    {
-        public int MessageId { get; set; }
-        public int TicketId { get; set; }
-        public string Sender { get; set; } = "User"; // User, Admin
-        public string MessageText { get; set; } = string.Empty;
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
+    public int MessageId { get; set; }
 
-        public virtual SupportTicket Ticket { get; set; } = null!;
-    }
+    public int TicketId { get; set; }
+
+    public string Sender { get; set; } = null!;
+
+    public string MessageText { get; set; } = null!;
+
+    public DateTime SentAt { get; set; }
+
+    public virtual SupportTicket Ticket { get; set; } = null!;
 }

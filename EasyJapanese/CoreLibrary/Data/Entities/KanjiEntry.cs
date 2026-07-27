@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CoreLibrary.Data.Entities;
@@ -23,7 +23,7 @@ public partial class KanjiEntry
 
     public DateTime CreatedAt { get; set; }
 
-    public virtual JlptLevel Level { get; set; } = null!;
+    public virtual ICollection<KanjiExample> KanjiExamples { get; set; } = new List<KanjiExample>();
 
-    public virtual ICollection<KanjiExample> Examples { get; set; } = new List<KanjiExample>();
+    public virtual JlptLevel Level { get; set; } = null!;
 }

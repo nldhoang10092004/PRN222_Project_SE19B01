@@ -21,6 +21,8 @@ public partial class Question
 
     public int SortOrder { get; set; }
 
+    public int? DifficultyLevel { get; set; }
+
     public virtual ICollection<AnswerOption> AnswerOptions { get; set; } = new List<AnswerOption>();
 
     public virtual Exercise? Exercise { get; set; }

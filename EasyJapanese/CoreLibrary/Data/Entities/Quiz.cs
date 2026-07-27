@@ -9,8 +9,6 @@ public partial class Quiz
 
     public int CourseId { get; set; }
 
-    public int? LessonId { get; set; }
-
     public string Title { get; set; } = null!;
 
     public int? Duration { get; set; }
@@ -20,6 +18,8 @@ public partial class Quiz
     public int SortOrder { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public int? LessonId { get; set; }
 
     public virtual Course Course { get; set; } = null!;
 

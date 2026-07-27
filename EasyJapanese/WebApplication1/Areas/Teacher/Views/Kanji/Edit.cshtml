@@ -82,11 +82,11 @@
     </div>
 </div>
 
-@if (Model.Examples.Any())
+@if (Model.KanjiExamples.Any())
 {
     <div class="card border-0 shadow-sm rounded-4 mt-4">
         <div class="card-body p-4">
-            <h5 class="fw-bold mb-3">Ví dụ từ vựng (@Model.Examples.Count)</h5>
+            <h5 class="fw-bold mb-3">Ví dụ từ vựng (@Model.KanjiExamples.Count)</h5>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -97,7 +97,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var example in Model.Examples.OrderBy(e => e.SortOrder))
+                        @foreach (var example in Model.KanjiExamples.OrderBy(e => e.SortOrder))
                         {
                             <tr>
                                 <td class="fw-bold">@example.Word</td>

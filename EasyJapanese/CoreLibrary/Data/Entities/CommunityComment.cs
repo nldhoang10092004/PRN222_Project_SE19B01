@@ -1,16 +1,21 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CoreLibrary.Data.Entities
+namespace CoreLibrary.Data.Entities;
+
+public partial class CommunityComment
 {
-    public class CommunityComment
-    {
-        public int CommentId { get; set; }
-        public int PostId { get; set; }
-        public int AuthorId { get; set; }
-        public string AuthorName { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int CommentId { get; set; }
 
-        public virtual CommunityPost Post { get; set; } = null!;
-    }
+    public int PostId { get; set; }
+
+    public int AuthorId { get; set; }
+
+    public string? AuthorName { get; set; }
+
+    public string Content { get; set; } = null!;
+
+    public DateTime CreatedAt { get; set; }
+
+    public virtual CommunityPost Post { get; set; } = null!;
 }

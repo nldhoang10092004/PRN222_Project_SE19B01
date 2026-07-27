@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CoreLibrary.Data.Entities;
@@ -23,7 +23,7 @@ public partial class FlashcardSet
 
     public virtual Course? Course { get; set; }
 
-    public virtual ICollection<Flashcard> Flashcards { get; set; } = new List<Flashcard>();
-
     public virtual Account CreatedByNavigation { get; set; } = null!;
+
+    public virtual ICollection<Flashcard> Flashcards { get; set; } = new List<Flashcard>();
 }

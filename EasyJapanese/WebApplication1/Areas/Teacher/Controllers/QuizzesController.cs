@@ -172,7 +172,7 @@ namespace WebApplication1.Areas.Teacher.Controllers
         }
 
         [HttpPost("questions/{quizId}/create")]
-        public async Task<IActionResult> CreateQuestion(int quizId, string questionText, int points, List<string> options, int correctIndex)
+        public async Task<IActionResult> CreateQuestion(int quizId, string questionText, int points, List<string> options, int correctIndex, int? difficultyLevel)
         {
             var user = HttpContext.Session.GetObject<CoreLibrary.Authentication.CurrentUser>(CoreLibrary.Authentication.IAuthenticationService.SessionKeyCurrentUser);
             var mentorId = user?.AccountId ?? 0;
@@ -189,7 +189,8 @@ namespace WebApplication1.Areas.Teacher.Controllers
                 QuestionText = questionText,
                 QuestionType = "MultipleChoice",
                 Points = points,
-                SortOrder = 0
+                SortOrder = 0,
+                DifficultyLevel = difficultyLevel
             };
 
             _context.Questions.Add(question);

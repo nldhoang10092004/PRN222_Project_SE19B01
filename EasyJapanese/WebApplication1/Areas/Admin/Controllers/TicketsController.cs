@@ -26,7 +26,7 @@ namespace WebApplication1.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(userEmail)) return null;
             return db.SupportTickets
-                .Include(t => t.Messages)
+                .Include(t => t.SupportMessages)
                 .FirstOrDefault(t => t.UserEmail.ToLower() == userEmail.ToLower() && t.Status != "Resolved");
         }
 
@@ -36,7 +36,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             if (string.IsNullOrEmpty(userFullName)) userFullName = "Khách hàng";
 
             var ticket = db.SupportTickets
-                .Include(t => t.Messages)
+                .Include(t => t.SupportMessages)
                 .FirstOrDefault(t => t.UserEmail.ToLower() == userEmail.ToLower() && t.Status != "Resolved");
 
             if (ticket == null)
@@ -120,7 +120,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             ViewData["Title"] = "Ticket Support Chat";
             
             var query = _context.SupportTickets
-                .Include(t => t.Messages)
+                .Include(t => t.SupportMessages)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(statusFilter))
@@ -135,7 +135,7 @@ namespace WebApplication1.Areas.Admin.Controllers
             if (selectedTicketId.HasValue)
             {
                 selectedTicket = await _context.SupportTickets
-                    .Include(t => t.Messages)
+                    .Include(t => t.SupportMessages)
                     .FirstOrDefaultAsync(t => t.TicketId == selectedTicketId.Value);
             }
 
@@ -159,7 +159,7 @@ namespace WebApplication1.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(int ticketId)
         {
             var ticket = await _context.SupportTickets
-                .Include(t => t.Messages)
+                .Include(t => t.SupportMessages)
                 .FirstOrDefaultAsync(t => t.TicketId == ticketId);
 
             if (ticket == null) return NotFound();

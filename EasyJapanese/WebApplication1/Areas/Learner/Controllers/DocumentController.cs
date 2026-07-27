@@ -29,7 +29,7 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             var query = _db.KanjiEntries
                 .Include(k => k.Level)
-                .Include(k => k.Examples)
+                .Include(k => k.KanjiExamples)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(level))

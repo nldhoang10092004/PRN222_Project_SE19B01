@@ -82,7 +82,7 @@
                             <td>@item.KunYomi</td>
                             <td>@item.StrokeCount</td>
                             <td><span class="badge bg-secondary">@item.Level.LevelName</span></td>
-                            <td>@item.Examples.Count</td>
+                            <td>@item.KanjiExamples.Count</td>
                             <td class="text-end pe-4">
                                 <a href="/teacher/kanji/edit/@item.KanjiId" class="btn btn-sm btn-outline-primary">Sửa</a>
                                 <form method="post" action="/teacher/kanji/delete/@item.KanjiId" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa Kanji này? Tất cả ví dụ liên quan cũng sẽ bị xóa.');">

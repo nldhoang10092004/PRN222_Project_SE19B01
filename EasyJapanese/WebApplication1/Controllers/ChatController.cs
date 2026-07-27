@@ -72,7 +72,7 @@ namespace WebApplication1.Controllers
                 userEmail = ticket.UserEmail,
                 userFullName = ticket.UserFullName,
                 status = ticket.Status,
-                messages = ticket.Messages.OrderBy(m => m.SentAt).Select(m => new
+                messages = ticket.SupportMessages.OrderBy(m => m.SentAt).Select(m => new
                 {
                     sender = m.Sender,
                     messageText = m.MessageText,
@@ -102,7 +102,7 @@ namespace WebApplication1.Controllers
                 ticketId = ticket.TicketId,
                 userEmail = ticket.UserEmail,
                 userFullName = ticket.UserFullName,
-                messages = ticket.Messages.OrderBy(m => m.SentAt).Select(m => new
+                messages = ticket.SupportMessages.OrderBy(m => m.SentAt).Select(m => new
                 {
                     sender = m.Sender,
                     messageText = m.MessageText,

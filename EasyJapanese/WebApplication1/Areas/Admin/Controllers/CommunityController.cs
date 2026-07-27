@@ -28,8 +28,8 @@ namespace WebApplication1.Areas.Admin.Controllers
             ViewData["CategoryFilter"] = categoryFilter;
 
             var query = _context.CommunityPosts
-                .Include(p => p.Comments)
-                .Include(p => p.Likes)
+                .Include(p => p.CommunityComments)
+                .Include(p => p.CommunityLikes)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchString))
@@ -56,8 +56,8 @@ namespace WebApplication1.Areas.Admin.Controllers
         {
             ViewData["Title"] = "Chi tiết Bài viết & Bình luận";
             var post = await _context.CommunityPosts
-                .Include(p => p.Comments)
-                .Include(p => p.Likes)
+                .Include(p => p.CommunityComments)
+                .Include(p => p.CommunityLikes)
                 .FirstOrDefaultAsync(p => p.PostId == id);
 
             if (post == null) return NotFound();
@@ -97,8 +97,8 @@ namespace WebApplication1.Areas.Admin.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             var post = await _context.CommunityPosts
-                .Include(p => p.Comments)
-                .Include(p => p.Likes)
+                .Include(p => p.CommunityComments)
+                .Include(p => p.CommunityLikes)
                 .FirstOrDefaultAsync(p => p.PostId == id);
 
             if (post == null) return NotFound();

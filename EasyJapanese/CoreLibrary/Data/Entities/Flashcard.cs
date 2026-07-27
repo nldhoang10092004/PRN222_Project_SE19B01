@@ -11,13 +11,9 @@ public partial class Flashcard
 
     public int? CourseId { get; set; }
 
-    public int? FlashcardSetId { get; set; }
-
     public string FrontText { get; set; } = null!;
 
     public string BackText { get; set; } = null!;
-
-    public string? ImageUrl { get; set; }
 
     public decimal Efactor { get; set; }
 
@@ -27,9 +23,13 @@ public partial class Flashcard
 
     public DateTime CreatedAt { get; set; }
 
+    public int? FlashcardSetId { get; set; }
+
+    public string? ImageUrl { get; set; }
+
     public virtual Course? Course { get; set; }
 
     public virtual FlashcardSet? FlashcardSet { get; set; }
 
-    public virtual Student Student { get; set; } = null!;
+    public virtual Student? Student { get; set; }
 }

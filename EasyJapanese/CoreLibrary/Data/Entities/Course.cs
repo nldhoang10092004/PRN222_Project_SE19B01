@@ -33,6 +33,8 @@ public partial class Course
 
     public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
 
+    public virtual ICollection<FlashcardSet> FlashcardSets { get; set; } = new List<FlashcardSet>();
+
     public virtual ICollection<Flashcard> Flashcards { get; set; } = new List<Flashcard>();
 
     public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();

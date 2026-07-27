@@ -15,5 +15,7 @@ public partial class JlptLevel
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
 
+    public virtual ICollection<KanjiEntry> KanjiEntries { get; set; } = new List<KanjiEntry>();
+
     public virtual ICollection<StudentPlacementResult> StudentPlacementResults { get; set; } = new List<StudentPlacementResult>();
 }
