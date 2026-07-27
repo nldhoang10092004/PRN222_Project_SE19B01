@@ -233,8 +233,8 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             // Return and cancel URLs
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var returnUrl = $"{baseUrl}/Learner/Membership/Success?transactionId={transaction.TransactionId}";
-            var cancelUrl = $"{baseUrl}/Learner/Membership/Cancelled?transactionId={transaction.TransactionId}";
+            var returnUrl = $"{baseUrl}/learn/membership/success?transactionId={transaction.TransactionId}";
+            var cancelUrl = $"{baseUrl}/learn/membership/cancelled?transactionId={transaction.TransactionId}";
 
             // PayOS payment link
             var paymentRequest = new CreatePaymentLinkRequest
