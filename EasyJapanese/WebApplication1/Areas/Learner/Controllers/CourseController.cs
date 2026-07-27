@@ -477,7 +477,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                                 .Select(a => new ExerciseAnswerOptionViewModel
                                 {
                                     OptionId = a.OptionId,
-                                    AnswerText = CoreLibrary.Utility.EncodingFixer.FixMojibake(a.AnswerText),
+                                    AnswerText = CoreLibrary.Utility.EncodingFixer.CleanAnswerText(a.AnswerText),
                                     IsCorrect = a.IsCorrect
                                 })
                                 .ToList()

@@ -154,7 +154,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                         Options = q.AnswerOptions.Select(o => new ListeningOptionViewModel
                         {
                             OptionId = o.OptionId,
-                            AnswerText = EncodingFixer.FixMojibake(o.AnswerText)
+                            AnswerText = EncodingFixer.CleanAnswerText(o.AnswerText)
                         }).ToList()
                     }).ToList()
             };
@@ -191,8 +191,9 @@ namespace WebApplication1.Areas.Learner.Controllers
                 resultList.Add(new
                 {
                     questionId = q.QuestionId,
+                    userOptionId = selected?.OptionId ?? 0,
                     isCorrect = isCorrect,
-                    correctOptionId = correctOption?.OptionId
+                    correctOptionId = correctOption?.OptionId ?? 0
                 });
             }
 
@@ -222,10 +223,11 @@ namespace WebApplication1.Areas.Learner.Controllers
 
             return Json(new
             {
-                answers = resultList,
-                correctCount,
-                totalQuestions,
-                scorePercent
+                success = true,
+                details = resultList,
+                correctAnswers = correctCount,
+                totalQuestions = totalQuestions,
+                score = scorePercent
             });
         }
 
@@ -287,7 +289,7 @@ namespace WebApplication1.Areas.Learner.Controllers
                     AnswerOptions = q.AnswerOptions.Select(o => new ReadingOptionVm
                     {
                         OptionId = o.OptionId,
-                        AnswerText = o.AnswerText
+                        AnswerText = EncodingFixer.CleanAnswerText(o.AnswerText)
                     }).ToList()
                 }).ToList()
             };
